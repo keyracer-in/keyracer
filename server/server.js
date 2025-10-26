@@ -35,6 +35,7 @@ const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const coderacerLeaderboardRoutes = require('./routes/coderacerLeaderboardRoutes');
 const aptitudeRoutes = require('./routes/aptitudeRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const hackathonRoutes = require('./routes/hackathonRoutes');
 
 // Import middleware
 const { authenticate } = require('./middleware/authMiddleware');
@@ -255,6 +256,7 @@ app.use('/api', challengeRoutes);
 app.use('/api', leaderboardRoutes);
 app.use('/api', aptitudeRoutes);
 app.use('/api', chatRoutes);
+app.use('/api/hackathons', hackathonRoutes);
 console.log('[SERVER] All API routes registered including chat routes');
 
 // Global rate limiting
