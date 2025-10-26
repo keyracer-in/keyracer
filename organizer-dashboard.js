@@ -422,6 +422,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const successModal = new bootstrap.Modal(document.getElementById('hackathonCreatedModal'));
             successModal.show();
 
+            // Focus management for accessibility
+            successModal._element.addEventListener('shown.bs.modal', function() {
+                const modal = document.getElementById('hackathonCreatedModal');
+                const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (focusableElements.length > 0) {
+                    focusableElements[0].focus();
+                }
+            });
+
             // Show alert with the codes
             alert(`Hackathon created successfully!\n\nHackathon ID: ${hackathonId}\nOrganizer Code: ${organizerCode}\n\nCopy the Hackathon ID to share with participants.`);
 
@@ -1318,12 +1327,66 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'hackathon.html';
     };
 
-    // Add event listener to logout button
+    // Add event listeners for buttons
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
             logoutOrganizer();
+        });
+    }
+
+    // Participants page buttons
+    const exportParticipantsBtn = document.getElementById('export-participants-btn');
+    if (exportParticipantsBtn) {
+        exportParticipantsBtn.addEventListener('click', function() {
+            exportParticipants();
+        });
+    }
+
+    const refreshParticipantsBtn = document.getElementById('refresh-participants-btn');
+    if (refreshParticipantsBtn) {
+        refreshParticipantsBtn.addEventListener('click', function() {
+            refreshParticipants();
+        });
+    }
+
+    // Submissions page button
+    const refreshSubmissionsBtn = document.getElementById('refresh-submissions-btn');
+    if (refreshSubmissionsBtn) {
+        refreshSubmissionsBtn.addEventListener('click', function() {
+            refreshSubmissions();
+        });
+    }
+
+    // Evaluation page button
+    const refreshEvaluationsBtn = document.getElementById('refresh-evaluations-btn');
+    if (refreshEvaluationsBtn) {
+        refreshEvaluationsBtn.addEventListener('click', function() {
+            refreshEvaluations();
+        });
+    }
+
+    // Chat page button
+    const refreshChatBtn = document.getElementById('refresh-chat-btn');
+    if (refreshChatBtn) {
+        refreshChatBtn.addEventListener('click', function() {
+            refreshChat();
+        });
+    }
+
+    // Copy buttons
+    const copyHackathonIdBtn = document.getElementById('copy-hackathon-id-btn');
+    if (copyHackathonIdBtn) {
+        copyHackathonIdBtn.addEventListener('click', function() {
+            copyToClipboard('generatedHackathonId');
+        });
+    }
+
+    const copyOrganizerCodeBtn = document.getElementById('copy-organizer-code-btn');
+    if (copyOrganizerCodeBtn) {
+        copyOrganizerCodeBtn.addEventListener('click', function() {
+            copyToClipboard('generatedOrganizerCode');
         });
     }
 

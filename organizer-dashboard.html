@@ -243,11 +243,11 @@
                 <div class="page-header">
                     <h1 class="page-title">Participants</h1>
                     <div class="action-buttons">
-                        <button class="btn btn-custom btn-secondary-custom" onclick="exportParticipants()">
+                        <button class="btn btn-custom btn-secondary-custom" id="export-participants-btn">
                             <i class="fas fa-download"></i>
                             <span>Export List</span>
                         </button>
-                        <button class="btn btn-custom btn-primary-custom" onclick="refreshParticipants()">
+                        <button class="btn btn-custom btn-primary-custom" id="refresh-participants-btn">
                             <i class="fas fa-sync-alt"></i>
                             <span>Refresh</span>
                         </button>
@@ -292,7 +292,7 @@
                 <div class="page-header">
                     <h1 class="page-title">Submissions</h1>
                     <div class="action-buttons">
-                        <button class="btn btn-custom btn-secondary-custom" onclick="refreshSubmissions()">
+                        <button class="btn btn-custom btn-secondary-custom" id="refresh-submissions-btn">
                             <i class="fas fa-sync-alt"></i>
                             <span>Refresh</span>
                         </button>
@@ -336,7 +336,7 @@
                 <div class="page-header">
                     <h1 class="page-title">Evaluation</h1>
                     <div class="action-buttons">
-                        <button class="btn btn-custom btn-secondary-custom" onclick="refreshEvaluations()">
+                        <button class="btn btn-custom btn-secondary-custom" id="refresh-evaluations-btn">
                             <i class="fas fa-sync-alt"></i>
                             <span>Refresh</span>
                         </button>
@@ -373,7 +373,7 @@
                 <div class="page-header">
                     <h1 class="page-title">Live Chat</h1>
                     <div class="action-buttons">
-                        <button class="btn btn-custom btn-secondary-custom" onclick="refreshChat()">
+                        <button class="btn btn-custom btn-secondary-custom" id="refresh-chat-btn">
                             <i class="fas fa-sync-alt"></i>
                             <span>Refresh</span>
                         </button>
@@ -447,7 +447,7 @@
                         
                         <div class="row mb-3">
                             <div class="col-md-12">
-                                <label for="notificationSettings" class="form-label">Notification Settings</label>
+                                <div id="notificationSettings" class="form-label">Notification Settings</div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
                                     <label class="form-check-label" for="emailNotifications">Email Notifications</label>
@@ -548,14 +548,14 @@
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="autoStart" class="form-label">Auto Start</label>
+                                <div id="autoStart" class="form-label">Auto Start</div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="autoStart">
                                     <label class="form-check-label" for="autoStart">Enable auto start at scheduled time</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label for="antiCheating" class="form-label">Anti-Cheating Tools</label>
+                                <div id="antiCheating" class="form-label">Anti-Cheating Tools</div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="screenshotCheck">
                                     <label class="form-check-label" for="screenshotCheck">Screenshot Check</label>
@@ -590,7 +590,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="editProblemForm">
-                        <input type="hidden" id="editProblemIndex">
+                        <input type="hidden" id="editProblemIndex" name="editProblemIndex">
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <label for="editProblemTitle" class="form-label">Problem Title</label>
@@ -800,7 +800,7 @@
                         <div class="col-md-6">
                             <h6 class="text-info">Evaluation</h6>
                             <form id="evaluationForm">
-                                <input type="hidden" id="eval-submission-id">
+                                <input type="hidden" id="eval-submission-id" name="eval-submission-id">
                                 <div class="mb-3">
                                     <label for="eval-score" class="form-label">Score (0-100)</label>
                                     <input type="number" class="form-control" id="eval-score" min="0" max="100" required>
@@ -848,7 +848,7 @@
                             <label class="form-label">Hackathon ID (For Participants)</label>
                             <div class="input-group">
                                 <input type="text" class="form-control" id="generatedHackathonId" readonly>
-                                <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('generatedHackathonId')">
+                                <button class="btn btn-outline-secondary" type="button" id="copy-hackathon-id-btn">
                                     <i class="fas fa-copy"></i>
                                 </button>
                             </div>
@@ -861,7 +861,7 @@
                             <label class="form-label">Your Organizer Code</label>
                             <div class="input-group">
                                 <input type="text" class="form-control" id="generatedOrganizerCode" readonly>
-                                <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('generatedOrganizerCode')">
+                                <button class="btn btn-outline-secondary" type="button" id="copy-organizer-code-btn">
                                     <i class="fas fa-copy"></i>
                                 </button>
                             </div>
@@ -891,7 +891,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="editHackathonForm">
-                        <input type="hidden" id="editHackathonIndex">
+                        <input type="hidden" id="editHackathonIndex" name="editHackathonIndex">
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <label for="editHackathonTitle" class="form-label">Hackathon Title</label>
@@ -939,14 +939,14 @@
                         
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="editAutoStart" class="form-label">Auto Start</label>
+                                <div id="editAutoStart" class="form-label">Auto Start</div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="editAutoStart">
                                     <label class="form-check-label" for="editAutoStart">Enable auto start at scheduled time</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label for="editAntiCheating" class="form-label">Anti-Cheating Tools</label>
+                                <div id="editAntiCheating" class="form-label">Anti-Cheating Tools</div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="editScreenshotCheck">
                                     <label class="form-check-label" for="editScreenshotCheck">Screenshot Check</label>
