@@ -15,11 +15,24 @@ class HackathonAPI {
                 body: JSON.stringify(hackathonData)
             });
 
-            const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to create hackathon');
+                // If response is not ok, try to get the error message
+                let errorMessage = 'Failed to create hackathon';
+                let responseText = '';
+                try {
+                    responseText = await response.text();
+                    // Try to parse as JSON
+                    const errorData = JSON.parse(responseText);
+                    errorMessage = errorData.error || errorMessage;
+                } catch (jsonError) {
+                    // If response is not JSON (e.g., HTML error page), use status text
+                    console.error('Server returned non-JSON response:', responseText.substring(0, 200) + '...');
+                    errorMessage = `Server error (${response.status || 'unknown'}): ${response.statusText || 'Unknown error'}`;
+                }
+                throw new Error(errorMessage);
             }
 
+            const data = await response.json();
             return data;
         } catch (error) {
             console.error('Error creating hackathon:', error);
