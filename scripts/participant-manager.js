@@ -1,50 +1,81 @@
 // Participant Management System for Hackathon Platform
 
-// Helper function to find hackathon across all organizers
-function findHackathonAcrossOrganizers(hackathonId) {
-    const allKeys = Object.keys(localStorage);
-    console.log('Searching for hackathon ID:', hackathonId);
-    console.log('Available keys:', allKeys.filter(k => k.includes('_hackathons')));
-    
-    for (const key of allKeys) {
-        if (key.includes('_hackathons')) {
-            try {
-                const hackathons = JSON.parse(localStorage.getItem(key));
-                console.log(`Checking hackathons in ${key}:`, hackathons.map(h => h.id));
-                const hackathon = hackathons.find(h => h.id === hackathonId);
-                if (hackathon) {
-                    const organizerId = key.split('_hackathons')[0];
-                    console.log('Found hackathon in organizer:', organizerId);
-                    return { hackathon, organizerId };
+// Helper function to find hackathon across all organizers by ID or organizer code
+async function findHackathonAcrossOrganizers(identifier) {
+    try {
+        console.log('Searching for hackathon identifier via API:', identifier);
+        const hackathon = await window.HackathonAPI.findHackathon(identifier);
+        console.log('Found hackathon via API:', hackathon);
+        return { hackathon, organizerId: hackathon.organizerId };
+    } catch (error) {
+        console.log('Hackathon not found via API, falling back to localStorage:', identifier);
+        // Fallback to localStorage search
+        const allKeys = Object.keys(localStorage);
+        console.log('Available keys:', allKeys.filter(k => k.includes('_hackathons')));
+
+        for (const key of allKeys) {
+            if (key.includes('_hackathons')) {
+                try {
+                    const hackathons = JSON.parse(localStorage.getItem(key));
+                    console.log(`Checking hackathons in ${key}:`, hackathons.map(h => ({id: h.id, organizerCode: h.organizerCode})));
+                    let hackathon;
+                    if (identifier.startsWith('ORG')) {
+                        // Search by organizer code
+                        hackathon = hackathons.find(h => h.organizerCode === identifier);
+                    } else {
+                        // Search by hackathon ID
+                        hackathon = hackathons.find(h => h.id === identifier);
+                    }
+                    if (hackathon) {
+                        const organizerId = key.split('_hackathons')[0];
+                        console.log('Found hackathon in organizer:', organizerId);
+                        console.log('Hackathon data:', hackathon);
+                        return { hackathon, organizerId };
+                    }
+                } catch (e) {
+                    console.log('Error parsing hackathons from key:', key, e);
                 }
-            } catch (e) {
-                console.log('Error parsing hackathons from key:', key, e);
             }
         }
+        console.log('Hackathon not found for identifier:', identifier);
+        console.log('All localStorage keys:', allKeys);
+        return null;
     }
-    console.log('Hackathon not found:', hackathonId);
-    return null;
 }
 
 // Function to register a new participant
-function registerParticipant(participantName, hackathonId, email = '') {
+async function registerParticipant(participantName, hackathonId, email = '') {
     // Validate inputs
     if (!participantName || !hackathonId) {
         throw new Error('Participant name and hackathon ID are required');
     }
     
     // Check if hackathon exists across all organizers
-    const hackathonData = findHackathonAcrossOrganizers(hackathonId);
-    
+    const hackathonData = await findHackathonAcrossOrganizers(hackathonId);
+
     if (!hackathonData) {
         throw new Error('Invalid hackathon ID');
     }
-    
+
     const { hackathon, organizerId } = hackathonData;
-    
+
+    // Try to register via API first
+    try {
+        const participant = await window.HackathonAPI.registerParticipant(hackathonId, {
+            name: participantName,
+            email: email
+        });
+
+        console.log('Participant registered via API:', participant);
+        return participant;
+    } catch (error) {
+        console.log('API registration failed, falling back to localStorage:', error);
+        // Fallback to localStorage registration
+    }
+
     // Generate unique participant ID
     const participantId = 'PART' + Date.now() + Math.random().toString(36).substr(2, 4).toUpperCase();
-    
+
     // Create participant object
     const participant = {
         id: participantId,
@@ -205,9 +236,9 @@ function getHackathonParticipants(hackathonId) {
     return allParticipants;
 }
 
-// Function to validate hackathon ID
-function validateHackathonId(hackathonId) {
-    const hackathonData = findHackathonAcrossOrganizers(hackathonId);
+// Function to validate hackathon ID or organizer code
+async function validateHackathonId(identifier) {
+    const hackathonData = await findHackathonAcrossOrganizers(identifier);
     return hackathonData ? hackathonData.hackathon : null;
 }
 

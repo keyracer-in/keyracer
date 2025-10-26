@@ -15,26 +15,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Content Security Policy for Google Analytics and inline event handlers
-app.use((req, res, next) => {
-  res.setHeader('Content-Security-Policy',
-    "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https:; " +
-    "script-src-attr 'unsafe-inline'; " +
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
-    "font-src 'self' https://fonts.gstatic.com https:; " +
-    "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://emkc.org https://cdnjs.cloudflare.com https:; " +
-    "img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com https:; " +
-    "media-src 'self' https:; " +
-    "frame-src 'self';"
-  );
-  next();
-});
+
 
 app.use(express.static('.'));
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/keyracer');
+
+// Routes
+const hackathonRoutes = require('./routes/hackathonRoutes');
+app.use('/api/hackathons', hackathonRoutes);
 
 // User Schema
 const userSchema = new mongoose.Schema({

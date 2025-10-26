@@ -1,0 +1,852 @@
+// Participant Dashboard Refactored JavaScript
+
+class ParticipantDashboard {
+    constructor() {
+        this.currentPage = 'problem';
+        this.codeEditor = null;
+        this.timerInterval = null;
+        this.chatMessages = [];
+        this.problems = [];
+        this.submissions = [];
+
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.initializeCodeEditor();
+        this.initializeParticles();
+        this.loadInitialData();
+        this.startTimer();
+        this.showFullscreenModal();
+    }
+
+    setupEventListeners() {
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = link.getAttribute('data-page');
+                this.navigateToPage(page);
+            });
+        });
+
+        // Mobile sidebar toggle
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const sidebarClose = document.getElementById('sidebar-close');
+
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', () => {
+                document.getElementById('sidebar').classList.add('show');
+            });
+        }
+
+        if (sidebarClose) {
+            sidebarClose.addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('show');
+            });
+        }
+
+        // Chat functionality
+        this.setupChat();
+
+        // Code execution
+        this.setupCodeExecution();
+
+        // Anti-cheating measures
+        this.setupAntiCheating();
+
+        // Form submissions
+        this.setupFormSubmissions();
+    }
+
+    navigateToPage(page) {
+        // Update navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        document.querySelector(`[data-page="${page}"]`).classList.add('active');
+
+        // Hide sidebar on mobile
+        if (window.innerWidth < 992) {
+            document.getElementById('sidebar').classList.remove('show');
+        }
+
+        // Show selected page
+        document.querySelectorAll('.page').forEach(p => {
+            p.classList.remove('active');
+        });
+        document.getElementById(`${page}-page`).classList.add('active');
+
+        this.currentPage = page;
+
+        // Load page-specific data
+        this.loadPageData(page);
+    }
+
+    loadPageData(page) {
+        switch (page) {
+            case 'problem':
+                this.loadProblems();
+                break;
+            case 'history':
+                this.loadSubmissionHistory();
+                break;
+            case 'rules':
+                // Rules are static
+                break;
+        }
+    }
+
+    loadProblems() {
+        // Load problems from localStorage or API
+        const problems = JSON.parse(localStorage.getItem('participantProblems')) || [];
+        const currentHackathonId = localStorage.getItem('currentHackathonId');
+
+        this.problems = currentHackathonId ?
+            problems.filter(p => p.hackathonId === currentHackathonId) : problems;
+
+        this.displayProblems();
+    }
+
+    displayProblems() {
+        const problemPage = document.getElementById('problem-page');
+        if (!problemPage) return;
+
+        if (this.problems.length === 0) {
+            problemPage.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Problem Statement</h1>
+                </div>
+                <div class="problem-container">
+                    <div class="problem-content">
+                        <p class="text-center">No problems available yet. Please check back later.</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        // Display the first problem (or current problem)
+        const problem = this.problems[0];
+        this.displayProblem(problem);
+    }
+
+    displayProblem(problem) {
+        const problemPage = document.getElementById('problem-page');
+        problemPage.innerHTML = `
+            <div class="page-header">
+                <h1 class="page-title">Problem Statement</h1>
+            </div>
+            <div class="problem-container">
+                <div class="problem-header">
+                    <h2 class="problem-title">${problem.title}</h2>
+                    <span class="problem-difficulty difficulty-${problem.difficulty}">${problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}</span>
+                </div>
+                <div class="problem-content">
+                    <div class="problem-section">
+                        <h3 class="problem-section-title">Description</h3>
+                        <p>${problem.description}</p>
+                    </div>
+                    <div class="problem-section">
+                        <h3 class="problem-section-title">Input Format</h3>
+                        <p>${problem.inputFormat || 'Not specified'}</p>
+                    </div>
+                    <div class="problem-section">
+                        <h3 class="problem-section-title">Output Format</h3>
+                        <p>${problem.outputFormat || 'Not specified'}</p>
+                    </div>
+                    ${problem.exampleInput ? `
+                        <div class="problem-section">
+                            <h3 class="problem-section-title">Example</h3>
+                            <div class="example-box">
+                                <h4 class="example-title">Input:</h4>
+                                <div class="code-example">${problem.exampleInput}</div>
+                                <h4 class="example-title">Output:</h4>
+                                <div class="code-example">${problem.exampleOutput || 'Not provided'}</div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${problem.constraints ? `
+                        <div class="problem-section">
+                            <h3 class="problem-section-title">Constraints</h3>
+                            <div class="constraints">
+                                <p>${problem.constraints}</p>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    loadSubmissionHistory() {
+        // Load submission history from localStorage or API
+        this.submissions = JSON.parse(localStorage.getItem('participantSubmissions')) || [];
+        this.displaySubmissionHistory();
+    }
+
+    displaySubmissionHistory() {
+        const historyContainer = document.querySelector('.history-container');
+        if (!historyContainer) return;
+
+        const tbody = historyContainer.querySelector('tbody');
+        if (!tbody) return;
+
+        if (this.submissions.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">No submissions yet.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = this.submissions.map(submission => `
+            <tr>
+                <td>#${submission.id}</td>
+                <td>${submission.problemTitle}</td>
+                <td>${submission.language}</td>
+                <td>${new Date(submission.timestamp).toLocaleString()}</td>
+                <td><span class="submission-status status-${submission.status}">${submission.status}</span></td>
+                <td>
+                    <button class="btn-sm btn-secondary-custom" onclick="viewSubmission(${submission.id})">View</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    setupChat() {
+        const chatHeader = document.getElementById('chat-header');
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const chatBody = document.getElementById('chat-body');
+
+        chatHeader.addEventListener('click', () => {
+            document.getElementById('chat-container').classList.toggle('open');
+        });
+
+        const sendMessage = () => {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            const currentHackathonId = localStorage.getItem('currentHackathonId');
+            const participantName = localStorage.getItem('participantName') || 'Anonymous';
+
+            if (!currentHackathonId) {
+                this.showNotification('No hackathon selected. Please join a hackathon first.', 'warning');
+                return;
+            }
+
+            const chatMessage = {
+                id: Date.now().toString(),
+                hackathonId: currentHackathonId,
+                sender: 'participant',
+                senderName: participantName,
+                message: message,
+                timestamp: new Date().toISOString()
+            };
+
+            this.chatMessages.push(chatMessage);
+            localStorage.setItem('chatMessages', JSON.stringify(this.chatMessages));
+
+            chatInput.value = '';
+            this.displayChatMessages();
+        };
+
+        chatSend.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Load existing messages
+        this.chatMessages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+        this.displayChatMessages();
+
+        // Auto-refresh chat messages
+        setInterval(() => {
+            this.displayChatMessages();
+        }, 5000);
+    }
+
+    displayChatMessages() {
+        const chatBody = document.getElementById('chat-body');
+        const currentHackathonId = localStorage.getItem('currentHackathonId');
+
+        if (!currentHackathonId) return;
+
+        const hackathonMessages = this.chatMessages
+            .filter(m => m.hackathonId === currentHackathonId)
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        chatBody.innerHTML = '';
+
+        if (hackathonMessages.length === 0) {
+            chatBody.innerHTML = `
+                <div class="text-center text-muted p-3">
+                    <i class="fas fa-comments fa-2x mb-2"></i>
+                    <p>No messages yet. Start the conversation!</p>
+                </div>
+            `;
+            return;
+        }
+
+        hackathonMessages.forEach(message => {
+            const messageElement = document.createElement('div');
+            messageElement.className = `chat-message ${message.sender === 'participant' ? 'message-sent' : 'message-received'}`;
+
+            const timestamp = new Date(message.timestamp);
+            const timeString = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            messageElement.innerHTML = `
+                <div class="message-content">
+                    <div class="message-sender" style="font-size: 0.8rem; color: ${message.sender === 'participant' ? 'var(--participant-color)' : 'var(--organizer-color)'}; margin-bottom: 2px;">
+                        ${message.senderName}
+                    </div>
+                    ${message.message}
+                </div>
+                <div class="message-time">${timeString}</div>
+            `;
+
+            chatBody.appendChild(messageElement);
+        });
+
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    initializeCodeEditor() {
+        const textarea = document.getElementById('solution-editor');
+        if (!textarea || typeof CodeMirror === 'undefined') return;
+
+        this.codeEditor = CodeMirror.fromTextArea(textarea, {
+            lineNumbers: true,
+            mode: 'javascript',
+            theme: 'dracula',
+            indentUnit: 4,
+            lineWrapping: true,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            gutters: ['CodeMirror-linenumbers'],
+            extraKeys: {
+                'Ctrl-V': () => false,
+                'Cmd-V': () => false,
+                'Ctrl-C': () => false,
+                'Cmd-C': () => false
+            }
+        });
+
+        // Focus and position cursor
+        setTimeout(() => {
+            this.codeEditor.refresh();
+            this.codeEditor.focus();
+            this.codeEditor.setCursor({line: 0, ch: 0});
+        }, 200);
+
+        // Prevent context menu and paste
+        this.codeEditor.getWrapperElement().addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+    }
+
+    setupCodeExecution() {
+        const runBtn = document.getElementById('run-code-btn');
+        if (!runBtn) return;
+
+        runBtn.addEventListener('click', () => {
+            this.runCode();
+        });
+    }
+
+    async runCode() {
+        const outputContent = document.getElementById('output-content');
+        if (!outputContent) return;
+
+        outputContent.textContent = 'Running code...';
+
+        try {
+            const code = this.codeEditor ? this.codeEditor.getValue() : '';
+            const language = document.querySelector('.language-selector').value;
+
+            if (!code.trim()) {
+                outputContent.textContent = 'Please enter some code to run.';
+                return;
+            }
+
+            // For demo purposes, we'll simulate code execution
+            // In a real implementation, you'd send this to a code execution service
+            setTimeout(() => {
+                outputContent.textContent = `Code executed successfully!\n\nLanguage: ${language}\nOutput: Hello, World!\nExecution time: 0.05 seconds`;
+            }, 1000);
+
+        } catch (error) {
+            outputContent.textContent = `Error: ${error.message}`;
+        }
+    }
+
+    setupAntiCheating() {
+        let tabSwitchCount = 0;
+        let fullscreenExitCount = 0;
+
+        // Tab switching detection
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                tabSwitchCount++;
+                localStorage.setItem('tabSwitchCount', tabSwitchCount.toString());
+
+                if (tabSwitchCount >= 3) {
+                    this.showNotification('Multiple tab switches detected! This may be reported to organizers.', 'warning');
+                }
+            }
+        });
+
+        // Fullscreen monitoring
+        document.addEventListener('fullscreenchange', () => this.handleFullscreenChange());
+        document.addEventListener('webkitfullscreenchange', () => this.handleFullscreenChange());
+        document.addEventListener('mozfullscreenchange', () => this.handleFullscreenChange());
+        document.addEventListener('msfullscreenchange', () => this.handleFullscreenChange());
+
+        // Prevent common cheating shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.key === 'u') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C')) {
+                e.preventDefault();
+                this.showNotification('Developer tools are disabled during the hackathon.', 'warning');
+                return false;
+            }
+        });
+
+        // Disable right-click
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+    }
+
+    handleFullscreenChange() {
+        const isFullscreen = !!(
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement
+        );
+
+        if (!isFullscreen) {
+            fullscreenExitCount++;
+            if (fullscreenExitCount === 1) {
+                this.showWarningModal('Warning!', 'You have exited fullscreen mode. Please return to fullscreen mode to continue.');
+            } else if (fullscreenExitCount >= 2) {
+                this.showDisqualificationModal();
+            }
+        }
+    }
+
+    setupFormSubmissions() {
+        // Handle solution submission
+        const submitBtn = document.querySelector('.btn-primary-custom');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.submitSolution();
+            });
+        }
+    }
+
+    submitSolution() {
+        const code = this.codeEditor ? this.codeEditor.getValue() : '';
+        const language = document.querySelector('.language-selector').value;
+
+        if (!code.trim()) {
+            this.showNotification('Please enter some code before submitting.', 'warning');
+            return;
+        }
+
+        // Create submission object
+        const submission = {
+            id: Date.now(),
+            problemTitle: 'Optimizing Network Traffic',
+            language: language,
+            code: code,
+            timestamp: new Date().toISOString(),
+            status: 'pending'
+        };
+
+        // Save to localStorage
+        this.submissions.push(submission);
+        localStorage.setItem('participantSubmissions', JSON.stringify(this.submissions));
+
+        // Update UI
+        this.displaySubmissionHistory();
+
+        // Show success message
+        this.showNotification('Solution submitted successfully!', 'success');
+
+        // Simulate status update after some time
+        setTimeout(() => {
+            submission.status = Math.random() > 0.5 ? 'accepted' : 'rejected';
+            localStorage.setItem('participantSubmissions', JSON.stringify(this.submissions));
+            this.displaySubmissionHistory();
+        }, 3000);
+    }
+
+    startTimer() {
+        const timerElement = document.getElementById('countdown-timer');
+        if (!timerElement) return;
+
+        const currentHackathonId = localStorage.getItem('currentHackathonId');
+        if (!currentHackathonId) {
+            timerElement.textContent = '00:00:00';
+            return;
+        }
+
+        // For demo purposes, set a 2.5 hour timer
+        let timeLeft = 2.5 * 60 * 60; // 2.5 hours in seconds
+
+        this.timerInterval = setInterval(() => {
+            const hours = Math.floor(timeLeft / 3600);
+            const minutes = Math.floor((timeLeft % 3600) / 60);
+            const seconds = timeLeft % 60;
+
+            timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(this.timerInterval);
+                timerElement.textContent = '00:00:00';
+                this.showNotification('Hackathon time is up!', 'warning');
+            }
+            timeLeft--;
+        }, 1000);
+    }
+
+    showFullscreenModal() {
+        setTimeout(() => {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.95);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                color: white;
+                font-family: 'Orbitron', sans-serif;
+            `;
+
+            modal.innerHTML = `
+                <div style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: 15px; border: 2px solid var(--accent-color); max-width: 500px;">
+                    <h2 style="color: var(--accent-color); margin-bottom: 20px;">🔒 Security Mode Required</h2>
+                    <p style="margin-bottom: 30px; font-size: 1.1rem; line-height: 1.5;">This hackathon requires fullscreen mode for security and fair play. Tab switching will be monitored.</p>
+                    <button id="enterFullscreenBtn" style="
+                        background: linear-gradient(90deg, var(--participant-color) 0%, var(--secondary-color) 100%);
+                        border: none;
+                        color: white;
+                        padding: 15px 30px;
+                        font-size: 1.1rem;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-family: 'Orbitron', sans-serif;
+                        font-weight: 600;
+                    ">Enter Fullscreen Mode</button>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            document.getElementById('enterFullscreenBtn').addEventListener('click', () => {
+                this.enterFullscreen();
+                document.body.removeChild(modal);
+            });
+        }, 2000);
+    }
+
+    enterFullscreen() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+            elem.mozRequestFullScreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+    }
+
+    showWarningModal(title, message) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+        `;
+
+        modal.innerHTML = `
+            <div style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: 15px; border: 2px solid var(--danger-color); max-width: 500px;">
+                <h2 style="color: var(--danger-color); margin-bottom: 20px;">⚠️ ${title}</h2>
+                <p style="margin-bottom: 30px; font-size: 1.1rem; line-height: 1.5;">${message}</p>
+                <button id="returnFullscreenBtn" style="
+                    background: linear-gradient(90deg, var(--participant-color) 0%, var(--secondary-color) 100%);
+                    border: none;
+                    color: white;
+                    padding: 15px 30px;
+                    font-size: 1.1rem;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-family: 'Orbitron', sans-serif;
+                    font-weight: 600;
+                ">Return to Fullscreen</button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById('returnFullscreenBtn').addEventListener('click', () => {
+            this.enterFullscreen();
+            document.body.removeChild(modal);
+        });
+    }
+
+    showDisqualificationModal() {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+        `;
+
+        modal.innerHTML = `
+            <div style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: 15px; border: 2px solid var(--danger-color); max-width: 500px;">
+                <h2 style="color: var(--danger-color); margin-bottom: 20px;">🚫 DISQUALIFIED</h2>
+                <p style="margin-bottom: 30px; font-size: 1.1rem; line-height: 1.5;">You have exited fullscreen mode twice. You are now disqualified from this hackathon.</p>
+                <button id="exitHackathonBtn" style="
+                    background: var(--danger-color);
+                    border: none;
+                    color: white;
+                    padding: 15px 30px;
+                    font-size: 1.1rem;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-family: 'Orbitron', sans-serif;
+                    font-weight: 600;
+                ">Exit Hackathon</button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById('exitHackathonBtn').addEventListener('click', () => {
+            window.location.href = 'hackathon.html';
+        });
+    }
+
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
+    }
+
+    initializeParticles() {
+        if (typeof particlesJS !== 'undefined') {
+            particlesJS("particles-js", {
+                "particles": {
+                    "number": {
+                        "value": 50,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#00FFDD"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        },
+                        "polygon": {
+                            "nb_sides": 5
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.2,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 1,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 2,
+                            "size_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#00C2FF",
+                        "opacity": 0.2,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 1,
+                        "direction": "none",
+                        "random": true,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false,
+                        "attract": {
+                            "enable": false,
+                            "rotateX": 600,
+                            "rotateY": 1200
+                        }
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
+                            "line_linked": {
+                                "opacity": 0.5
+                            }
+                        },
+                        "bubble": {
+                            "distance": 400,
+                            "size": 40,
+                            "duration": 2,
+                            "opacity": 8,
+                            "speed": 3
+                        },
+                        "repulse": {
+                            "distance": 200,
+                            "duration": 0.4
+                        },
+                        "push": {
+                            "particles_nb": 4
+                        },
+                        "remove": {
+                            "particles_nb": 2
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+        }
+    }
+
+    loadInitialData() {
+        // Set participant name
+        const participantName = localStorage.getItem('participantName');
+        if (participantName) {
+            const nameElement = document.getElementById('participant-name');
+            if (nameElement) nameElement.textContent = participantName;
+        }
+
+        // Load initial problems
+        this.loadProblems();
+    }
+}
+
+// Global function for viewing submissions
+function viewSubmission(submissionId) {
+    // Implementation for viewing submission details
+    console.log('Viewing submission:', submissionId);
+}
+
+// Initialize dashboard when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Preloader animation
+    const preloader = document.getElementById('preloader');
+    const loaderBar = document.getElementById('loader-bar');
+    let width = 0;
+
+    const loadingMessages = [
+        "Loading participant dashboard",
+        "Preparing problem statements",
+        "Setting up code editor",
+        "Configuring submission system",
+        "Ready to code!"
+    ];
+
+    let loadingText = preloader.querySelector('p');
+    loadingText.textContent = loadingMessages[0];
+
+    let messageIndex = 0;
+    const messageInterval = setInterval(() => {
+        messageIndex = (messageIndex + 1) % loadingMessages.length;
+        loadingText.textContent = loadingMessages[messageIndex];
+    }, 1500);
+
+    const interval = setInterval(() => {
+        width += Math.floor(Math.random() * 10) + 1;
+        if (width > 100) width = 100;
+        loaderBar.style.width = width + '%';
+
+        if (width === 100) {
+            clearInterval(interval);
+            clearInterval(messageInterval);
+            loadingText.textContent = "Launch complete!";
+            setTimeout(() => {
+                preloader.style.opacity = '0';
+                preloader.style.visibility = 'hidden';
+                new ParticipantDashboard();
+            }, 800);
+        }
+    }, 100);
+});
