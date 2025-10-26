@@ -1318,6 +1318,15 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'hackathon.html';
     };
 
+    // Add event listener to logout button
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            logoutOrganizer();
+        });
+    }
+
     // Initialize functions on load
     loadHackathonsIntoSelect();
     displayHackathons();
