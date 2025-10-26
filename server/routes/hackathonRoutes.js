@@ -221,4 +221,62 @@ router.post('/:hackathonId/submit', async (req, res) => {
   }
 });
 
+// Get participant data
+router.get('/:hackathonId/participant/:participantId', async (req, res) => {
+  try {
+    const { hackathonId, participantId } = req.params;
+
+    const hackathon = await Hackathon.findOne({ id: hackathonId });
+    if (!hackathon) {
+      return res.status(404).json({ error: 'Hackathon not found' });
+    }
+
+    const participant = hackathon.participants.find(p => p.id === participantId);
+    if (!participant) {
+      return res.status(404).json({ error: 'Participant not found' });
+    }
+
+    res.json({
+      success: true,
+      participant: {
+        id: participant.id,
+        name: participant.name,
+        email: participant.email,
+        joinedAt: participant.joinedAt,
+        status: participant.status,
+        submissions: participant.submissions,
+        lastActivity: participant.lastActivity
+      }
+    });
+  } catch (error) {
+    console.error('Error getting participant:', error);
+    res.status(500).json({ error: 'Failed to get participant' });
+  }
+});
+
+// Get participant submissions
+router.get('/:hackathonId/participant/:participantId/submissions', async (req, res) => {
+  try {
+    const { hackathonId, participantId } = req.params;
+
+    const hackathon = await Hackathon.findOne({ id: hackathonId });
+    if (!hackathon) {
+      return res.status(404).json({ error: 'Hackathon not found' });
+    }
+
+    const participant = hackathon.participants.find(p => p.id === participantId);
+    if (!participant) {
+      return res.status(404).json({ error: 'Participant not found' });
+    }
+
+    res.json({
+      success: true,
+      submissions: participant.submissions
+    });
+  } catch (error) {
+    console.error('Error getting participant submissions:', error);
+    res.status(500).json({ error: 'Failed to get participant submissions' });
+  }
+});
+
 module.exports = router;

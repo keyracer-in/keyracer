@@ -21,7 +21,7 @@ document.getElementById('existingConductor').addEventListener('change', function
     }, 1000);
 });
 
-// Generate a unique hackathon code
+// Generate a unique organizer code
 function generateUniqueCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
@@ -92,9 +92,9 @@ document.getElementById('conductorSubmit').addEventListener('click', function() 
             window.location.href = `organizer-dashboard.html?organizerName=${encodeURIComponent(conductorName)}&isNew=true`;
         }, 800);
     } else {
-        const hackathonCode = document.getElementById('hackathonCode').value.trim();
+        const organizerCode = document.getElementById('hackathonCode').value.trim();
         
-        if (hackathonCode === '') {
+        if (organizerCode === '') {
             submitBtn.classList.remove('animate__pulse');
             submitBtn.classList.add('animate__shakeX');
             submitBtn.textContent = 'Access Dashboard';
@@ -122,7 +122,7 @@ document.getElementById('conductorSubmit').addEventListener('click', function() 
             if (key.includes('_hackathons')) {
                 try {
                     const hackathons = JSON.parse(localStorage.getItem(key));
-                    const hackathon = hackathons.find(h => h.organizerCode === hackathonCode);
+                    const hackathon = hackathons.find(h => h.organizerCode === organizerCode);
                     if (hackathon) {
                         validHackathon = hackathon;
                         // Try to get organizer name from stored data
@@ -162,7 +162,7 @@ document.getElementById('conductorSubmit').addEventListener('click', function() 
         
         setTimeout(() => {
             // Store the validated info in localStorage
-            localStorage.setItem('currentOrganizerCode', hackathonCode);
+            localStorage.setItem('currentOrganizerCode', organizerCode);
             localStorage.setItem('currentHackathonId', validHackathon.id);
             localStorage.setItem('hackathonName', validHackathon.title);
             localStorage.setItem('organizerName', organizerName);
@@ -170,7 +170,7 @@ document.getElementById('conductorSubmit').addEventListener('click', function() 
             localStorage.setItem('isNewHackathon', 'false');
             
             // Redirect to organizer dashboard with parameters
-            window.location.href = `organizer-dashboard.html?organizerCode=${encodeURIComponent(hackathonCode)}&organizerName=${encodeURIComponent(organizerName)}`;
+            window.location.href = `organizer-dashboard.html?organizerCode=${encodeURIComponent(organizerCode)}&organizerName=${encodeURIComponent(organizerName)}`;
         }, 800);
     }
 });

@@ -153,6 +153,38 @@ class HackathonAPI {
             throw error;
         }
     }
+
+    async getParticipant(hackathonId, participantId) {
+        try {
+            const response = await fetch(`${this.baseURL}/${hackathonId}/participant/${participantId}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to get participant');
+            }
+
+            return data.participant;
+        } catch (error) {
+            console.error('Error getting participant:', error);
+            throw error;
+        }
+    }
+
+    async getParticipantSubmissions(hackathonId, participantId) {
+        try {
+            const response = await fetch(`${this.baseURL}/${hackathonId}/participant/${participantId}/submissions`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to get participant submissions');
+            }
+
+            return data.submissions;
+        } catch (error) {
+            console.error('Error getting participant submissions:', error);
+            throw error;
+        }
+    }
 }
 
 // Create global instance

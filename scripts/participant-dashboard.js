@@ -60,7 +60,7 @@ class ParticipantDashboard {
         this.setupFormSubmissions();
     }
 
-    navigateToPage(page) {
+    async navigateToPage(page) {
         // Update navigation
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('active');
@@ -81,16 +81,16 @@ class ParticipantDashboard {
         this.currentPage = page;
 
         // Load page-specific data
-        this.loadPageData(page);
+        await this.loadPageData(page);
     }
 
-    loadPageData(page) {
+    async loadPageData(page) {
         switch (page) {
             case 'problem':
-                this.loadProblems();
+                await this.loadProblems();
                 break;
             case 'history':
-                this.loadSubmissionHistory();
+                await this.loadSubmissionHistory();
                 break;
             case 'rules':
                 // Rules are static
@@ -98,15 +98,23 @@ class ParticipantDashboard {
         }
     }
 
-    loadProblems() {
-        // Load problems from localStorage or API
-        const problems = JSON.parse(localStorage.getItem('participantProblems')) || [];
-        const currentHackathonId = localStorage.getItem('currentHackathonId');
+    async loadProblems() {
+        try {
+            const currentHackathonId = localStorage.getItem('currentHackathonId');
+            if (!currentHackathonId) {
+                this.showNotification('No hackathon selected', 'warning');
+                return;
+            }
 
-        this.problems = currentHackathonId ?
-            problems.filter(p => p.hackathonId === currentHackathonId) : problems;
-
-        this.displayProblems();
+            // Load problems from API
+            this.problems = await window.HackathonAPI.getHackathonProblems(currentHackathonId);
+            this.displayProblems();
+        } catch (error) {
+            console.error('Error loading problems:', error);
+            this.showNotification('Failed to load problems', 'error');
+            this.problems = [];
+            this.displayProblems();
+        }
     }
 
     displayProblems() {
@@ -180,10 +188,25 @@ class ParticipantDashboard {
         `;
     }
 
-    loadSubmissionHistory() {
-        // Load submission history from localStorage or API
-        this.submissions = JSON.parse(localStorage.getItem('participantSubmissions')) || [];
-        this.displaySubmissionHistory();
+    async loadSubmissionHistory() {
+        try {
+            const currentHackathonId = localStorage.getItem('currentHackathonId');
+            const currentParticipantId = localStorage.getItem('currentParticipantId');
+
+            if (!currentHackathonId || !currentParticipantId) {
+                this.showNotification('Participant data not found', 'warning');
+                return;
+            }
+
+            // Load submissions from API
+            this.submissions = await window.HackathonAPI.getParticipantSubmissions(currentHackathonId, currentParticipantId);
+            this.displaySubmissionHistory();
+        } catch (error) {
+            console.error('Error loading submission history:', error);
+            this.showNotification('Failed to load submission history', 'error');
+            this.submissions = [];
+            this.displaySubmissionHistory();
+        }
     }
 
     displaySubmissionHistory() {
@@ -347,6 +370,22 @@ class ParticipantDashboard {
             e.preventDefault();
             return false;
         });
+
+        // Apply anti-cheating attributes from data attributes
+        const solutionTextarea = document.getElementById('solution-editor');
+        if (solutionTextarea) {
+            const antiCheatAttrs = ['onpaste', 'ondrop', 'oncontextmenu', 'onselectstart', 'ondragstart'];
+            antiCheatAttrs.forEach(attr => {
+                const dataAttr = `data-${attr}`;
+                if (solutionTextarea.hasAttribute(dataAttr)) {
+                    const handler = solutionTextarea.getAttribute(dataAttr);
+                    solutionTextarea.addEventListener(attr.slice(2), (e) => {
+                        e.preventDefault();
+                        return eval(handler);
+                    });
+                }
+            });
+        }
     }
 
     setupCodeExecution() {
@@ -454,7 +493,7 @@ class ParticipantDashboard {
         }
     }
 
-    submitSolution() {
+    async submitSolution() {
         const code = this.codeEditor ? this.codeEditor.getValue() : '';
         const language = document.querySelector('.language-selector').value;
 
@@ -463,32 +502,42 @@ class ParticipantDashboard {
             return;
         }
 
-        // Create submission object
-        const submission = {
-            id: Date.now(),
-            problemTitle: 'Optimizing Network Traffic',
-            language: language,
-            code: code,
-            timestamp: new Date().toISOString(),
-            status: 'pending'
-        };
+        try {
+            const currentHackathonId = localStorage.getItem('currentHackathonId');
+            const currentParticipantId = localStorage.getItem('currentParticipantId');
 
-        // Save to localStorage
-        this.submissions.push(submission);
-        localStorage.setItem('participantSubmissions', JSON.stringify(this.submissions));
+            if (!currentHackathonId || !currentParticipantId) {
+                this.showNotification('Participant data not found', 'error');
+                return;
+            }
 
-        // Update UI
-        this.displaySubmissionHistory();
+            // Get current problem
+            const currentProblem = this.problems.length > 0 ? this.problems[0] : null;
+            if (!currentProblem) {
+                this.showNotification('No problem selected', 'error');
+                return;
+            }
 
-        // Show success message
-        this.showNotification('Solution submitted successfully!', 'success');
+            // Submit via API
+            const submissionData = {
+                participantId: currentParticipantId,
+                problemId: currentProblem.id,
+                code: code,
+                language: language
+            };
 
-        // Simulate status update after some time
-        setTimeout(() => {
-            submission.status = Math.random() > 0.5 ? 'accepted' : 'rejected';
-            localStorage.setItem('participantSubmissions', JSON.stringify(this.submissions));
-            this.displaySubmissionHistory();
-        }, 3000);
+            const submission = await window.HackathonAPI.submitSolution(currentHackathonId, submissionData);
+
+            // Reload submission history to show the new submission
+            await this.loadSubmissionHistory();
+
+            // Show success message
+            this.showNotification('Solution submitted successfully!', 'success');
+
+        } catch (error) {
+            console.error('Error submitting solution:', error);
+            this.showNotification('Failed to submit solution', 'error');
+        }
     }
 
     startTimer() {
@@ -790,7 +839,7 @@ class ParticipantDashboard {
         }
     }
 
-    loadInitialData() {
+    async loadInitialData() {
         // Set participant name
         const participantName = localStorage.getItem('participantName');
         if (participantName) {
@@ -799,7 +848,7 @@ class ParticipantDashboard {
         }
 
         // Load initial problems
-        this.loadProblems();
+        await this.loadProblems();
     }
 }
 
