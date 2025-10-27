@@ -32,7 +32,7 @@ function generateUniqueCode() {
 }
 
 // Conductor form submission with enhanced animations
-document.getElementById('conductorSubmit').addEventListener('click', function() {
+document.getElementById('conductorSubmit').addEventListener('click', async function() {
     const isNewConductor = document.getElementById('newConductor').checked;
     const submitBtn = document.getElementById('conductorSubmit');
     
@@ -113,47 +113,40 @@ document.getElementById('conductorSubmit').addEventListener('click', function() 
             return;
         }
         
-        // Validate organizer code across all organizers
-        const allKeys = Object.keys(localStorage);
+        // Validate organizer code using API
         let validHackathon = null;
         let organizerName = 'Organizer';
-        
-        for (const key of allKeys) {
-            if (key.includes('_hackathons')) {
-                try {
-                    const hackathons = JSON.parse(localStorage.getItem(key));
-                    const hackathon = hackathons.find(h => h.organizerCode === organizerCode);
-                    if (hackathon) {
-                        validHackathon = hackathon;
-                        // Try to get organizer name from stored data
-                        const storedName = localStorage.getItem('organizerName') || localStorage.getItem('conductorName');
-                        if (storedName) {
-                            organizerName = storedName;
-                        }
-                        break;
-                    }
-                } catch (e) {
-                    // Skip invalid entries
-                }
+
+        try {
+            // Use HackathonAPI to find hackathon by organizer code
+            validHackathon = await window.HackathonAPI.findHackathon(organizerCode);
+
+            // Try to get organizer name from stored data
+            const storedName = localStorage.getItem('organizerName') || localStorage.getItem('conductorName');
+            if (storedName) {
+                organizerName = storedName;
             }
+        } catch (error) {
+            console.error('Error validating organizer code:', error);
+            validHackathon = null;
         }
-        
+
         if (!validHackathon) {
             submitBtn.classList.remove('animate__pulse');
             submitBtn.classList.add('animate__shakeX');
             submitBtn.textContent = 'Invalid Code';
-            
+
             // Show error styling
             document.getElementById('hackathonCode').style.borderColor = 'var(--danger-color)';
             document.getElementById('hackathonCode').classList.add('animate__animated', 'animate__shakeX');
-            
+
             setTimeout(() => {
                 submitBtn.classList.remove('animate__shakeX');
                 submitBtn.textContent = 'Access Dashboard';
                 document.getElementById('hackathonCode').classList.remove('animate__shakeX');
                 document.getElementById('hackathonCode').style.borderColor = '';
             }, 2000);
-            
+
             return;
         }
         
@@ -176,7 +169,7 @@ document.getElementById('conductorSubmit').addEventListener('click', function() 
 });
 
 // Participant form submission with enhanced animations
-document.getElementById('participantSubmit').addEventListener('click', function() {
+document.getElementById('participantSubmit').addEventListener('click', async function() {
     const participantName = document.getElementById('participantName').value.trim();
     const hackathonId = document.getElementById('hackathonId').value.trim();
     const submitBtn = document.getElementById('participantSubmit');
@@ -215,30 +208,34 @@ document.getElementById('participantSubmit').addEventListener('click', function(
     }
     
     try {
-        // Validate hackathon ID using ParticipantManager
-        const validHackathon = window.ParticipantManager.validateHackathonId(hackathonId);
-        
-        if (!validHackathon) {
+        // Validate hackathon ID using API (only accepts hackathon IDs, not organizer codes)
+        const validHackathon = await window.HackathonAPI.findHackathon(hackathonId);
+
+        // Additional validation: ensure the identifier is a hackathon ID, not an organizer code
+        if (!validHackathon || hackathonId.startsWith('ORG')) {
             submitBtn.classList.remove('animate__pulse');
             submitBtn.classList.add('animate__shakeX');
-            submitBtn.textContent = 'Invalid ID';
-            
+            submitBtn.textContent = 'Invalid Hackathon ID';
+
             // Show error styling
             document.getElementById('hackathonId').style.borderColor = 'var(--danger-color)';
             document.getElementById('hackathonId').classList.add('animate__animated', 'animate__shakeX');
-            
+
             setTimeout(() => {
                 submitBtn.classList.remove('animate__shakeX');
                 submitBtn.textContent = 'Join Hackathon';
                 document.getElementById('hackathonId').classList.remove('animate__shakeX');
                 document.getElementById('hackathonId').style.borderColor = '';
             }, 2000);
-            
+
             return;
         }
-        
-        // Register participant using ParticipantManager
-        const registeredParticipant = window.ParticipantManager.registerParticipant(participantName, hackathonId);
+
+        // Register participant using API
+        const registeredParticipant = await window.HackathonAPI.registerParticipant(hackathonId, {
+            name: participantName,
+            email: '' // Optional email field
+        });
         
         submitBtn.textContent = 'Success!';
         submitBtn.style.background = 'linear-gradient(90deg, var(--participant-color) 0%, var(--secondary-color) 100%)';
