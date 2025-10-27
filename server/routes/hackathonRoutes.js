@@ -37,25 +37,39 @@ router.post('/create', async (req, res) => {
 router.get('/find/:identifier', async (req, res) => {
   try {
     const { identifier } = req.params;
+    console.log(`[HACKATHON FIND] Searching for identifier: ${identifier}`);
 
     let hackathon;
-    if (identifier.startsWith('ORG')) {
-      // Search by organizer code
-      hackathon = await Hackathon.findOne({ organizerCode: identifier });
+    if (identifier.toUpperCase().startsWith('ORG')) {
+      // Search by organizer code (case-insensitive)
+      console.log(`[HACKATHON FIND] Searching by organizer code: ${identifier}`);
+      hackathon = await Hackathon.findOne({
+        organizerCode: { $regex: new RegExp(`^${identifier}$`, 'i') }
+      });
+      console.log(`[HACKATHON FIND] Organizer code search result:`, hackathon ? `Found hackathon ${hackathon.id}` : 'Not found');
     } else {
       // Search by hackathon ID
+      console.log(`[HACKATHON FIND] Searching by hackathon ID: ${identifier}`);
       hackathon = await Hackathon.findOne({ id: identifier });
+      console.log(`[HACKATHON FIND] Hackathon ID search result:`, hackathon ? `Found hackathon ${hackathon.id}` : 'Not found');
     }
 
     if (!hackathon) {
-      return res.status(404).json({ error: 'Hackathon not found' });
+      console.log(`[HACKATHON FIND] No hackathon found for identifier: ${identifier}`);
+      return res.status(404).json({
+        error: 'Hackathon not found',
+        identifier: identifier,
+        message: `No hackathon found with ${identifier.startsWith('ORG') ? 'organizer code' : 'ID'} "${identifier}"`
+      });
     }
 
+    console.log(`[HACKATHON FIND] Successfully found hackathon: ${hackathon.title} (${hackathon.id})`);
     res.json({
       success: true,
       hackathon: {
         id: hackathon.id,
         organizerCode: hackathon.organizerCode,
+        organizerId: hackathon.organizerId,
         title: hackathon.title,
         date: hackathon.date,
         startTime: hackathon.startTime,
@@ -276,6 +290,28 @@ router.get('/:hackathonId/participant/:participantId/submissions', async (req, r
   } catch (error) {
     console.error('Error getting participant submissions:', error);
     res.status(500).json({ error: 'Failed to get participant submissions' });
+  }
+});
+
+// Debug route to list all hackathons (development only)
+router.get('/debug/list', async (req, res) => {
+  try {
+    const hackathons = await Hackathon.find({}, 'id organizerCode title date status participants');
+    res.json({
+      success: true,
+      count: hackathons.length,
+      hackathons: hackathons.map(h => ({
+        id: h.id,
+        organizerCode: h.organizerCode,
+        title: h.title,
+        date: h.date,
+        status: h.status,
+        participantCount: h.participants.length
+      }))
+    });
+  } catch (error) {
+    console.error('Error listing hackathons:', error);
+    res.status(500).json({ error: 'Failed to list hackathons' });
   }
 });
 

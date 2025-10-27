@@ -1,5 +1,5 @@
 // Preloader animation
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const preloader = document.getElementById('preloader');
     const loaderBar = document.getElementById('loader-bar');
     let width = 0;
@@ -266,35 +266,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // If organizer code exists, find the corresponding organizer ID
     if (organizerCode) {
-        // Search through all stored hackathons to find the organizer
-        const allKeys = Object.keys(localStorage);
-        let foundOrganizerId = null;
-        let foundHackathon = null;
+        try {
+            console.log('Finding hackathon for organizer code:', organizerCode);
+            const hackathon = await window.HackathonAPI.findHackathon(organizerCode);
 
-        for (const key of allKeys) {
-            if (key.includes('_hackathons')) {
-                try {
-                    const hackathons = JSON.parse(localStorage.getItem(key));
-                    const hackathon = hackathons.find(h => h.organizerCode === organizerCode);
-                    if (hackathon) {
-                        // Extract organizer ID from the key
-                        foundOrganizerId = key.split('_hackathons')[0];
-                        foundHackathon = hackathon;
-                        console.log('Found organizer ID from key:', foundOrganizerId, 'for code:', organizerCode);
-                        break;
-                    }
-                } catch (e) {
-                    // Skip invalid entries
-                }
+            if (hackathon && hackathon.organizerId) {
+                currentOrganizerId = hackathon.organizerId;
+                localStorage.setItem('currentOrganizerId', currentOrganizerId);
+                localStorage.setItem('currentOrganizerCode', organizerCode);
+                console.log('Set current organizer ID to:', currentOrganizerId, 'from hackathon:', hackathon.id);
+            } else {
+                throw new Error('Hackathon found but no organizer ID');
             }
-        }
-
-        if (foundOrganizerId && foundHackathon) {
-            currentOrganizerId = foundOrganizerId;
-            localStorage.setItem('currentOrganizerId', currentOrganizerId);
-            localStorage.setItem('currentOrganizerCode', organizerCode);
-            console.log('Set current organizer ID to:', currentOrganizerId);
-        } else {
+        } catch (error) {
+            console.error('Error finding hackathon:', error);
             // Invalid organizer code
             alert('Invalid organizer code. Please check and try again.');
             window.location.href = 'hackathon.html';
@@ -540,9 +525,9 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Real-time updates - check for participant changes every 3 seconds
-    setInterval(function() {
+    setInterval(async function() {
         displayHackathons();
-        displayParticipants();
+        await displayParticipants();
         displaySubmissions();
         displayEvaluations();
         displayLeaderboard();
@@ -767,25 +752,27 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Display participants function
-    function displayParticipants() {
-        // Get all participants across all organizers for this organizer's hackathons
+    async function displayParticipants() {
+        // Get all participants for this organizer's hackathons from API
         const hackathons = getOrganizerData('hackathons');
         const hackathonIds = hackathons.map(h => h.id);
 
-        // Find participants across all organizer keys
-        const allKeys = Object.keys(localStorage);
         let allParticipants = [];
 
-        for (const key of allKeys) {
-            if (key.includes('_participants')) {
-                try {
-                    const participants = JSON.parse(localStorage.getItem(key));
-                    // Filter participants that belong to this organizer's hackathons
-                    const relevantParticipants = participants.filter(p => hackathonIds.includes(p.hackathonId));
-                    allParticipants = allParticipants.concat(relevantParticipants);
-                } catch (e) {
-                    // Skip invalid entries
+        // Fetch participants for each hackathon from API
+        for (const hackathonId of hackathonIds) {
+            try {
+                const response = await window.HackathonAPI.getParticipants(hackathonId);
+                if (response.success && response.participants) {
+                    // Add hackathonId to each participant for filtering
+                    const participantsWithHackathon = response.participants.map(p => ({
+                        ...p,
+                        hackathonId: hackathonId
+                    }));
+                    allParticipants = allParticipants.concat(participantsWithHackathon);
                 }
+            } catch (error) {
+                console.error(`Error fetching participants for hackathon ${hackathonId}:`, error);
             }
         }
 
@@ -797,20 +784,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Current organizer ID:', currentOrganizerId);
         console.log('Organizer hackathons:', hackathons);
         console.log('Looking for participants across all organizers for hackathons:', hackathonIds);
-        console.log('All localStorage keys:', allKeys.filter(k => k.includes('_participants')));
-        console.log('Found participants:', participants);
-
-        // Debug: Show all participants in localStorage
-        for (const key of allKeys) {
-            if (key.includes('_participants')) {
-                try {
-                    const participants = JSON.parse(localStorage.getItem(key));
-                    console.log(`Participants in ${key}:`, participants);
-                } catch (e) {
-                    console.log(`Invalid participants data in ${key}`);
-                }
-            }
-        }
+        console.log('Found participants from API:', participants);
 
         if (!tableBody) return;
 
@@ -1394,7 +1368,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadHackathonsIntoSelect();
     displayHackathons();
     displayProblems();
-    displayParticipants();
+    displayParticipants().catch(error => console.error('Error loading participants:', error));
     displaySubmissions();
     displayEvaluations();
     displayLeaderboard();

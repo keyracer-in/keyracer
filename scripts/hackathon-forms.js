@@ -118,8 +118,10 @@ document.getElementById('conductorSubmit').addEventListener('click', async funct
         let organizerName = 'Organizer';
 
         try {
+            console.log(`[FORMS] Validating organizer code: ${organizerCode}`);
             // Use HackathonAPI to find hackathon by organizer code
             validHackathon = await window.HackathonAPI.findHackathon(organizerCode);
+            console.log(`[FORMS] Valid hackathon found:`, validHackathon);
 
             // Try to get organizer name from stored data
             const storedName = localStorage.getItem('organizerName') || localStorage.getItem('conductorName');
@@ -127,7 +129,7 @@ document.getElementById('conductorSubmit').addEventListener('click', async funct
                 organizerName = storedName;
             }
         } catch (error) {
-            console.error('Error validating organizer code:', error);
+            console.error('[FORMS] Error validating organizer code:', error);
             validHackathon = null;
         }
 
@@ -136,16 +138,34 @@ document.getElementById('conductorSubmit').addEventListener('click', async funct
             submitBtn.classList.add('animate__shakeX');
             submitBtn.textContent = 'Invalid Code';
 
-            // Show error styling
-            document.getElementById('hackathonCode').style.borderColor = 'var(--danger-color)';
+            // Show error styling and message
             document.getElementById('hackathonCode').classList.add('animate__animated', 'animate__shakeX');
+            document.getElementById('hackathonCode').style.borderColor = 'var(--danger-color)';
+
+            // Show specific error message
+            const errorMsg = document.createElement('div');
+            errorMsg.id = 'organizerCodeError';
+            errorMsg.style.color = 'var(--danger-color)';
+            errorMsg.style.fontSize = '0.9rem';
+            errorMsg.style.marginTop = '5px';
+            errorMsg.textContent = `Organizer code "${organizerCode}" not found. Please check the code and try again.`;
+
+            // Remove any existing error message
+            const existingError = document.getElementById('organizerCodeError');
+            if (existingError) existingError.remove();
+
+            document.getElementById('hackathonCode').parentNode.appendChild(errorMsg);
 
             setTimeout(() => {
                 submitBtn.classList.remove('animate__shakeX');
                 submitBtn.textContent = 'Access Dashboard';
                 document.getElementById('hackathonCode').classList.remove('animate__shakeX');
                 document.getElementById('hackathonCode').style.borderColor = '';
-            }, 2000);
+
+                // Remove error message
+                const errorMsg = document.getElementById('organizerCodeError');
+                if (errorMsg) errorMsg.remove();
+            }, 4000);
 
             return;
         }

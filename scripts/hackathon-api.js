@@ -42,16 +42,20 @@ class HackathonAPI {
 
     async findHackathon(identifier) {
         try {
+            console.log(`[HACKATHON API] Finding hackathon with identifier: ${identifier}`);
             const response = await fetch(`${this.baseURL}/find/${identifier}`);
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Hackathon not found');
+                const errorMessage = data.message || data.error || 'Hackathon not found';
+                console.error(`[HACKATHON API] Find failed (${response.status}): ${errorMessage}`);
+                throw new Error(errorMessage);
             }
 
+            console.log(`[HACKATHON API] Successfully found hackathon: ${data.hackathon.title}`);
             return data.hackathon;
         } catch (error) {
-            console.error('Error finding hackathon:', error);
+            console.error('[HACKATHON API] Error finding hackathon:', error);
             throw error;
         }
     }
@@ -78,7 +82,7 @@ class HackathonAPI {
         }
     }
 
-    async getHackathonParticipants(hackathonId) {
+    async getParticipants(hackathonId) {
         try {
             const response = await fetch(`${this.baseURL}/${hackathonId}/participants`);
             const data = await response.json();
@@ -87,7 +91,7 @@ class HackathonAPI {
                 throw new Error(data.error || 'Failed to get participants');
             }
 
-            return data.participants;
+            return data;
         } catch (error) {
             console.error('Error getting participants:', error);
             throw error;
