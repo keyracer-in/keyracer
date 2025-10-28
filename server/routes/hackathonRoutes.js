@@ -7,9 +7,11 @@ router.post('/create', async (req, res) => {
   try {
     const hackathonData = req.body;
 
-    // Generate unique ID and organizer code
+    // Generate unique ID
     const id = 'HK' + Math.random().toString(36).substr(2, 6).toUpperCase();
-    const organizerCode = 'ORG' + Math.random().toString(36).substr(2, 9).toUpperCase();
+
+    // Use provided organizer code or generate one
+    const organizerCode = hackathonData.organizerCode || 'ORG' + Math.random().toString(36).substr(2, 9).toUpperCase();
 
     const hackathon = new Hackathon({
       ...hackathonData,
@@ -69,7 +71,6 @@ router.get('/find/:identifier', async (req, res) => {
       hackathon: {
         id: hackathon.id,
         organizerCode: hackathon.organizerCode,
-        organizerId: hackathon.organizerId,
         title: hackathon.title,
         date: hackathon.date,
         startTime: hackathon.startTime,
@@ -293,22 +294,23 @@ router.get('/:hackathonId/participant/:participantId/submissions', async (req, r
   }
 });
 
-// Get hackathons by organizer ID
-router.get('/organizer/:organizerId', async (req, res) => {
+// Get hackathons by organizer code
+router.get('/organizer/:organizerCode', async (req, res) => {
   try {
-    const { organizerId } = req.params;
+    const { organizerCode } = req.params;
 
-    const hackathons = await Hackathon.find({ organizerId }, 'id organizerCode title date status participants organizerId');
+    const hackathons = await Hackathon.find({ organizerCode });
     res.json({
       success: true,
       hackathons: hackathons.map(h => ({
         id: h.id,
         organizerCode: h.organizerCode,
-        organizerId: h.organizerId,
         title: h.title,
         date: h.date,
         status: h.status,
-        participantCount: h.participants.length
+        participantCount: h.participants.length,
+        problems: h.problems,
+        participants: h.participants
       }))
     });
   } catch (error) {
@@ -320,14 +322,13 @@ router.get('/organizer/:organizerId', async (req, res) => {
 // Debug route to list all hackathons (development only)
 router.get('/debug/list', async (req, res) => {
   try {
-    const hackathons = await Hackathon.find({}, 'id organizerCode title date status participants organizerId');
+    const hackathons = await Hackathon.find({}, 'id organizerCode title date status participants');
     res.json({
       success: true,
       count: hackathons.length,
       hackathons: hackathons.map(h => ({
         id: h.id,
         organizerCode: h.organizerCode,
-        organizerId: h.organizerId,
         title: h.title,
         date: h.date,
         status: h.status,

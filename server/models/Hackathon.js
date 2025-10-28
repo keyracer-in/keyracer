@@ -11,10 +11,6 @@ const hackathonSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  organizerId: {
-    type: String,
-    required: true
-  },
   title: {
     type: String,
     required: true

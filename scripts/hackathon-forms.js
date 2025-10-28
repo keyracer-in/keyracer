@@ -85,7 +85,6 @@ document.getElementById('conductorSubmit').addEventListener('click', async funct
             localStorage.setItem('isNewHackathon', 'true');
             
             // Clear any existing organizer data to start fresh
-            localStorage.removeItem('currentOrganizerId');
             localStorage.removeItem('currentOrganizerCode');
             
             // Redirect to organizer dashboard with parameters

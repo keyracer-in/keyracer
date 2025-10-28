@@ -190,9 +190,9 @@ class HackathonAPI {
         }
     }
 
-    async getHackathonsByOrganizer(organizerId) {
+    async getHackathonsByOrganizer(organizerCode) {
         try {
-            const response = await fetch(`${this.baseURL}/organizer/${organizerId}`);
+            const response = await fetch(`${this.baseURL}/organizer/${organizerCode}`);
             const data = await response.json();
 
             if (!response.ok) {

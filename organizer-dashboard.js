@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
 
     // Organizer Data Management
-    let currentOrganizerId = localStorage.getItem('currentOrganizerId');
+    let currentOrganizerCode = localStorage.getItem('currentOrganizerCode');
 
     // Check if organizer is accessing via organizer code
     const urlParams = new URLSearchParams(window.location.search);
@@ -264,22 +264,42 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    // If organizer code exists, find the corresponding organizer ID
+    // If organizer code exists, validate it and load hackathons
     if (organizerCode) {
         try {
-            console.log('Finding hackathon for organizer code:', organizerCode);
+            console.log('Validating organizer code:', organizerCode);
             const hackathon = await window.HackathonAPI.findHackathon(organizerCode);
 
-            if (hackathon && hackathon.organizerId) {
-                currentOrganizerId = hackathon.organizerId;
-                localStorage.setItem('currentOrganizerId', currentOrganizerId);
+            if (hackathon) {
+                currentOrganizerCode = organizerCode;
                 localStorage.setItem('currentOrganizerCode', organizerCode);
-                console.log('Set current organizer ID to:', currentOrganizerId, 'from hackathon:', hackathon.id);
+                console.log('Validated organizer code:', organizerCode, 'for hackathon:', hackathon.id);
+
+                // Load all hackathons for this organizer from MongoDB
+                console.log('Loading hackathons from MongoDB for organizer code:', currentOrganizerCode);
+                const hackathonsFromDB = await window.HackathonAPI.getHackathonsByOrganizer(currentOrganizerCode);
+                console.log('Hackathons loaded from DB:', hackathonsFromDB);
+
+                if (hackathonsFromDB && hackathonsFromDB.length > 0) {
+                    // Store hackathons in localStorage for UI display
+                    setOrganizerData('hackathons', hackathonsFromDB);
+
+                    // Also store problems and participants data for each hackathon
+                    hackathonsFromDB.forEach(hackathon => {
+                        if (hackathon.problems && hackathon.problems.length > 0) {
+                            setOrganizerData('problems', hackathon.problems);
+                        }
+                        if (hackathon.participants && hackathon.participants.length > 0) {
+                            // Store participants data if needed for other functions
+                            console.log(`Loaded ${hackathon.participants.length} participants for hackathon ${hackathon.id}`);
+                        }
+                    });
+                }
             } else {
-                throw new Error('Hackathon found but no organizer ID');
+                throw new Error('Hackathon not found for organizer code');
             }
         } catch (error) {
-            console.error('Error finding hackathon:', error);
+            console.error('Error validating organizer code:', error);
             // Invalid organizer code
             alert('Invalid organizer code. Please check and try again.');
             window.location.href = 'hackathon.html';
@@ -287,49 +307,41 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    // If no organizer ID exists, create one for new organizer
-    if (!currentOrganizerId) {
-        currentOrganizerId = 'ORG_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-        localStorage.setItem('currentOrganizerId', currentOrganizerId);
-    }
-
-    // If no organizer code was provided, try to load hackathons from MongoDB
-    if (!organizerCode) {
+    // If no organizer code was provided, try to load hackathons from MongoDB using stored code
+    if (!organizerCode && currentOrganizerCode) {
         try {
-            console.log('Loading hackathons from MongoDB for organizer:', currentOrganizerId);
-            const hackathonsFromDB = await window.HackathonAPI.getHackathonsByOrganizer(currentOrganizerId);
+            console.log('Loading hackathons from MongoDB for stored organizer code:', currentOrganizerCode);
+            const hackathonsFromDB = await window.HackathonAPI.getHackathonsByOrganizer(currentOrganizerCode);
             console.log('Hackathons loaded from DB:', hackathonsFromDB);
 
             if (hackathonsFromDB && hackathonsFromDB.length > 0) {
                 // Store hackathons in localStorage for UI display
                 setOrganizerData('hackathons', hackathonsFromDB);
 
-                // Get organizer code from the first hackathon
-                const firstHackathon = hackathonsFromDB[0];
-                if (firstHackathon.organizerCode) {
-                    organizerCode = firstHackathon.organizerCode;
-                    localStorage.setItem('currentOrganizerCode', organizerCode);
-                    console.log('Loaded organizer code from DB hackathon:', organizerCode);
-                }
+                // Also store problems and participants data for each hackathon
+                hackathonsFromDB.forEach(hackathon => {
+                    if (hackathon.problems && hackathon.problems.length > 0) {
+                        setOrganizerData('problems', hackathon.problems);
+                    }
+                    if (hackathon.participants && hackathon.participants.length > 0) {
+                        // Store participants data if needed for other functions
+                        console.log(`Loaded ${hackathon.participants.length} participants for hackathon ${hackathon.id}`);
+                    }
+                });
             }
         } catch (error) {
             console.error('Error loading hackathons from DB:', error);
             // Fallback to localStorage if DB fails
             const storedHackathons = getOrganizerData('hackathons');
             if (storedHackathons.length > 0) {
-                const firstHackathon = storedHackathons[0];
-                if (firstHackathon.organizerCode) {
-                    organizerCode = firstHackathon.organizerCode;
-                    localStorage.setItem('currentOrganizerCode', organizerCode);
-                    console.log('Fallback: Loaded organizer code from localStorage:', organizerCode);
-                }
+                console.log('Fallback: Loaded hackathons from localStorage');
             }
         }
     }
 
     // Helper functions for organizer-specific data
     function getOrganizerKey(key) {
-        return `${currentOrganizerId}_${key}`;
+        return `${currentOrganizerCode}_${key}`;
     }
 
     function getOrganizerData(key) {
@@ -366,7 +378,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const organizerCode = generateOrganizerCode();
 
             console.log('Creating hackathon with ID:', hackathonId, 'Organizer Code:', organizerCode);
-            console.log('Current organizer ID:', currentOrganizerId);
+            console.log('Current organizer code:', currentOrganizerCode);
 
             // Get selected tech stack
             const techStackSelect = document.getElementById('allowedTechStack');
@@ -376,7 +388,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             const hackathon = {
                 id: hackathonId,
                 organizerCode: organizerCode,
-                organizerId: currentOrganizerId,
                 title,
                 date,
                 startTime,
@@ -397,7 +408,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             // Save hackathon to MongoDB via API
             try {
                 const result = await window.HackathonAPI.createHackathon({
-                    organizerId: currentOrganizerId,
                     title: hackathon.title,
                     date: hackathon.date,
                     startTime: hackathon.startTime,
@@ -405,7 +415,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                     rules: hackathon.rules,
                     allowedTechStack: hackathon.allowedTechStack,
                     autoStart: hackathon.autoStart,
-                    antiCheating: hackathon.antiCheating
+                    antiCheating: hackathon.antiCheating,
+                    organizerCode: organizerCode
                 });
 
                 console.log('Hackathon created successfully:', result);
@@ -757,7 +768,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     status: status,
                     feedback: feedback,
                     evaluatedAt: new Date().toISOString(),
-                    evaluatedBy: currentOrganizerId
+                    evaluatedBy: currentOrganizerCode
                 };
 
                 localStorage.setItem('submissions', JSON.stringify(allSubmissions));
@@ -818,7 +829,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const participantCount = document.getElementById('participant-count');
         const hackathonFilter = document.getElementById('hackathon-filter');
 
-        console.log('Current organizer ID:', currentOrganizerId);
+        console.log('Current organizer code:', currentOrganizerCode);
         console.log('Organizer hackathons:', hackathons);
         console.log('Looking for participants across all organizers for hackathons:', hackathonIds);
         console.log('Found participants from API:', participants);
@@ -1319,7 +1330,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Logout function
     window.logoutOrganizer = function() {
         // Clear organizer-specific data
-        localStorage.removeItem('currentOrganizerId');
         localStorage.removeItem('currentOrganizerCode');
         localStorage.removeItem('currentHackathonId');
 
@@ -1328,7 +1338,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         allKeys.forEach(key => {
             if (key.includes('_hackathons') || key.includes('_problems') || key.includes('_participants')) {
                 // Only clear if it matches the current organizer's data
-                if (key.startsWith(currentOrganizerId + '_')) {
+                if (key.startsWith(currentOrganizerCode + '_')) {
                     localStorage.removeItem(key);
                 }
             }
