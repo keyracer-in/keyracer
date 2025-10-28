@@ -10,6 +10,10 @@ class ParticipantDashboard {
         this.submissions = [];
         this.tabSwitchCount = 0;
         this.fullscreenExitCount = 0;
+        this.codeExecutor = new CodeExecutor();
+
+        // Make dashboard accessible globally for viewSubmission function
+        window.participantDashboard = this;
 
         this.init();
     }
@@ -229,16 +233,80 @@ class ParticipantDashboard {
 
         tbody.innerHTML = this.submissions.map(submission => `
             <tr>
-                <td>#${submission.id}</td>
-                <td>${submission.problemTitle}</td>
+                <td>#${submission._id ? submission._id.toString() : 'N/A'}</td>
+                <td>${submission.problemId}</td>
                 <td>${submission.language}</td>
-                <td>${new Date(submission.timestamp).toLocaleString()}</td>
+                <td>${new Date(submission.submittedAt).toLocaleString()}</td>
                 <td><span class="submission-status status-${submission.status}">${submission.status}</span></td>
                 <td>
-                    <button class="btn-sm btn-secondary-custom" onclick="viewSubmission(${submission.id})">View</button>
+                    <button class="btn-sm btn-secondary-custom" onclick="viewSubmission('${submission._id ? submission._id.toString() : submission.problemId}')">View</button>
                 </td>
             </tr>
         `).join('');
+    }
+
+    viewSubmission(submissionId) {
+        // Find the submission by ID
+        const submission = this.submissions.find(s => s._id && s._id.toString() === submissionId);
+        if (!submission) {
+            console.log('Submission not found:', submissionId);
+            return;
+        }
+
+        // Create a modal to display submission details
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+        `;
+
+        modal.innerHTML = `
+            <div style="background: var(--card-bg); border-radius: 15px; border: 2px solid var(--accent-color); max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: var(--accent-color); margin: 0;">Submission Details</h2>
+                    <button id="closeModalBtn" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>Problem ID:</strong> ${submission.problemId}
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>Language:</strong> ${submission.language}
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>Submitted At:</strong> ${new Date(submission.submittedAt).toLocaleString()}
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>Status:</strong> <span class="submission-status status-${submission.status}">${submission.status}</span>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>Code:</strong>
+                </div>
+                <pre style="background: #1e1e1e; padding: 15px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px;">${submission.code}</pre>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Close modal functionality
+        document.getElementById('closeModalBtn').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
     }
 
     setupChat() {
@@ -403,26 +471,53 @@ class ParticipantDashboard {
         const outputContent = document.getElementById('output-content');
         if (!outputContent) return;
 
-        outputContent.textContent = 'Running code...';
+        const code = this.codeEditor ? this.codeEditor.getValue() : '';
+        if (!code.trim()) {
+            outputContent.innerHTML = '<div class="error">Please enter some code to run.</div>';
+            return;
+        }
+
+        // Get the current problem to determine language
+        const currentProblem = this.getCurrentProblem();
+        if (!currentProblem) {
+            outputContent.innerHTML = '<div class="error">No problem selected. Please select a problem first.</div>';
+            return;
+        }
+
+        // Show loading state
+        outputContent.innerHTML = '<div class="loading">Running code...</div>';
 
         try {
-            const code = this.codeEditor ? this.codeEditor.getValue() : '';
-            const language = document.querySelector('.language-selector').value;
+            // Use the Piston API to execute code
+            const result = await this.codeExecutor.execute(code, currentProblem.language || 'javascript');
 
-            if (!code.trim()) {
-                outputContent.textContent = 'Please enter some code to run.';
-                return;
+            if (result.error) {
+                outputContent.innerHTML = `
+                    <div class="error">Execution Error:</div>
+                    <pre class="error-output">${result.error}</pre>
+                `;
+            } else {
+                outputContent.innerHTML = `
+                    <div class="success">Code executed successfully!</div>
+                    <pre class="code-output">${result.output || 'No output'}</pre>
+                `;
             }
-
-            // For demo purposes, we'll simulate code execution
-            // In a real implementation, you'd send this to a code execution service
-            setTimeout(() => {
-                outputContent.textContent = `Code executed successfully!\n\nLanguage: ${language}\nOutput: Hello, World!\nExecution time: 0.05 seconds`;
-            }, 1000);
-
         } catch (error) {
-            outputContent.textContent = `Error: ${error.message}`;
+            outputContent.innerHTML = `<div class="error">Error: ${error.message}</div>`;
         }
+    }
+
+    getCurrentProblem() {
+        // Get the current problem from URL or from the problems list
+        const urlParams = new URLSearchParams(window.location.search);
+        const problemId = urlParams.get('problem');
+
+        if (problemId) {
+            return this.problems.find(p => p.id === problemId);
+        }
+
+        // If no problem in URL, return the first problem or null
+        return this.problems.length > 0 ? this.problems[0] : null;
     }
 
     setupAntiCheating() {
@@ -853,8 +948,11 @@ class ParticipantDashboard {
 
 // Global function for viewing submissions
 function viewSubmission(submissionId) {
-    // Implementation for viewing submission details
-    console.log('Viewing submission:', submissionId);
+    if (window.participantDashboard) {
+        window.participantDashboard.viewSubmission(submissionId);
+    } else {
+        console.log('Viewing submission:', submissionId);
+    }
 }
 
 // Initialize dashboard when DOM is loaded
