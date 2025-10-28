@@ -8,6 +8,8 @@ class ParticipantDashboard {
         this.chatMessages = [];
         this.problems = [];
         this.submissions = [];
+        this.tabSwitchCount = 0;
+        this.fullscreenExitCount = 0;
 
         this.init();
     }
@@ -424,16 +426,13 @@ class ParticipantDashboard {
     }
 
     setupAntiCheating() {
-        let tabSwitchCount = 0;
-        let fullscreenExitCount = 0;
-
         // Tab switching detection
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                tabSwitchCount++;
-                localStorage.setItem('tabSwitchCount', tabSwitchCount.toString());
+                this.tabSwitchCount++;
+                localStorage.setItem('tabSwitchCount', this.tabSwitchCount.toString());
 
-                if (tabSwitchCount >= 3) {
+                if (this.tabSwitchCount >= 3) {
                     this.showNotification('Multiple tab switches detected! This may be reported to organizers.', 'warning');
                 }
             }
@@ -473,10 +472,10 @@ class ParticipantDashboard {
         );
 
         if (!isFullscreen) {
-            fullscreenExitCount++;
-            if (fullscreenExitCount === 1) {
+            this.fullscreenExitCount++;
+            if (this.fullscreenExitCount === 1 || this.fullscreenExitCount === 2) {
                 this.showWarningModal('Warning!', 'You have exited fullscreen mode. Please return to fullscreen mode to continue.');
-            } else if (fullscreenExitCount >= 2) {
+            } else if (this.fullscreenExitCount >= 3) {
                 this.showDisqualificationModal();
             }
         }
