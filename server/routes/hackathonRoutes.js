@@ -293,16 +293,41 @@ router.get('/:hackathonId/participant/:participantId/submissions', async (req, r
   }
 });
 
+// Get hackathons by organizer ID
+router.get('/organizer/:organizerId', async (req, res) => {
+  try {
+    const { organizerId } = req.params;
+
+    const hackathons = await Hackathon.find({ organizerId }, 'id organizerCode title date status participants organizerId');
+    res.json({
+      success: true,
+      hackathons: hackathons.map(h => ({
+        id: h.id,
+        organizerCode: h.organizerCode,
+        organizerId: h.organizerId,
+        title: h.title,
+        date: h.date,
+        status: h.status,
+        participantCount: h.participants.length
+      }))
+    });
+  } catch (error) {
+    console.error('Error getting hackathons by organizer:', error);
+    res.status(500).json({ error: 'Failed to get hackathons by organizer' });
+  }
+});
+
 // Debug route to list all hackathons (development only)
 router.get('/debug/list', async (req, res) => {
   try {
-    const hackathons = await Hackathon.find({}, 'id organizerCode title date status participants');
+    const hackathons = await Hackathon.find({}, 'id organizerCode title date status participants organizerId');
     res.json({
       success: true,
       count: hackathons.length,
       hackathons: hackathons.map(h => ({
         id: h.id,
         organizerCode: h.organizerCode,
+        organizerId: h.organizerId,
         title: h.title,
         date: h.date,
         status: h.status,

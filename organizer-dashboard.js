@@ -293,6 +293,40 @@ document.addEventListener('DOMContentLoaded', async function() {
         localStorage.setItem('currentOrganizerId', currentOrganizerId);
     }
 
+    // If no organizer code was provided, try to load hackathons from MongoDB
+    if (!organizerCode) {
+        try {
+            console.log('Loading hackathons from MongoDB for organizer:', currentOrganizerId);
+            const hackathonsFromDB = await window.HackathonAPI.getHackathonsByOrganizer(currentOrganizerId);
+            console.log('Hackathons loaded from DB:', hackathonsFromDB);
+
+            if (hackathonsFromDB && hackathonsFromDB.length > 0) {
+                // Store hackathons in localStorage for UI display
+                setOrganizerData('hackathons', hackathonsFromDB);
+
+                // Get organizer code from the first hackathon
+                const firstHackathon = hackathonsFromDB[0];
+                if (firstHackathon.organizerCode) {
+                    organizerCode = firstHackathon.organizerCode;
+                    localStorage.setItem('currentOrganizerCode', organizerCode);
+                    console.log('Loaded organizer code from DB hackathon:', organizerCode);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading hackathons from DB:', error);
+            // Fallback to localStorage if DB fails
+            const storedHackathons = getOrganizerData('hackathons');
+            if (storedHackathons.length > 0) {
+                const firstHackathon = storedHackathons[0];
+                if (firstHackathon.organizerCode) {
+                    organizerCode = firstHackathon.organizerCode;
+                    localStorage.setItem('currentOrganizerCode', organizerCode);
+                    console.log('Fallback: Loaded organizer code from localStorage:', organizerCode);
+                }
+            }
+        }
+    }
+
     // Helper functions for organizer-specific data
     function getOrganizerKey(key) {
         return `${currentOrganizerId}_${key}`;
@@ -394,6 +428,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             // Store organizer code for this session
             localStorage.setItem('currentOrganizerCode', organizerCode);
             localStorage.setItem('currentHackathonId', hackathonId);
+
+            // Also store the organizer code in the hackathon data for future access
+            hackathon.organizerCode = organizerCode;
 
             // Close the create modal
             const createModal = bootstrap.Modal.getInstance(document.getElementById('createHackathonModal'));
