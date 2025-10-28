@@ -294,6 +294,48 @@ router.get('/:hackathonId/participant/:participantId/submissions', async (req, r
   }
 });
 
+// Get all submissions for a hackathon
+router.get('/:hackathonId/submissions', async (req, res) => {
+  try {
+    const { hackathonId } = req.params;
+
+    const hackathon = await Hackathon.findOne({ id: hackathonId });
+    if (!hackathon) {
+      return res.status(404).json({ error: 'Hackathon not found' });
+    }
+
+    // Collect all submissions from all participants
+    const allSubmissions = [];
+    hackathon.participants.forEach(participant => {
+      participant.submissions.forEach(submission => {
+        allSubmissions.push({
+          id: submission._id ? submission._id.toString() : `sub_${Date.now()}_${Math.random()}`,
+          participantId: participant.id,
+          participantName: participant.name,
+          problemId: submission.problemId,
+          code: submission.code,
+          language: submission.language,
+          submittedAt: submission.submittedAt,
+          status: submission.status,
+          evaluated: submission.evaluated || false,
+          evaluation: submission.evaluation || null
+        });
+      });
+    });
+
+    // Sort by submission time (newest first)
+    allSubmissions.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+
+    res.json({
+      success: true,
+      submissions: allSubmissions
+    });
+  } catch (error) {
+    console.error('Error getting hackathon submissions:', error);
+    res.status(500).json({ error: 'Failed to get hackathon submissions' });
+  }
+});
+
 // Get hackathons by organizer code
 router.get('/organizer/:organizerCode', async (req, res) => {
   try {

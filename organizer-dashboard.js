@@ -576,25 +576,29 @@ document.addEventListener('DOMContentLoaded', async function() {
     setInterval(async function() {
         displayHackathons();
         await displayParticipants();
-        displaySubmissions();
-        displayEvaluations();
-        displayLeaderboard();
+        await displaySubmissions();
+        await displayEvaluations();
+        await displayLeaderboard();
     }, 3000);
 
     // Display submissions function
-    function displaySubmissions() {
+    async function displaySubmissions() {
         const hackathons = getOrganizerData('hackathons');
         const hackathonIds = hackathons.map(h => h.id);
 
-        // Get all submissions from localStorage
-        const allSubmissions = JSON.parse(localStorage.getItem('submissions')) || [];
+        let allSubmissions = [];
 
-        // Filter submissions for this organizer's hackathons
-        const organizerSubmissions = allSubmissions.filter(sub => {
-            // Check if submission belongs to organizer's problems
-            const problems = getOrganizerData('problems');
-            return problems.some(p => p.id === sub.problemId);
-        });
+        // Fetch submissions from API for each hackathon
+        for (const hackathonId of hackathonIds) {
+            try {
+                const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
+                if (submissions && submissions.length > 0) {
+                    allSubmissions = allSubmissions.concat(submissions);
+                }
+            } catch (error) {
+                console.error(`Error fetching submissions for hackathon ${hackathonId}:`, error);
+            }
+        }
 
         const tableBody = document.getElementById('submissions-table-body');
         const submissionCount = document.getElementById('submission-count');
@@ -602,19 +606,19 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!tableBody) return;
 
         if (submissionCount) {
-            submissionCount.textContent = organizerSubmissions.length;
+            submissionCount.textContent = allSubmissions.length;
         }
 
         tableBody.innerHTML = '';
 
-        if (organizerSubmissions.length === 0) {
+        if (allSubmissions.length === 0) {
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `<td colspan="6" class="text-center">No submissions found</td>`;
             tableBody.appendChild(emptyRow);
             return;
         }
 
-        organizerSubmissions.forEach(submission => {
+        allSubmissions.forEach(submission => {
             const problems = getOrganizerData('problems');
             const problem = problems.find(p => p.id === submission.problemId);
             const problemTitle = problem ? problem.title : 'Unknown Problem';
@@ -625,7 +629,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${localStorage.getItem('participantName') || 'Anonymous'}</td>
+                <td>${submission.participantName || 'Anonymous'}</td>
                 <td>${problemTitle}</td>
                 <td>${submission.language}</td>
                 <td>${submittedDate}</td>
@@ -646,15 +650,26 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // Display evaluations function
-    function displayEvaluations() {
+    async function displayEvaluations() {
         const hackathons = getOrganizerData('hackathons');
-        const allSubmissions = JSON.parse(localStorage.getItem('submissions')) || [];
+        const hackathonIds = hackathons.map(h => h.id);
 
-        // Filter pending evaluations for this organizer's problems
-        const problems = getOrganizerData('problems');
-        const pendingEvaluations = allSubmissions.filter(sub => {
-            return problems.some(p => p.id === sub.problemId) && !sub.evaluated;
-        });
+        let allSubmissions = [];
+
+        // Fetch submissions from API for each hackathon
+        for (const hackathonId of hackathonIds) {
+            try {
+                const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
+                if (submissions && submissions.length > 0) {
+                    allSubmissions = allSubmissions.concat(submissions);
+                }
+            } catch (error) {
+                console.error(`Error fetching submissions for hackathon ${hackathonId}:`, error);
+            }
+        }
+
+        // Filter pending evaluations
+        const pendingEvaluations = allSubmissions.filter(sub => !sub.evaluated);
 
         const tableBody = document.getElementById('evaluations-table-body');
         const evaluationCount = document.getElementById('evaluation-count');
@@ -675,6 +690,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 
         pendingEvaluations.forEach(submission => {
+            const problems = getOrganizerData('problems');
             const problem = problems.find(p => p.id === submission.problemId);
             const problemTitle = problem ? problem.title : 'Unknown Problem';
             const submittedDate = new Date(submission.submittedAt).toLocaleString();
@@ -682,7 +698,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${submission.id}</td>
-                <td>${localStorage.getItem('participantName') || 'Anonymous'}</td>
+                <td>${submission.participantName || 'Anonymous'}</td>
                 <td>${problemTitle}</td>
                 <td>${submission.language}</td>
                 <td><span class="status upcoming">Pending</span></td>
@@ -699,25 +715,60 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // View submission function
-    window.viewSubmission = function(submissionId) {
-        const allSubmissions = JSON.parse(localStorage.getItem('submissions')) || [];
-        const submission = allSubmissions.find(s => s.id === submissionId);
+    window.viewSubmission = async function(submissionId) {
+        const hackathons = getOrganizerData('hackathons');
+        const hackathonIds = hackathons.map(h => h.id);
+
+        let submission = null;
+
+        // Find submission across all hackathons
+        for (const hackathonId of hackathonIds) {
+            try {
+                const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
+                submission = submissions.find(s => s.id === submissionId);
+                if (submission) break;
+            } catch (error) {
+                console.error(`Error fetching submissions for hackathon ${hackathonId}:`, error);
+            }
+        }
 
         if (submission) {
             const problems = getOrganizerData('problems');
             const problem = problems.find(p => p.id === submission.problemId);
             const problemTitle = problem ? problem.title : 'Unknown Problem';
 
-            alert(`Submission Details:\n\nID: ${submission.id}\nProblem: ${problemTitle}\nLanguage: ${submission.language}\nSubmitted: ${new Date(submission.submittedAt).toLocaleString()}\nStatus: ${submission.status}\n\nCode:\n${submission.code}`);
+            alert(`Submission Details:\n\nID: ${submission.id}\nParticipant: ${submission.participantName}\nProblem: ${problemTitle}\nLanguage: ${submission.language}\nSubmitted: ${new Date(submission.submittedAt).toLocaleString()}\nStatus: ${submission.status}\n\nCode:\n${submission.code}`);
+        } else {
+            alert('Submission not found');
         }
     };
 
     // Evaluate submission function
-    window.evaluateSubmission = function(submissionId) {
-        const allSubmissions = JSON.parse(localStorage.getItem('submissions')) || [];
-        const submission = allSubmissions.find(s => s.id === submissionId);
+    window.evaluateSubmission = async function(submissionId) {
+        const hackathons = getOrganizerData('hackathons');
+        const hackathonIds = hackathons.map(h => h.id);
 
-        if (!submission) return;
+        let submission = null;
+        let hackathonId = null;
+
+        // Find submission across all hackathons
+        for (const hid of hackathonIds) {
+            try {
+                const submissions = await window.HackathonAPI.getHackathonSubmissions(hid);
+                submission = submissions.find(s => s.id === submissionId);
+                if (submission) {
+                    hackathonId = hid;
+                    break;
+                }
+            } catch (error) {
+                console.error(`Error fetching submissions for hackathon ${hid}:`, error);
+            }
+        }
+
+        if (!submission || !hackathonId) {
+            alert('Submission not found');
+            return;
+        }
 
         const problems = getOrganizerData('problems');
         const problem = problems.find(p => p.id === submission.problemId);
@@ -725,8 +776,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         // Populate evaluation modal
         document.getElementById('eval-submission-id').value = submissionId;
+        document.getElementById('eval-hackathon-id').value = hackathonId; // Store hackathon ID for evaluation
         document.getElementById('submission-details').innerHTML = `
             <p><strong>ID:</strong> ${submission.id}</p>
+            <p><strong>Participant:</strong> ${submission.participantName}</p>
             <p><strong>Problem:</strong> ${problemTitle}</p>
             <p><strong>Language:</strong> ${submission.language}</p>
             <p><strong>Submitted:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
@@ -746,42 +799,45 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Save evaluation
     const saveEvaluationBtn = document.getElementById('saveEvaluationBtn');
     if (saveEvaluationBtn) {
-        saveEvaluationBtn.addEventListener('click', function() {
+        saveEvaluationBtn.addEventListener('click', async function() {
             const submissionId = document.getElementById('eval-submission-id').value;
+            const hackathonId = document.getElementById('eval-hackathon-id').value;
             const score = document.getElementById('eval-score').value;
             const status = document.getElementById('eval-status').value;
             const feedback = document.getElementById('eval-feedback').value;
 
-            if (!score || !status) {
+            if (!score || !status || !hackathonId) {
                 alert('Please fill in all required fields');
                 return;
             }
 
-            // Update submission with evaluation
-            const allSubmissions = JSON.parse(localStorage.getItem('submissions')) || [];
-            const submissionIndex = allSubmissions.findIndex(s => s.id === submissionId);
-
-            if (submissionIndex !== -1) {
-                allSubmissions[submissionIndex].evaluated = true;
-                allSubmissions[submissionIndex].evaluation = {
-                    score: parseInt(score),
-                    status: status,
-                    feedback: feedback,
-                    evaluatedAt: new Date().toISOString(),
-                    evaluatedBy: currentOrganizerCode
+            try {
+                // Update evaluation via API (we'll need to add this endpoint)
+                const evaluationData = {
+                    submissionId: submissionId,
+                    evaluation: {
+                        score: parseInt(score),
+                        status: status,
+                        feedback: feedback,
+                        evaluatedAt: new Date().toISOString(),
+                        evaluatedBy: currentOrganizerCode
+                    }
                 };
 
-                localStorage.setItem('submissions', JSON.stringify(allSubmissions));
+                // For now, we'll show a message that evaluation saving needs backend implementation
+                alert('Evaluation feature requires backend implementation. Score: ' + score + ', Status: ' + status);
 
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('evaluationModal'));
                 modal.hide();
 
                 // Refresh displays
-                displaySubmissions();
-                displayEvaluations();
+                await displaySubmissions();
+                await displayEvaluations();
 
-                alert('Evaluation saved successfully!');
+            } catch (error) {
+                console.error('Error saving evaluation:', error);
+                alert('Failed to save evaluation. Please try again.');
             }
         });
     }
@@ -899,23 +955,33 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // Display leaderboard function
-    function displayLeaderboard() {
+    async function displayLeaderboard() {
         const hackathons = getOrganizerData('hackathons');
         const hackathonIds = hackathons.map(h => h.id);
-        const allSubmissions = JSON.parse(localStorage.getItem('submissions')) || [];
 
-        // Filter submissions for this organizer's problems
-        const problems = getOrganizerData('problems');
-        const organizerSubmissions = allSubmissions.filter(sub => {
-            return problems.some(p => p.id === sub.problemId) && sub.evaluated && sub.evaluation;
-        });
+        let allSubmissions = [];
+
+        // Fetch submissions from API for each hackathon
+        for (const hackathonId of hackathonIds) {
+            try {
+                const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
+                if (submissions && submissions.length > 0) {
+                    allSubmissions = allSubmissions.concat(submissions);
+                }
+            } catch (error) {
+                console.error(`Error fetching submissions for hackathon ${hackathonId}:`, error);
+            }
+        }
+
+        // Filter evaluated submissions
+        const evaluatedSubmissions = allSubmissions.filter(sub => sub.evaluated && sub.evaluation);
 
         // Calculate participant scores
         const participantScores = {};
 
-        organizerSubmissions.forEach(submission => {
-            const participantId = submission.participantId || 'anonymous';
-            const participantName = localStorage.getItem('participantName') || 'Anonymous';
+        evaluatedSubmissions.forEach(submission => {
+            const participantId = submission.participantId;
+            const participantName = submission.participantName || 'Anonymous';
 
             if (!participantScores[participantId]) {
                 participantScores[participantId] = {
@@ -923,7 +989,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     name: participantName,
                     totalScore: 0,
                     solvedProblems: 0,
-                    hackathonId: submission.hackathonId || '',
+                    hackathonId: '', // We'll need to determine this from context
                     submissions: []
                 };
             }
@@ -1130,7 +1196,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Add Problem Button Event
     const addProblemBtn = document.getElementById('addProblemBtn');
     if (addProblemBtn) {
-        addProblemBtn.addEventListener('click', function() {
+        addProblemBtn.addEventListener('click', async function() {
             const title = document.getElementById('problemTitle').value;
             const difficulty = document.getElementById('problemDifficulty').value;
             const category = document.getElementById('problemCategory').value;
@@ -1142,46 +1208,53 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return;
             }
 
-            const problem = {
-                id: 'PROB' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+            const problemData = {
                 title,
                 difficulty,
                 category,
-                hackathonId,
                 description,
                 constraints: document.getElementById('problemConstraints').value,
-                timeLimit: document.getElementById('problemTimeLimit').value,
-                memoryLimit: document.getElementById('problemMemoryLimit').value,
+                timeLimit: parseInt(document.getElementById('problemTimeLimit').value) || 1000,
+                memoryLimit: parseInt(document.getElementById('problemMemoryLimit').value) || 256,
                 sampleInput: document.getElementById('problemSampleInput').value,
                 sampleOutput: document.getElementById('problemSampleOutput').value,
                 createdAt: new Date().toISOString(),
                 status: 'active'
             };
 
-            // Save problem to organizer-specific storage
-            let problems = getOrganizerData('problems');
-            problems.push(problem);
-            setOrganizerData('problems', problems);
+            try {
+                // Save problem to database via API
+                const addedProblem = await window.HackathonAPI.addProblem(hackathonId, problemData);
+                console.log('Problem added to database:', addedProblem);
 
-            // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addProblemModal'));
-            modal.hide();
+                // Save problem to organizer-specific storage
+                let problems = getOrganizerData('problems');
+                problems.push(addedProblem);
+                setOrganizerData('problems', problems);
 
-            // Reset form
-            document.getElementById('addProblemForm').reset();
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addProblemModal'));
+                modal.hide();
 
-            // Refresh problems table
-            displayProblems();
+                // Reset form
+                document.getElementById('addProblemForm').reset();
 
-            // Trigger problem sync for participants
-            if (window.problemSync) {
-                window.problemSync.broadcastProblems();
+                // Refresh problems table
+                displayProblems();
+
+                // Trigger problem sync for participants
+                if (window.problemSync) {
+                    window.problemSync.broadcastProblems();
+                }
+                if (window.triggerProblemUpdate) {
+                    window.triggerProblemUpdate();
+                }
+
+                alert('Problem added successfully!');
+            } catch (error) {
+                console.error('Failed to add problem:', error);
+                alert('Failed to add problem. Please try again.');
             }
-            if (window.triggerProblemUpdate) {
-                window.triggerProblemUpdate();
-            }
-
-            alert('Problem added successfully!');
         });
     }
 
@@ -1372,6 +1445,82 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
+    // Participant action functions
+    window.viewParticipant = function(participantId) {
+        // Get all participants for this organizer's hackathons
+        const hackathons = getOrganizerData('hackathons');
+        const hackathonIds = hackathons.map(h => h.id);
+
+        let participant = null;
+        let hackathonName = 'Unknown';
+
+        // Find participant across all hackathons
+        for (const hackathonId of hackathonIds) {
+            try {
+                // Since we already have participants data from displayParticipants, we can search in local data
+                // For now, show basic info
+                const hackathon = hackathons.find(h => h.id === hackathonId);
+                if (hackathon && hackathon.participants) {
+                    participant = hackathon.participants.find(p => p.id === participantId);
+                    if (participant) {
+                        hackathonName = hackathon.title;
+                        break;
+                    }
+                }
+            } catch (error) {
+                console.error(`Error finding participant ${participantId}:`, error);
+            }
+        }
+
+        if (participant) {
+            alert(`Participant Details:\n\nName: ${participant.name}\nEmail: ${participant.email || 'Not provided'}\nHackathon: ${hackathonName}\nJoined: ${new Date(participant.joinedAt).toLocaleString()}\nStatus: ${participant.status || 'Active'}\nSubmissions: ${participant.submissions ? participant.submissions.length : 0}`);
+        } else {
+            alert('Participant not found');
+        }
+    };
+
+    window.messageParticipant = function(participantId) {
+        // Message feature removed as requested
+        alert('Message feature is currently disabled');
+    };
+
+    window.removeParticipant = function(participantId) {
+        if (confirm('Are you sure you want to remove this participant from the hackathon?')) {
+            // This would require backend implementation to properly remove participant
+            alert('Participant removal requires backend implementation. Participant ID: ' + participantId);
+        }
+    };
+
+    // Export participants function
+    window.exportParticipants = function() {
+        const hackathons = getOrganizerData('hackathons');
+        let csvContent = 'Name,Email,Hackathon,Joined,Status,Submissions\n';
+
+        hackathons.forEach(hackathon => {
+            if (hackathon.participants && hackathon.participants.length > 0) {
+                hackathon.participants.forEach(participant => {
+                    const submissions = participant.submissions ? participant.submissions.length : 0;
+                    csvContent += `"${participant.name}","${participant.email || ''}","${hackathon.title}","${new Date(participant.joinedAt).toLocaleString()}","${participant.status || 'active'}","${submissions}"\n`;
+                });
+            }
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'participants.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    // Refresh participants function
+    window.refreshParticipants = function() {
+        displayParticipants().catch(error => console.error('Error refreshing participants:', error));
+    };
+
     // Submissions page button
     const refreshSubmissionsBtn = document.getElementById('refresh-submissions-btn');
     if (refreshSubmissionsBtn) {
@@ -1388,13 +1537,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // Chat page button
-    const refreshChatBtn = document.getElementById('refresh-chat-btn');
-    if (refreshChatBtn) {
-        refreshChatBtn.addEventListener('click', function() {
-            refreshChat();
-        });
-    }
+
 
     // Copy buttons
     const copyHackathonIdBtn = document.getElementById('copy-hackathon-id-btn');
@@ -1416,8 +1559,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     displayHackathons();
     displayProblems();
     displayParticipants().catch(error => console.error('Error loading participants:', error));
-    displaySubmissions();
-    displayEvaluations();
-    displayLeaderboard();
+    displaySubmissions().catch(error => console.error('Error loading submissions:', error));
+    displayEvaluations().catch(error => console.error('Error loading evaluations:', error));
+    displayLeaderboard().catch(error => console.error('Error loading leaderboard:', error));
 
 });

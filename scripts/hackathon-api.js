@@ -205,6 +205,22 @@ class HackathonAPI {
             throw error;
         }
     }
+
+    async getHackathonSubmissions(hackathonId) {
+        try {
+            const response = await fetch(`${this.baseURL}/${hackathonId}/submissions`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to get hackathon submissions');
+            }
+
+            return data.submissions;
+        } catch (error) {
+            console.error('Error getting hackathon submissions:', error);
+            throw error;
+        }
+    }
 }
 
 // Create global instance
