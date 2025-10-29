@@ -23,7 +23,7 @@ app.use(express.static('.'));
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/keyracer');
 
 // Routes
-const hackathonRoutes = require('./routes/hackathonRoutes');
+const hackathonRoutes = require('./server/routes/hackathonRoutes');
 app.use('/api/hackathons', hackathonRoutes);
 
 // User Schema

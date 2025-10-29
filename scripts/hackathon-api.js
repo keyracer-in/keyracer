@@ -221,6 +221,28 @@ class HackathonAPI {
             throw error;
         }
     }
+
+    async evaluateSubmission(hackathonId, evaluationData) {
+        try {
+            const response = await fetch(`${this.baseURL}/${hackathonId}/evaluate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(evaluationData)
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to evaluate submission');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Error evaluating submission:', error);
+            throw error;
+        }
+    }
 }
 
 // Create global instance

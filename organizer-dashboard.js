@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
-    // Display evaluations function
+    // Display evaluations function - Participant-centric view
     async function displayEvaluations() {
         const hackathons = getOrganizerData('hackathons');
         const hackathonIds = hackathons.map(h => h.id);
@@ -668,43 +668,81 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         }
 
-        // Filter pending evaluations
-        const pendingEvaluations = allSubmissions.filter(sub => !sub.evaluated);
+        // Group submissions by participant
+        const participantEvaluations = {};
 
+        allSubmissions.forEach(submission => {
+            const participantId = submission.participantId;
+            const participantName = submission.participantName || 'Anonymous';
+
+            if (!participantEvaluations[participantId]) {
+                participantEvaluations[participantId] = {
+                    id: participantId,
+                    name: participantName,
+                    submissions: [],
+                    totalScore: 0,
+                    problemsSolved: 0,
+                    totalEvaluated: 0
+                };
+            }
+
+            participantEvaluations[participantId].submissions.push(submission);
+
+            // Calculate scores for evaluated submissions
+            if (submission.evaluated && submission.evaluation) {
+                participantEvaluations[participantId].totalEvaluated++;
+                if (submission.evaluation.status === 'accepted') {
+                    participantEvaluations[participantId].totalScore += submission.evaluation.score;
+                    participantEvaluations[participantId].problemsSolved++;
+                }
+            }
+        });
+
+        const participants = Object.values(participantEvaluations);
         const tableBody = document.getElementById('evaluations-table-body');
         const evaluationCount = document.getElementById('evaluation-count');
 
         if (!tableBody) return;
 
         if (evaluationCount) {
-            evaluationCount.textContent = pendingEvaluations.length;
+            evaluationCount.textContent = participants.length;
         }
 
         tableBody.innerHTML = '';
 
-        if (pendingEvaluations.length === 0) {
+        if (participants.length === 0) {
             const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `<td colspan="6" class="text-center">No pending evaluations</td>`;
+            emptyRow.innerHTML = `<td colspan="5" class="text-center">No participants found</td>`;
             tableBody.appendChild(emptyRow);
             return;
         }
 
-        pendingEvaluations.forEach(submission => {
-            const problems = getOrganizerData('problems');
-            const problem = problems.find(p => p.id === submission.problemId);
-            const problemTitle = problem ? problem.title : 'Unknown Problem';
-            const submittedDate = new Date(submission.submittedAt).toLocaleString();
+        participants.forEach(participant => {
+            const evaluationStatus = participant.totalEvaluated === participant.submissions.length ?
+                'Fully Evaluated' : `${participant.totalEvaluated}/${participant.submissions.length} Evaluated`;
+            const statusClass = participant.totalEvaluated === participant.submissions.length ? 'active' : 'upcoming';
 
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${submission.id}</td>
-                <td>${submission.participantName || 'Anonymous'}</td>
-                <td>${problemTitle}</td>
-                <td>${submission.language}</td>
-                <td><span class="status upcoming">Pending</span></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar me-2" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                            ${participant.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div class="fw-bold">${participant.name}</div>
+                        </div>
+                    </div>
+                </td>
+                <td><span class="badge bg-info">${participant.problemsSolved}/${participant.submissions.length}</span></td>
+                <td><span class="badge bg-success">${participant.totalScore}</span></td>
+                <td><span class="status ${statusClass}">${evaluationStatus}</span></td>
                 <td>
                     <div class="actions">
-                        <button class="action-btn edit" title="Evaluate" onclick="evaluateSubmission('${submission.id}')">
+                        <button class="action-btn view" title="View Details" onclick="viewParticipantEvaluation('${participant.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn edit" title="Evaluate" onclick="evaluateParticipant('${participant.id}')">
                             <i class="fas fa-star"></i>
                         </button>
                     </div>
@@ -743,8 +781,121 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     };
 
-    // Evaluate submission function
-    window.evaluateSubmission = async function(submissionId) {
+    // View participant evaluation details
+    window.viewParticipantEvaluation = async function(participantId) {
+        const hackathons = getOrganizerData('hackathons');
+        const hackathonIds = hackathons.map(h => h.id);
+
+        let participant = null;
+        let participantSubmissions = [];
+
+        // Find participant and their submissions across all hackathons
+        for (const hackathonId of hackathonIds) {
+            try {
+                const hackathon = hackathons.find(h => h.id === hackathonId);
+                if (hackathon && hackathon.participants) {
+                    const foundParticipant = hackathon.participants.find(p => p.id === participantId);
+                    if (foundParticipant) {
+                        participant = foundParticipant;
+                        // Get submissions for this participant
+                        const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
+                        participantSubmissions = submissions.filter(s => s.participantId === participantId);
+                        break;
+                    }
+                }
+            } catch (error) {
+                console.error(`Error fetching participant data for hackathon ${hackathonId}:`, error);
+            }
+        }
+
+        if (!participant) {
+            alert('Participant not found');
+            return;
+        }
+
+        // Populate participant info
+        document.getElementById('participant-info').innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Name:</strong> ${participant.name}</p>
+                    <p><strong>Email:</strong> ${participant.email || 'Not provided'}</p>
+                    <p><strong>Joined:</strong> ${new Date(participant.joinedAt).toLocaleString()}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Total Submissions:</strong> ${participantSubmissions.length}</p>
+                    <p><strong>Status:</strong> ${participant.status || 'Active'}</p>
+                </div>
+            </div>
+        `;
+
+        // Populate problems accordion
+        const problemsContainer = document.getElementById('participant-problems');
+        problemsContainer.innerHTML = '';
+
+        const problems = getOrganizerData('problems');
+
+        participantSubmissions.forEach((submission, index) => {
+            const problem = problems.find(p => p.id === submission.problemId);
+            const problemTitle = problem ? problem.title : 'Unknown Problem';
+            const evaluationStatus = submission.evaluated ? 'Evaluated' : 'Pending';
+            const score = submission.evaluated && submission.evaluation ? submission.evaluation.score : 'N/A';
+            const status = submission.evaluated && submission.evaluation ? submission.evaluation.status : 'Not Evaluated';
+
+            const problemCard = document.createElement('div');
+            problemCard.className = 'accordion-item';
+            problemCard.innerHTML = `
+                <h2 class="accordion-header" id="heading${index}">
+                    <button class="accordion-button ${index > 0 ? 'collapsed' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="collapse${index}">
+                        <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                            <span><strong>${problemTitle}</strong> - ${submission.language}</span>
+                            <div>
+                                <span class="badge bg-${submission.evaluated ? 'success' : 'warning'} me-2">${evaluationStatus}</span>
+                                <span class="badge bg-info">${score}/100</span>
+                            </div>
+                        </div>
+                    </button>
+                </h2>
+                <div id="collapse${index}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" aria-labelledby="heading${index}" data-bs-parent="#participant-problems">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Submitted:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
+                                <p><strong>Status:</strong> ${status}</p>
+                                <p><strong>Score:</strong> ${score}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Code Preview:</h6>
+                                <div class="code-example" style="max-height: 200px; overflow-y: auto; font-size: 0.8rem;">
+                                    ${submission.code.substring(0, 500)}${submission.code.length > 500 ? '...' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        ${submission.evaluated && submission.evaluation ? `
+                            <div class="mt-3">
+                                <h6>Feedback:</h6>
+                                <p class="text-muted">${submission.evaluation.feedback || 'No feedback provided'}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            problemsContainer.appendChild(problemCard);
+        });
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('participantEvaluationModal'));
+        modal.show();
+    };
+
+    // Evaluate participant function
+    window.evaluateParticipant = async function(participantId) {
+        // This will open the detailed evaluation modal for the participant
+        // For now, we'll reuse the view function but with evaluation capabilities
+        viewParticipantEvaluation(participantId);
+    };
+
+    // Evaluate individual problem submission
+    window.evaluateProblemSubmission = async function(participantId, problemId) {
         const hackathons = getOrganizerData('hackathons');
         const hackathonIds = hackathons.map(h => h.id);
 
@@ -755,7 +906,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         for (const hid of hackathonIds) {
             try {
                 const submissions = await window.HackathonAPI.getHackathonSubmissions(hid);
-                submission = submissions.find(s => s.id === submissionId);
+                submission = submissions.find(s => s.participantId === participantId && s.problemId === problemId);
                 if (submission) {
                     hackathonId = hid;
                     break;
@@ -774,47 +925,58 @@ document.addEventListener('DOMContentLoaded', async function() {
         const problem = problems.find(p => p.id === submission.problemId);
         const problemTitle = problem ? problem.title : 'Unknown Problem';
 
-        // Populate evaluation modal
-        document.getElementById('eval-submission-id').value = submissionId;
-        document.getElementById('eval-hackathon-id').value = hackathonId; // Store hackathon ID for evaluation
-        document.getElementById('submission-details').innerHTML = `
-            <p><strong>ID:</strong> ${submission.id}</p>
-            <p><strong>Participant:</strong> ${submission.participantName}</p>
+        // Populate problem evaluation modal
+        document.getElementById('eval-participant-id').value = participantId;
+        document.getElementById('eval-problem-id').value = problemId;
+        document.getElementById('eval-hackathon-id').value = hackathonId;
+
+        document.getElementById('problem-details').innerHTML = `
             <p><strong>Problem:</strong> ${problemTitle}</p>
+            <p><strong>Participant:</strong> ${submission.participantName}</p>
             <p><strong>Language:</strong> ${submission.language}</p>
             <p><strong>Submitted:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
-            <p><strong>Status:</strong> ${submission.status}</p>
+            <p><strong>Current Status:</strong> ${submission.evaluated ? submission.evaluation.status : 'Not Evaluated'}</p>
+            ${submission.evaluated ? `<p><strong>Current Score:</strong> ${submission.evaluation.score}/100</p>` : ''}
         `;
 
-        document.getElementById('submission-code').textContent = submission.code;
+        document.getElementById('problem-code').textContent = submission.code;
 
-        // Clear form
-        document.getElementById('evaluationForm').reset();
+        // Pre-fill form if already evaluated
+        if (submission.evaluated && submission.evaluation) {
+            document.getElementById('problem-score').value = submission.evaluation.score;
+            document.getElementById('problem-status').value = submission.evaluation.status;
+            document.getElementById('problem-feedback').value = submission.evaluation.feedback || '';
+        } else {
+            // Clear form for new evaluation
+            document.getElementById('problemEvaluationForm').reset();
+        }
 
         // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('evaluationModal'));
+        const modal = new bootstrap.Modal(document.getElementById('problemEvaluationModal'));
         modal.show();
     };
 
-    // Save evaluation
-    const saveEvaluationBtn = document.getElementById('saveEvaluationBtn');
-    if (saveEvaluationBtn) {
-        saveEvaluationBtn.addEventListener('click', async function() {
-            const submissionId = document.getElementById('eval-submission-id').value;
+    // Save problem evaluation
+    const saveProblemEvaluationBtn = document.getElementById('saveProblemEvaluationBtn');
+    if (saveProblemEvaluationBtn) {
+        saveProblemEvaluationBtn.addEventListener('click', async function() {
+            const participantId = document.getElementById('eval-participant-id').value;
+            const problemId = document.getElementById('eval-problem-id').value;
             const hackathonId = document.getElementById('eval-hackathon-id').value;
-            const score = document.getElementById('eval-score').value;
-            const status = document.getElementById('eval-status').value;
-            const feedback = document.getElementById('eval-feedback').value;
+            const score = document.getElementById('problem-score').value;
+            const status = document.getElementById('problem-status').value;
+            const feedback = document.getElementById('problem-feedback').value;
 
-            if (!score || !status || !hackathonId) {
+            if (!score || !status || !hackathonId || !participantId || !problemId) {
                 alert('Please fill in all required fields');
                 return;
             }
 
             try {
-                // Update evaluation via API (we'll need to add this endpoint)
+                // Update evaluation via API
                 const evaluationData = {
-                    submissionId: submissionId,
+                    participantId: participantId,
+                    problemId: problemId,
                     evaluation: {
                         score: parseInt(score),
                         status: status,
@@ -824,11 +986,17 @@ document.addEventListener('DOMContentLoaded', async function() {
                     }
                 };
 
-                // For now, we'll show a message that evaluation saving needs backend implementation
-                alert('Evaluation feature requires backend implementation. Score: ' + score + ', Status: ' + status);
+                // Call API to save evaluation
+                const result = await window.HackathonAPI.evaluateSubmission(hackathonId, evaluationData);
+
+                if (result.success) {
+                    alert('Evaluation saved successfully!');
+                } else {
+                    throw new Error('Failed to save evaluation');
+                }
 
                 // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('evaluationModal'));
+                const modal = bootstrap.Modal.getInstance(document.getElementById('problemEvaluationModal'));
                 modal.hide();
 
                 // Refresh displays
@@ -841,6 +1009,27 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
+
+    // Save all evaluations for participant
+    const saveAllEvaluationsBtn = document.getElementById('saveAllEvaluationsBtn');
+    if (saveAllEvaluationsBtn) {
+        saveAllEvaluationsBtn.addEventListener('click', async function() {
+            // This would save all evaluations at once - for now, we'll just close the modal
+            // In a full implementation, this would collect all evaluation forms and save them
+            alert('Bulk evaluation save feature - to be implemented');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('participantEvaluationModal'));
+            modal.hide();
+        });
+    }
+
+    // Quick action functions
+    window.evaluateAllPending = function() {
+        alert('Evaluate all pending submissions - feature to be implemented');
+    };
+
+    window.exportParticipantResults = function() {
+        alert('Export participant results - feature to be implemented');
+    };
 
     // Refresh functions
     window.refreshSubmissions = function() {
@@ -1283,7 +1472,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             row.innerHTML = `
                 <td>${problem.title}</td>
                 <td><span class="badge bg-${getDifficultyColor(problem.difficulty)}">${problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}</span></td>
-                <td>${problem.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
+                <td>${problem.category ? problem.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A'}</td>
                 <td>${hackathonName}</td>
                 <td><span class="status active">Active</span></td>
                 <td>

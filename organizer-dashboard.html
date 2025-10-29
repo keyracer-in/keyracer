@@ -337,21 +337,20 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="hackathon-list">
                     <div class="list-header">
-                        <h2 class="list-title">Pending Evaluations <span id="evaluation-count" class="badge bg-warning">0</span></h2>
+                        <h2 class="list-title">Participant Evaluations <span id="evaluation-count" class="badge bg-warning">0</span></h2>
                     </div>
-                    
+
                     <div class="table-responsive">
                         <table class="hackathon-table">
                             <thead>
                                 <tr>
-                                    <th>Submission ID</th>
                                     <th>Participant</th>
-                                    <th>Problem</th>
-                                    <th>Language</th>
-                                    <th>Status</th>
+                                    <th>Problems Solved</th>
+                                    <th>Total Score</th>
+                                    <th>Evaluation Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -729,42 +728,89 @@
         </div>
     </div>
     
-    <!-- Evaluation Modal -->
-    <div class="modal fade" id="evaluationModal" tabindex="-1" aria-labelledby="evaluationModalLabel">
+    <!-- Participant Evaluation Modal -->
+    <div class="modal fade" id="participantEvaluationModal" tabindex="-1" aria-labelledby="participantEvaluationModalLabel">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="evaluationModalLabel" style="color: var(--organizer-color); font-family: 'Orbitron', sans-serif;">Evaluate Submission</h5>
+                    <h5 class="modal-title" id="participantEvaluationModalLabel" style="color: var(--organizer-color); font-family: 'Orbitron', sans-serif;">Evaluate Participant</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="text-info">Participant Information</h6>
+                            <div id="participant-info" class="p-3 bg-light rounded"></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h6 class="text-info">Problem Submissions</h6>
+                            <div id="participant-problems" class="accordion" style="max-height: 400px; overflow-y: auto;">
+                                <!-- Problem evaluation cards will be inserted here -->
+                            </div>
+
+                            <div class="mt-3 p-3 bg-light rounded">
+                                <h6>Quick Actions</h6>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="evaluateAllPending()">
+                                        <i class="fas fa-star-half-alt"></i> Evaluate All Pending
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success" onclick="exportParticipantResults()">
+                                        <i class="fas fa-download"></i> Export Results
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" id="saveAllEvaluationsBtn">Save All Evaluations</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Problem Evaluation Modal -->
+    <div class="modal fade" id="problemEvaluationModal" tabindex="-1" aria-labelledby="problemEvaluationModalLabel">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="problemEvaluationModalLabel" style="color: var(--organizer-color); font-family: 'Orbitron', sans-serif;">Evaluate Problem Submission</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-info">Submission Details</h6>
-                            <div id="submission-details"></div>
-                            
-                            <h6 class="text-info mt-4">Code</h6>
-                            <div class="code-example" id="submission-code" style="max-height: 300px; overflow-y: auto;"></div>
+                            <h6 class="text-info">Problem Details</h6>
+                            <div id="problem-details"></div>
+
+                            <h6 class="text-info mt-4">Code Submission</h6>
+                            <div class="code-example" id="problem-code" style="max-height: 300px; overflow-y: auto;"></div>
                         </div>
                         <div class="col-md-6">
                             <h6 class="text-info">Evaluation</h6>
-                            <form id="evaluationForm">
-                                <input type="hidden" id="eval-submission-id" name="eval-submission-id">
+                            <form id="problemEvaluationForm">
+                                <input type="hidden" id="eval-participant-id" name="eval-participant-id">
+                                <input type="hidden" id="eval-problem-id" name="eval-problem-id">
+                                <input type="hidden" id="eval-hackathon-id" name="eval-hackathon-id">
                                 <div class="mb-3">
-                                    <label for="eval-score" class="form-label">Score (0-100)</label>
-                                    <input type="number" class="form-control" id="eval-score" min="0" max="100" required>
+                                    <label for="problem-score" class="form-label">Score (0-100)</label>
+                                    <input type="number" class="form-control" id="problem-score" min="0" max="100" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="eval-status" class="form-label">Status</label>
-                                    <select class="form-select" id="eval-status" required>
+                                    <label for="problem-status" class="form-label">Status</label>
+                                    <select class="form-select" id="problem-status" required>
                                         <option value="accepted">Accepted</option>
                                         <option value="rejected">Rejected</option>
                                         <option value="partial">Partial Credit</option>
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="eval-feedback" class="form-label">Feedback</label>
-                                    <textarea class="form-control" id="eval-feedback" rows="4" placeholder="Provide feedback to the participant"></textarea>
+                                    <label for="problem-feedback" class="form-label">Feedback</label>
+                                    <textarea class="form-control" id="problem-feedback" rows="4" placeholder="Provide feedback for this problem"></textarea>
                                 </div>
                             </form>
                         </div>
@@ -772,7 +818,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveEvaluationBtn">Save Evaluation</button>
+                    <button type="button" class="btn btn-primary" id="saveProblemEvaluationBtn">Save Evaluation</button>
                 </div>
             </div>
         </div>

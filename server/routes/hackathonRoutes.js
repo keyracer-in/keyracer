@@ -336,6 +336,57 @@ router.get('/:hackathonId/submissions', async (req, res) => {
   }
 });
 
+// Evaluate a submission
+router.post('/:hackathonId/evaluate', async (req, res) => {
+  try {
+    const { hackathonId } = req.params;
+    const { participantId, problemId, evaluation } = req.body;
+
+    console.log(`[EVALUATE] Evaluating submission for hackathon ${hackathonId}, participant ${participantId}, problem ${problemId}`);
+
+    const hackathon = await Hackathon.findOne({ id: hackathonId });
+    if (!hackathon) {
+      return res.status(404).json({ error: 'Hackathon not found' });
+    }
+
+    const participant = hackathon.participants.find(p => p.id === participantId);
+    if (!participant) {
+      return res.status(404).json({ error: 'Participant not found' });
+    }
+
+    const submission = participant.submissions.find(s => s.problemId === problemId);
+    if (!submission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    // Update submission with evaluation
+    submission.evaluated = true;
+    submission.evaluation = {
+      score: evaluation.score,
+      status: evaluation.status,
+      feedback: evaluation.feedback,
+      evaluatedAt: evaluation.evaluatedAt,
+      evaluatedBy: evaluation.evaluatedBy
+    };
+
+    // Update participant last activity
+    participant.lastActivity = new Date();
+
+    await hackathon.save();
+
+    console.log(`[EVALUATE] Successfully evaluated submission for participant ${participantId}, problem ${problemId}`);
+
+    res.json({
+      success: true,
+      message: 'Evaluation saved successfully',
+      evaluation: submission.evaluation
+    });
+  } catch (error) {
+    console.error('Error evaluating submission:', error);
+    res.status(500).json({ error: 'Failed to evaluate submission' });
+  }
+});
+
 // Get hackathons by organizer code
 router.get('/organizer/:organizerCode', async (req, res) => {
   try {
