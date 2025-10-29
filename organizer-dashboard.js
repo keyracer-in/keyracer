@@ -639,7 +639,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                         <button class="action-btn view" title="View Code" onclick="viewSubmission('${submission.id}')">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="action-btn edit" title="Evaluate" onclick="evaluateSubmission('${submission.id}')">
+                        <button class="action-btn edit" title="Evaluate" onclick="evaluateProblemSubmission('${submission.participantId}', '${submission.problemId}')">
                             <i class="fas fa-star"></i>
                         </button>
                     </div>
