@@ -593,7 +593,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             try {
                 const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
                 if (submissions && submissions.length > 0) {
-                    allSubmissions = allSubmissions.concat(submissions);
+                    // Add hackathonId to each submission for grouping
+                    const submissionsWithHackathonId = submissions.map(submission => ({
+                        ...submission,
+                        hackathonId: hackathonId
+                    }));
+                    allSubmissions = allSubmissions.concat(submissionsWithHackathonId);
                 }
             } catch (error) {
                 console.error(`Error fetching submissions for hackathon ${hackathonId}:`, error);
@@ -661,7 +666,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             try {
                 const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
                 if (submissions && submissions.length > 0) {
-                    allSubmissions = allSubmissions.concat(submissions);
+                    // Add hackathonId to each submission for grouping
+                    const submissionsWithHackathonId = submissions.map(submission => ({
+                        ...submission,
+                        hackathonId: hackathonId
+                    }));
+                    allSubmissions = allSubmissions.concat(submissionsWithHackathonId);
                 }
             } catch (error) {
                 console.error(`Error fetching submissions for hackathon ${hackathonId}:`, error);
@@ -1118,7 +1128,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                 try {
                     const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
                     if (submissions && submissions.length > 0) {
-                        allSubmissions = allSubmissions.concat(submissions);
+                        // Add hackathonId to each submission for grouping
+                        const submissionsWithHackathonId = submissions.map(submission => ({
+                            ...submission,
+                            hackathonId: hackathonId
+                        }));
+                        allSubmissions = allSubmissions.concat(submissionsWithHackathonId);
                     }
                 } catch (error) {
                     console.error(`Error fetching submissions for hackathon ${hackathonId}:`, error);
@@ -1133,14 +1148,14 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return;
             }
 
-            // Group by hackathon for better organization
-            const submissionsByHackathon = {};
-            pendingSubmissions.forEach(submission => {
-                if (!submissionsByHackathon[submission.hackathonId]) {
-                    submissionsByHackathon[submission.hackathonId] = [];
-                }
-                submissionsByHackathon[submission.hackathonId].push(submission);
-            });
+        // Group by hackathon for better organization
+        const submissionsByHackathon = {};
+        pendingSubmissions.forEach(submission => {
+            if (!submissionsByHackathon[submission.hackathonId]) {
+                submissionsByHackathon[submission.hackathonId] = [];
+            }
+            submissionsByHackathon[submission.hackathonId].push(submission);
+        });
 
             // Build the bulk evaluation UI
             let html = '';
@@ -1225,7 +1240,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                 try {
                     const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
                     if (submissions && submissions.length > 0) {
-                        allSubmissions = allSubmissions.concat(submissions);
+                        // Add hackathonId to each submission for grouping
+                        const submissionsWithHackathonId = submissions.map(submission => ({
+                            ...submission,
+                            hackathonId: hackathonId
+                        }));
+                        allSubmissions = allSubmissions.concat(submissionsWithHackathonId);
                     }
                 } catch (error) {
                     console.error(`Error fetching submissions for hackathon ${hackathonId}:`, error);
@@ -1414,7 +1434,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             try {
                 const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
                 if (submissions && submissions.length > 0) {
-                    allSubmissions = allSubmissions.concat(submissions);
+                    // Add hackathonId to each submission for grouping
+                    const submissionsWithHackathonId = submissions.map(submission => ({
+                        ...submission,
+                        hackathonId: hackathonId
+                    }));
+                    allSubmissions = allSubmissions.concat(submissionsWithHackathonId);
                 }
             } catch (error) {
                 console.error(`Error fetching submissions for hackathon ${hackathonId}:`, error);
@@ -1437,7 +1462,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     name: participantName,
                     totalScore: 0,
                     solvedProblems: 0,
-                    hackathonId: '', // We'll need to determine this from context
+                    hackathonId: submission.hackathonId, // Use the hackathonId from the submission
                     submissions: []
                 };
             }
