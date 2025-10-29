@@ -931,29 +931,47 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('eval-hackathon-id').value = hackathonId;
 
         document.getElementById('problem-details').innerHTML = `
-            <p><strong>Problem:</strong> ${problemTitle}</p>
-            <p><strong>Participant:</strong> ${submission.participantName}</p>
-            <p><strong>Language:</strong> ${submission.language}</p>
-            <p><strong>Submitted:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
-            <p><strong>Current Status:</strong> ${submission.evaluated ? submission.evaluation.status : 'Not Evaluated'}</p>
-            ${submission.evaluated ? `<p><strong>Current Score:</strong> ${submission.evaluation.score}/100</p>` : ''}
+            <div class="card mb-3 bg-light">
+                <div class="card-body">
+                    <h6 class="card-title text-dark"><i class="fas fa-code"></i> Problem Details</h6>
+                    <p class="mb-1 text-dark"><strong>Problem:</strong> ${problemTitle}</p>
+                    <p class="mb-1 text-dark"><strong>Participant:</strong> ${submission.participantName}</p>
+                    <p class="mb-1 text-dark"><strong>Language:</strong> ${submission.language}</p>
+                    <p class="mb-1 text-dark"><strong>Submitted:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
+                    <p class="mb-1 text-dark"><strong>Current Status:</strong> <span class="badge bg-${submission.evaluated ? 'success' : 'warning'}">${submission.evaluated ? submission.evaluation.status : 'Not Evaluated'}</span></p>
+                    ${submission.evaluated ? `<p class="mb-0 text-dark"><strong>Current Score:</strong> <span class="badge bg-primary">${submission.evaluation.score}/100</span></p>` : ''}
+                </div>
+            </div>
         `;
 
+        // Display code in a readable format
         document.getElementById('problem-code').textContent = submission.code;
+
+        // Reset form first, then pre-fill if already evaluated
+        const form = document.getElementById('problemEvaluationForm');
+        form.reset();
 
         // Pre-fill form if already evaluated
         if (submission.evaluated && submission.evaluation) {
             document.getElementById('problem-score').value = submission.evaluation.score;
             document.getElementById('problem-status').value = submission.evaluation.status;
             document.getElementById('problem-feedback').value = submission.evaluation.feedback || '';
-        } else {
-            // Clear form for new evaluation
-            document.getElementById('problemEvaluationForm').reset();
         }
 
         // Show modal
         const modal = new bootstrap.Modal(document.getElementById('problemEvaluationModal'));
         modal.show();
+
+        // Focus on score input after modal is shown
+        modal._element.addEventListener('shown.bs.modal', function() {
+            setTimeout(() => {
+                const scoreInput = document.getElementById('problem-score');
+                if (scoreInput) {
+                    scoreInput.focus();
+                    scoreInput.select();
+                }
+            }, 100);
+        });
     };
 
     // Save problem evaluation
@@ -989,11 +1007,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 // Call API to save evaluation
                 const result = await window.HackathonAPI.evaluateSubmission(hackathonId, evaluationData);
 
-                if (result.success) {
-                    alert('Evaluation saved successfully!');
-                } else {
-                    throw new Error('Failed to save evaluation');
-                }
+                // If we reach here, the API call was successful
+                alert('Evaluation saved successfully!');
 
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('problemEvaluationModal'));
@@ -1022,13 +1037,257 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
+    // Save bulk evaluations
+    const saveBulkEvaluationsBtn = document.getElementById('saveBulkEvaluationsBtn');
+    if (saveBulkEvaluationsBtn) {
+        saveBulkEvaluationsBtn.addEventListener('click', async function() {
+            try {
+                const forms = document.querySelectorAll('.bulk-evaluation-form');
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (const form of forms) {
+                    const formData = new FormData(form);
+                    const score = formData.get('score');
+                    const status = formData.get('status');
+                    const feedback = formData.get('feedback');
+
+                    // Skip if score is not provided
+                    if (!score || score === '') {
+                        continue;
+                    }
+
+                    const submissionId = form.dataset.submissionId;
+                    const hackathonId = form.dataset.hackathonId;
+                    const participantId = form.dataset.participantId;
+                    const problemId = form.dataset.problemId;
+
+                    try {
+                        const evaluationData = {
+                            participantId: participantId,
+                            problemId: problemId,
+                            evaluation: {
+                                score: parseInt(score),
+                                status: status,
+                                feedback: feedback || '',
+                                evaluatedAt: new Date().toISOString(),
+                                evaluatedBy: currentOrganizerCode
+                            }
+                        };
+
+                        await window.HackathonAPI.evaluateSubmission(hackathonId, evaluationData);
+                        successCount++;
+                    } catch (error) {
+                        console.error(`Error saving evaluation for submission ${submissionId}:`, error);
+                        errorCount++;
+                    }
+                }
+
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('bulkEvaluationModal'));
+                modal.hide();
+
+                // Refresh displays
+                await displaySubmissions();
+                await displayEvaluations();
+
+                // Show results
+                if (errorCount === 0) {
+                    alert(`Successfully saved ${successCount} evaluations!`);
+                } else {
+                    alert(`Saved ${successCount} evaluations successfully. ${errorCount} evaluations failed to save.`);
+                }
+
+            } catch (error) {
+                console.error('Error saving bulk evaluations:', error);
+                alert('Failed to save evaluations. Please try again.');
+            }
+        });
+    }
+
     // Quick action functions
-    window.evaluateAllPending = function() {
-        alert('Evaluate all pending submissions - feature to be implemented');
+    window.evaluateAllPending = async function() {
+        try {
+            const hackathons = getOrganizerData('hackathons');
+            const hackathonIds = hackathons.map(h => h.id);
+
+            let allSubmissions = [];
+
+            // Fetch submissions from API for each hackathon
+            for (const hackathonId of hackathonIds) {
+                try {
+                    const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
+                    if (submissions && submissions.length > 0) {
+                        allSubmissions = allSubmissions.concat(submissions);
+                    }
+                } catch (error) {
+                    console.error(`Error fetching submissions for hackathon ${hackathonId}:`, error);
+                }
+            }
+
+            // Filter pending submissions (not evaluated)
+            const pendingSubmissions = allSubmissions.filter(submission => !submission.evaluated);
+
+            if (pendingSubmissions.length === 0) {
+                alert('No pending submissions found to evaluate.');
+                return;
+            }
+
+            // Group by hackathon for better organization
+            const submissionsByHackathon = {};
+            pendingSubmissions.forEach(submission => {
+                if (!submissionsByHackathon[submission.hackathonId]) {
+                    submissionsByHackathon[submission.hackathonId] = [];
+                }
+                submissionsByHackathon[submission.hackathonId].push(submission);
+            });
+
+            // Build the bulk evaluation UI
+            let html = '';
+            const problems = getOrganizerData('problems');
+
+            Object.keys(submissionsByHackathon).forEach(hackathonId => {
+                const hackathon = hackathons.find(h => h.id === hackathonId);
+                const hackathonName = hackathon ? hackathon.title : 'Unknown Hackathon';
+
+                html += `<div class="mb-4">
+                    <h6 class="text-primary mb-3"><i class="fas fa-trophy"></i> ${hackathonName}</h6>`;
+
+                submissionsByHackathon[hackathonId].forEach(submission => {
+                    const problem = problems.find(p => p.id === submission.problemId);
+                    const problemTitle = problem ? problem.title : 'Unknown Problem';
+
+                    html += `
+                        <div class="card mb-3 border-warning">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="card-title text-dark">${problemTitle}</h6>
+                                        <p class="card-text text-muted mb-1">
+                                            <strong>Participant:</strong> ${submission.participantName || 'Anonymous'}<br>
+                                            <strong>Language:</strong> ${submission.language}<br>
+                                            <strong>Submitted:</strong> ${new Date(submission.submittedAt).toLocaleString()}
+                                        </p>
+                                        <div class="code-preview bg-light p-2 rounded" style="font-family: monospace; font-size: 0.8rem; max-height: 100px; overflow-y: auto;">
+                                            ${submission.code.substring(0, 200)}${submission.code.length > 200 ? '...' : ''}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <form class="bulk-evaluation-form" data-submission-id="${submission.id}" data-hackathon-id="${hackathonId}" data-participant-id="${submission.participantId}" data-problem-id="${submission.problemId}">
+                                            <div class="mb-2">
+                                                <label class="form-label small">Score (0-100)</label>
+                                                <input type="number" class="form-control form-control-sm" name="score" min="0" max="100" required>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label small">Status</label>
+                                                <select class="form-select form-select-sm" name="status" required>
+                                                    <option value="accepted">Accepted</option>
+                                                    <option value="rejected">Rejected</option>
+                                                    <option value="partial">Partial Credit</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label small">Feedback</label>
+                                                <textarea class="form-control form-control-sm" name="feedback" rows="2" placeholder="Optional feedback"></textarea>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                html += '</div>';
+            });
+
+            document.getElementById('bulk-evaluation-list').innerHTML = html;
+            document.getElementById('pending-count').textContent = pendingSubmissions.length;
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('bulkEvaluationModal'));
+            modal.show();
+
+        } catch (error) {
+            console.error('Error loading bulk evaluation:', error);
+            alert('Failed to load pending submissions. Please try again.');
+        }
     };
 
-    window.exportParticipantResults = function() {
-        alert('Export participant results - feature to be implemented');
+    window.exportParticipantResults = async function() {
+        try {
+            const hackathons = getOrganizerData('hackathons');
+            const hackathonIds = hackathons.map(h => h.id);
+
+            let allSubmissions = [];
+
+            // Fetch submissions from API for each hackathon
+            for (const hackathonId of hackathonIds) {
+                try {
+                    const submissions = await window.HackathonAPI.getHackathonSubmissions(hackathonId);
+                    if (submissions && submissions.length > 0) {
+                        allSubmissions = allSubmissions.concat(submissions);
+                    }
+                } catch (error) {
+                    console.error(`Error fetching submissions for hackathon ${hackathonId}:`, error);
+                }
+            }
+
+            // Group submissions by participant
+            const participantEvaluations = {};
+
+            allSubmissions.forEach(submission => {
+                const participantId = submission.participantId;
+                const participantName = submission.participantName || 'Anonymous';
+
+                if (!participantEvaluations[participantId]) {
+                    participantEvaluations[participantId] = {
+                        id: participantId,
+                        name: participantName,
+                        submissions: [],
+                        totalScore: 0,
+                        problemsSolved: 0,
+                        totalEvaluated: 0
+                    };
+                }
+
+                participantEvaluations[participantId].submissions.push(submission);
+
+                // Calculate scores for evaluated submissions
+                if (submission.evaluated && submission.evaluation) {
+                    participantEvaluations[participantId].totalEvaluated++;
+                    if (submission.evaluation.status === 'accepted') {
+                        participantEvaluations[participantId].totalScore += submission.evaluation.score;
+                        participantEvaluations[participantId].problemsSolved++;
+                    }
+                }
+            });
+
+            // Create CSV content
+            let csvContent = 'Participant Name,Total Score,Problems Solved,Problems Evaluated,Total Submissions,Evaluation Status\n';
+
+            Object.values(participantEvaluations).forEach(participant => {
+                const evaluationStatus = participant.totalEvaluated === participant.submissions.length ?
+                    'Fully Evaluated' : `${participant.totalEvaluated}/${participant.submissions.length} Evaluated`;
+
+                csvContent += `"${participant.name}","${participant.totalScore}","${participant.problemsSolved}","${participant.totalEvaluated}","${participant.submissions.length}","${evaluationStatus}"\n`;
+            });
+
+            // Create and download CSV file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'participant_evaluations.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            alert('Evaluation results exported successfully!');
+        } catch (error) {
+            console.error('Error exporting participant results:', error);
+            alert('Failed to export evaluation results. Please try again.');
+        }
     };
 
     // Refresh functions

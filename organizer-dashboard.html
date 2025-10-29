@@ -823,6 +823,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Bulk Evaluation Modal -->
+    <div class="modal fade" id="bulkEvaluationModal" tabindex="-1" aria-labelledby="bulkEvaluationModalLabel">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulkEvaluationModalLabel" style="color: var(--organizer-color); font-family: 'Orbitron', sans-serif;">Evaluate All Pending Submissions</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Review and score all pending submissions below. You can quickly assign scores and status to multiple submissions at once.
+                    </div>
+
+                    <div id="bulk-evaluation-list" style="max-height: 500px; overflow-y: auto;">
+                        <!-- Pending submissions will be loaded here -->
+                    </div>
+
+                    <div class="mt-3 text-muted">
+                        <small>Total pending submissions: <span id="pending-count">0</span></small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="saveBulkEvaluationsBtn">
+                        <i class="fas fa-save"></i> Save All Evaluations
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Hackathon Created Success Modal -->
     <div class="modal fade" id="hackathonCreatedModal" tabindex="-1" aria-labelledby="hackathonCreatedModalLabel">
