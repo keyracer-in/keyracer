@@ -190,22 +190,23 @@ document.getElementById('conductorSubmit').addEventListener('click', async funct
 // Participant form submission with enhanced animations
 document.getElementById('participantSubmit').addEventListener('click', async function() {
     const participantName = document.getElementById('participantName').value.trim();
+    const participantEmail = document.getElementById('participantEmail').value.trim();
     const hackathonId = document.getElementById('hackathonId').value.trim();
     const submitBtn = document.getElementById('participantSubmit');
-    
+
     // Add animation to button
     submitBtn.classList.add('animate__animated', 'animate__pulse');
     submitBtn.textContent = 'Processing...';
-    
-    if (participantName === '' || hackathonId === '') {
+
+    if (participantName === '' || participantEmail === '' || hackathonId === '') {
         submitBtn.classList.remove('animate__pulse');
         submitBtn.classList.add('animate__shakeX');
         submitBtn.textContent = 'Join Hackathon';
-        
+
         setTimeout(() => {
             submitBtn.classList.remove('animate__shakeX');
         }, 1000);
-        
+
         // Highlight empty fields
         if (participantName === '') {
             document.getElementById('participantName').classList.add('animate__animated', 'animate__shakeX');
@@ -214,7 +215,15 @@ document.getElementById('participantSubmit').addEventListener('click', async fun
                 document.getElementById('participantName').classList.remove('animate__shakeX');
             }, 1000);
         }
-        
+
+        if (participantEmail === '') {
+            document.getElementById('participantEmail').classList.add('animate__animated', 'animate__shakeX');
+            document.getElementById('participantEmail').style.borderColor = 'var(--danger-color)';
+            setTimeout(() => {
+                document.getElementById('participantEmail').classList.remove('animate__shakeX');
+            }, 1000);
+        }
+
         if (hackathonId === '') {
             document.getElementById('hackathonId').classList.add('animate__animated', 'animate__shakeX');
             document.getElementById('hackathonId').style.borderColor = 'var(--danger-color)';
@@ -222,7 +231,27 @@ document.getElementById('participantSubmit').addEventListener('click', async fun
                 document.getElementById('hackathonId').classList.remove('animate__shakeX');
             }, 1000);
         }
-        
+
+        return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(participantEmail)) {
+        submitBtn.classList.remove('animate__pulse');
+        submitBtn.classList.add('animate__shakeX');
+        submitBtn.textContent = 'Invalid Email';
+
+        document.getElementById('participantEmail').classList.add('animate__animated', 'animate__shakeX');
+        document.getElementById('participantEmail').style.borderColor = 'var(--danger-color)';
+
+        setTimeout(() => {
+            submitBtn.classList.remove('animate__shakeX');
+            submitBtn.textContent = 'Join Hackathon';
+            document.getElementById('participantEmail').classList.remove('animate__shakeX');
+            document.getElementById('participantEmail').style.borderColor = '';
+        }, 2000);
+
         return;
     }
     
@@ -253,7 +282,7 @@ document.getElementById('participantSubmit').addEventListener('click', async fun
         // Register participant using API
         const registeredParticipant = await window.HackathonAPI.registerParticipant(hackathonId, {
             name: participantName,
-            email: '' // Optional email field
+            email: participantEmail
         });
         
         submitBtn.textContent = 'Success!';
