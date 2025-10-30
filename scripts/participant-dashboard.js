@@ -10,6 +10,7 @@ class ParticipantDashboard {
         this.submissions = [];
         this.tabSwitchCount = 0;
         this.fullscreenExitCount = 0;
+        this.currentProblemIndex = 0;
         this.codeExecutor = new CodeExecutor();
 
         // Make dashboard accessible globally for viewSubmission function
@@ -141,55 +142,107 @@ class ParticipantDashboard {
             return;
         }
 
-        // Display the first problem (or current problem)
-        const problem = this.problems[0];
-        this.displayProblem(problem);
-    }
+        // Create problem selector if multiple problems exist
+        let problemSelector = '';
+        if (this.problems.length > 1) {
+            problemSelector = `
+                <div class="problem-selector">
+                    <div class="problem-tabs">
+                        ${this.problems.map((problem, index) => `
+                            <button class="problem-tab ${index === 0 ? 'active' : ''}" data-problem-index="${index}">
+                                <span class="problem-number">${index + 1}</span>
+                                <span class="problem-title-short">${problem.title.substring(0, 20)}${problem.title.length > 20 ? '...' : ''}</span>
+                                <span class="problem-difficulty difficulty-${problem.difficulty}">${problem.difficulty.charAt(0).toUpperCase()}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
 
-    displayProblem(problem) {
-        const problemPage = document.getElementById('problem-page');
         problemPage.innerHTML = `
             <div class="page-header">
                 <h1 class="page-title">Problem Statement</h1>
+                ${problemSelector}
             </div>
             <div class="problem-container">
-                <div class="problem-header">
-                    <h2 class="problem-title">${problem.title}</h2>
-                    <span class="problem-difficulty difficulty-${problem.difficulty}">${problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}</span>
+                <div class="problem-content" id="problem-content">
+                    <!-- Problem content will be loaded here -->
                 </div>
-                <div class="problem-content">
-                    <div class="problem-section">
-                        <h3 class="problem-section-title">Description</h3>
-                        <p>${problem.description}</p>
-                    </div>
-                    <div class="problem-section">
-                        <h3 class="problem-section-title">Input Format</h3>
-                        <p>${problem.inputFormat || 'Not specified'}</p>
-                    </div>
-                    <div class="problem-section">
-                        <h3 class="problem-section-title">Output Format</h3>
-                        <p>${problem.outputFormat || 'Not specified'}</p>
-                    </div>
-                    ${problem.exampleInput ? `
-                        <div class="problem-section">
-                            <h3 class="problem-section-title">Example</h3>
-                            <div class="example-box">
-                                <h4 class="example-title">Input:</h4>
-                                <div class="code-example">${problem.exampleInput}</div>
-                                <h4 class="example-title">Output:</h4>
-                                <div class="code-example">${problem.exampleOutput || 'Not provided'}</div>
-                            </div>
-                        </div>
-                    ` : ''}
-                    ${problem.constraints ? `
-                        <div class="problem-section">
-                            <h3 class="problem-section-title">Constraints</h3>
-                            <div class="constraints">
-                                <p>${problem.constraints}</p>
-                            </div>
-                        </div>
-                    ` : ''}
+            </div>
+        `;
+
+        // Add event listeners for problem tabs
+        if (this.problems.length > 1) {
+            const problemTabs = problemPage.querySelectorAll('.problem-tab');
+            problemTabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-problem-index'));
+                    this.selectProblem(index);
+                });
+            });
+        }
+
+        // Display the first problem by default
+        this.displayProblem(this.problems[0]);
+    }
+
+    selectProblem(index) {
+        // Update active tab
+        const problemTabs = document.querySelectorAll('.problem-tab');
+        problemTabs.forEach((tab, i) => {
+            tab.classList.toggle('active', i === index);
+        });
+
+        // Display selected problem
+        const problem = this.problems[index];
+        this.displayProblem(problem);
+
+        // Update current problem for submission
+        this.currentProblemIndex = index;
+    }
+
+    displayProblem(problem) {
+        const problemContent = document.getElementById('problem-content');
+        if (!problemContent) return;
+
+        problemContent.innerHTML = `
+            <div class="problem-header">
+                <h2 class="problem-title">${problem.title}</h2>
+                <span class="problem-difficulty difficulty-${problem.difficulty}">${problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)}</span>
+            </div>
+            <div class="problem-content">
+                <div class="problem-section">
+                    <h3 class="problem-section-title">Description</h3>
+                    <p>${problem.description}</p>
                 </div>
+                <div class="problem-section">
+                    <h3 class="problem-section-title">Input Format</h3>
+                    <p>${problem.inputFormat || 'Not specified'}</p>
+                </div>
+                <div class="problem-section">
+                    <h3 class="problem-section-title">Output Format</h3>
+                    <p>${problem.outputFormat || 'Not specified'}</p>
+                </div>
+                ${problem.exampleInput ? `
+                    <div class="problem-section">
+                        <h3 class="problem-section-title">Example</h3>
+                        <div class="example-box">
+                            <h4 class="example-title">Input:</h4>
+                            <div class="code-example">${problem.exampleInput}</div>
+                            <h4 class="example-title">Output:</h4>
+                            <div class="code-example">${problem.exampleOutput || 'Not provided'}</div>
+                        </div>
+                    </div>
+                ` : ''}
+                ${problem.constraints ? `
+                    <div class="problem-section">
+                        <h3 class="problem-section-title">Constraints</h3>
+                        <div class="constraints">
+                            <p>${problem.constraints}</p>
+                        </div>
+                    </div>
+                ` : ''}
             </div>
         `;
     }
@@ -484,8 +537,8 @@ class ParticipantDashboard {
             return;
         }
 
-        // Show loading state
-        outputContent.innerHTML = '<div class="loading">Running code...</div>';
+        // Show loading state with problem context
+        outputContent.innerHTML = `<div class="loading">Running code for "${currentProblem.title}"...</div>`;
 
         try {
             // Use the Piston API to execute code
@@ -493,17 +546,17 @@ class ParticipantDashboard {
 
             if (result.error) {
                 outputContent.innerHTML = `
-                    <div class="error">Execution Error:</div>
+                    <div class="error">Execution Error for "${currentProblem.title}":</div>
                     <pre class="error-output">${result.error}</pre>
                 `;
             } else {
                 outputContent.innerHTML = `
-                    <div class="success">Code executed successfully!</div>
+                    <div class="success">Code executed successfully for "${currentProblem.title}"!</div>
                     <pre class="code-output">${result.output || 'No output'}</pre>
                 `;
             }
         } catch (error) {
-            outputContent.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            outputContent.innerHTML = `<div class="error">Error running code for "${currentProblem.title}": ${error.message}</div>`;
         }
     }
 
@@ -516,8 +569,9 @@ class ParticipantDashboard {
             return this.problems.find(p => p.id === problemId);
         }
 
-        // If no problem in URL, return the first problem or null
-        return this.problems.length > 0 ? this.problems[0] : null;
+        // If no problem in URL, return the currently selected problem or the first problem
+        const currentIndex = this.currentProblemIndex !== undefined ? this.currentProblemIndex : 0;
+        return this.problems.length > 0 ? this.problems[currentIndex] : null;
     }
 
     setupAntiCheating() {
@@ -596,6 +650,87 @@ class ParticipantDashboard {
             return;
         }
 
+        // Show confirmation modal
+        this.showSubmissionConfirmation(code, language);
+    }
+
+    showSubmissionConfirmation(code, language) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+        `;
+
+        modal.innerHTML = `
+            <div style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: 15px; border: 2px solid var(--accent-color); max-width: 600px; width: 90%;">
+                <h2 style="color: var(--accent-color); margin-bottom: 20px;">⚠️ Confirm Submission</h2>
+                <p style="margin-bottom: 20px; font-size: 1.1rem; line-height: 1.5;">
+                    Are you sure you want to submit your solution?
+                </p>
+                <div style="margin-bottom: 20px; text-align: left;">
+                    <strong>Language:</strong> ${language.charAt(0).toUpperCase() + language.slice(1)}<br>
+                    <strong>Code Length:</strong> ${code.length} characters<br>
+                    <strong>Problem:</strong> ${this.getCurrentProblem() ? this.getCurrentProblem().title : 'N/A'}
+                </div>
+                <p style="margin-bottom: 30px; font-size: 0.9rem; color: var(--text-secondary);">
+                    Once submitted, you cannot modify your solution. Make sure your code is correct and complete.
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button id="cancelSubmitBtn" style="
+                        background: var(--danger-color);
+                        border: none;
+                        color: white;
+                        padding: 12px 25px;
+                        font-size: 1rem;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-family: 'Orbitron', sans-serif;
+                        font-weight: 600;
+                    ">Cancel</button>
+                    <button id="confirmSubmitBtn" style="
+                        background: linear-gradient(90deg, var(--participant-color) 0%, var(--secondary-color) 100%);
+                        border: none;
+                        color: white;
+                        padding: 12px 25px;
+                        font-size: 1rem;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-family: 'Orbitron', sans-serif;
+                        font-weight: 600;
+                    ">Submit Solution</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById('cancelSubmitBtn').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+
+        document.getElementById('confirmSubmitBtn').addEventListener('click', async () => {
+            document.body.removeChild(modal);
+            await this.processSubmission(code, language);
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
+    }
+
+    async processSubmission(code, language) {
         try {
             const currentHackathonId = localStorage.getItem('currentHackathonId');
             const currentParticipantId = localStorage.getItem('currentParticipantId');
@@ -605,8 +740,8 @@ class ParticipantDashboard {
                 return;
             }
 
-            // Get current problem
-            const currentProblem = this.problems.length > 0 ? this.problems[0] : null;
+            // Get current problem (now uses the selected problem)
+            const currentProblem = this.getCurrentProblem();
             if (!currentProblem) {
                 this.showNotification('No problem selected', 'error');
                 return;
@@ -625,8 +760,8 @@ class ParticipantDashboard {
             // Reload submission history to show the new submission
             await this.loadSubmissionHistory();
 
-            // Show success message
-            this.showNotification('Solution submitted successfully!', 'success');
+            // Show success message with problem name
+            this.showNotification(`Solution for "${currentProblem.title}" submitted successfully!`, 'success');
 
         } catch (error) {
             console.error('Error submitting solution:', error);
