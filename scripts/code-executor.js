@@ -1,4 +1,4 @@
-e t/**
+/**
  * Code Executor Service
  * Handles code execution using the Piston API
  */
@@ -370,7 +370,7 @@ class CodeExecutor {
 
             // Post-processing for Python beginner challenges with list/tuple output
             const listTupleChallenges = [142, 146, 147]; // Add more IDs as needed
-            if (lahe nguage === 'python' && listTupleChallenges.includes(challengeId)) {
+            if (language === 'python' && listTupleChallenges.includes(challengeId)) {
                 // If output looks like a Python list or tuple, convert to space-separated string
                 if (/^\[.*\]$/.test(actualOutput) || /^\(.*\)$/.test(actualOutput)) {
                     try {
