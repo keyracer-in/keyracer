@@ -200,6 +200,9 @@ class ParticipantDashboard {
 
         // Update current problem for submission
         this.currentProblemIndex = index;
+
+        // Update submission page with selected problem details
+        this.updateSubmissionPage(problem);
     }
 
     displayProblem(problem) {
@@ -1078,6 +1081,28 @@ class ParticipantDashboard {
 
         // Load initial problems
         await this.loadProblems();
+
+        // Initialize submission page with first problem if available
+        if (this.problems.length > 0) {
+            this.updateSubmissionPage(this.problems[0]);
+        }
+    }
+
+    updateSubmissionPage(problem) {
+        const titleElement = document.getElementById('submission-problem-title');
+        const difficultyElement = document.getElementById('submission-problem-difficulty');
+
+        if (titleElement) {
+            titleElement.textContent = problem.title;
+        }
+
+        if (difficultyElement) {
+            // Clear existing difficulty classes
+            difficultyElement.className = 'problem-difficulty';
+            // Add the appropriate difficulty class
+            difficultyElement.classList.add(`difficulty-${problem.difficulty}`);
+            difficultyElement.textContent = problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1);
+        }
     }
 }
 
