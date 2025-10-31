@@ -53,6 +53,9 @@ class CodeExecutor {
     _wrapCodeWithTestHarness(code, language, input) {
         // Don't wrap if code already contains main function or is complete
         if (language === 'python') {
+            // For Python, don't replace print() with console.log() - keep it as print()
+            return code;
+        } else if (language === 'javascript') {
             // Check if code contains input() calls - if so, don't wrap with function calls
             if (code.includes('input(')) {
                 // Remove prompts from input() calls to prevent stdin issues
@@ -100,7 +103,9 @@ class CodeExecutor {
             if (code.includes('readline') || code.includes('prompt')) {
                 return code; // Let the code handle input
             }
-            return code;
+            // Replace print() with console.log() for Node.js compatibility
+            let processedCode = code.replace(/\bprint\s*\(/g, 'console.log(');
+            return processedCode;
         } else if (language === 'c') {
             // Check if code uses scanf or other input functions
             if (code.includes('scanf') || code.includes('getchar') || code.includes('fgets')) {

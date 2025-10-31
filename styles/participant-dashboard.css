@@ -741,6 +741,73 @@ body {
     font-size: 0.8rem;
 }
 
+/* Custom Input Section */
+.custom-input-section {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.custom-input-header {
+    background: var(--secondary-bg);
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.custom-input-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.custom-input-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: var(--accent-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 0.8rem;
+}
+
+.custom-input-toggle:hover {
+    background: var(--accent-color);
+    color: var(--primary-bg);
+}
+
+.custom-input-container {
+    padding: var(--spacing-md);
+    background: var(--primary-bg);
+}
+
+.custom-input-textarea {
+    width: 100%;
+    min-height: 120px;
+    background: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    resize: vertical;
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.custom-input-textarea:focus {
+    border-color: var(--accent-color);
+}
+
+.custom-input-help {
+    margin-top: var(--spacing-sm);
+}
+
 /* Output Section */
 .output-section {
     border-top: 1px solid var(--border-color);

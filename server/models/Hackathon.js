@@ -73,7 +73,17 @@ const hackathonSchema = new mongoose.Schema({
       language: String,
       submittedAt: Date,
       status: String,
-      score: Number
+      evaluated: {
+        type: Boolean,
+        default: false
+      },
+      evaluation: {
+        score: Number,
+        status: String,
+        feedback: String,
+        evaluatedAt: Date,
+        evaluatedBy: String
+      }
     }],
     lastActivity: Date
   }],

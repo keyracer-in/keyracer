@@ -521,6 +521,14 @@ class ParticipantDashboard {
         runBtn.addEventListener('click', () => {
             this.runCode();
         });
+
+        // Setup custom input toggle
+        const customInputToggle = document.getElementById('custom-input-toggle');
+        if (customInputToggle) {
+            customInputToggle.addEventListener('click', () => {
+                this.toggleCustomInput();
+            });
+        }
     }
 
     async runCode() {
@@ -533,33 +541,38 @@ class ParticipantDashboard {
             return;
         }
 
-        // Get the current problem to determine language
+        // Get the selected language from the dropdown
+        const language = document.querySelector('.language-selector').value;
+
+        // Get custom input if provided
+        const customInput = document.getElementById('custom-input-editor');
+        const input = customInput && customInput.value.trim() ? customInput.value : '';
+
+        // Get the current problem for context
         const currentProblem = this.getCurrentProblem();
-        if (!currentProblem) {
-            outputContent.innerHTML = '<div class="error">No problem selected. Please select a problem first.</div>';
-            return;
-        }
 
         // Show loading state with problem context
-        outputContent.innerHTML = `<div class="loading">Running code for "${currentProblem.title}"...</div>`;
+        const problemTitle = currentProblem ? currentProblem.title : 'Unknown Problem';
+        const inputIndicator = input ? ' with custom input' : '';
+        outputContent.innerHTML = `<div class="loading">Running ${language.charAt(0).toUpperCase() + language.slice(1)} code for "${problemTitle}"${inputIndicator}...</div>`;
 
         try {
-            // Use the Piston API to execute code
-            const result = await this.codeExecutor.execute(code, currentProblem.language || 'javascript');
+            // Use the Piston API to execute code with the selected language and custom input
+            const result = await this.codeExecutor.execute(code, language, input);
 
             if (result.error) {
                 outputContent.innerHTML = `
-                    <div class="error">Execution Error for "${currentProblem.title}":</div>
+                    <div class="error">Execution Error for "${problemTitle}" (${language.charAt(0).toUpperCase() + language.slice(1)}):</div>
                     <pre class="error-output">${result.error}</pre>
                 `;
             } else {
                 outputContent.innerHTML = `
-                    <div class="success">Code executed successfully for "${currentProblem.title}"!</div>
+                    <div class="success">Code executed successfully for "${problemTitle}" (${language.charAt(0).toUpperCase() + language.slice(1)} )!</div>
                     <pre class="code-output">${result.output || 'No output'}</pre>
                 `;
             }
         } catch (error) {
-            outputContent.innerHTML = `<div class="error">Error running code for "${currentProblem.title}": ${error.message}</div>`;
+            outputContent.innerHTML = `<div class="error">Error running code for "${problemTitle}" (${language.charAt(0).toUpperCase() + language.slice(1)}): ${error.message}</div>`;
         }
     }
 
@@ -1102,6 +1115,29 @@ class ParticipantDashboard {
             // Add the appropriate difficulty class
             difficultyElement.classList.add(`difficulty-${problem.difficulty}`);
             difficultyElement.textContent = problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1);
+        }
+
+        // Update custom input placeholder with problem example if available
+        const customInputEditor = document.getElementById('custom-input-editor');
+        if (customInputEditor && problem.exampleInput) {
+            customInputEditor.placeholder = `Enter custom input for testing your code...\n\nExample from "${problem.title}":\n${problem.exampleInput}`;
+        }
+    }
+
+    toggleCustomInput() {
+        const container = document.getElementById('custom-input-container');
+        const toggleBtn = document.getElementById('custom-input-toggle');
+        const toggleIcon = toggleBtn.querySelector('i');
+        const toggleText = toggleBtn.querySelector('span');
+
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            toggleIcon.className = 'fas fa-chevron-up';
+            toggleText.textContent = 'Hide Input';
+        } else {
+            container.style.display = 'none';
+            toggleIcon.className = 'fas fa-chevron-down';
+            toggleText.textContent = 'Show Input';
         }
     }
 }

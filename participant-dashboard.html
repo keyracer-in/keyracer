@@ -215,6 +215,7 @@
                                 <option value="python">Python</option>
                                 <option value="java">Java</option>
                                 <option value="cpp">C++</option>
+                                <option value="c">C</option>
                             </select>
                             <div class="editor-actions">
                                 <button class="editor-btn" title="Format Code">
@@ -227,6 +228,23 @@
                         </div>
                         <div id="code-editor-container">
                             <textarea class="code-textarea" id="solution-editor" placeholder="Write your code here..." data-onpaste="return false" data-ondrop="return false" data-oncontextmenu="return false" data-onselectstart="return true" data-ondragstart="return false"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Custom Input Section -->
+                    <div class="custom-input-section">
+                        <div class="custom-input-header">
+                            <h3 class="custom-input-title">Custom Input (Optional)</h3>
+                            <button class="custom-input-toggle" id="custom-input-toggle">
+                                <i class="fas fa-chevron-down"></i>
+                                <span>Show Input</span>
+                            </button>
+                        </div>
+                        <div class="custom-input-container" id="custom-input-container" style="display: none;">
+                            <textarea class="custom-input-textarea" id="custom-input-editor" placeholder="Enter custom input for testing your code...&#10;&#10;Example:&#10;3 3&#10;1 2 10&#10;2 3 5&#10;1 3 8&#10;8&#10;4&#10;6" rows="6"></textarea>
+                            <div class="custom-input-help">
+                                <small class="text-muted">Enter input data that will be passed to your program via stdin. Each line represents input that would normally come from the console.</small>
+                            </div>
                         </div>
                     </div>
 
