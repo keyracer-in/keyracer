@@ -57,6 +57,8 @@ class ProblemSync {
                 hackathonName: hackathon ? hackathon.title : 'Unknown',
                 description: problem.description,
                 constraints: problem.constraints,
+                inputFormat: problem.inputFormat,
+                outputFormat: problem.outputFormat,
                 timeLimit: problem.timeLimit,
                 memoryLimit: problem.memoryLimit,
                 sampleInput: problem.sampleInput,

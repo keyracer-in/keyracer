@@ -1687,6 +1687,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 category,
                 description,
                 constraints: document.getElementById('problemConstraints').value,
+                inputFormat: document.getElementById('problemInputFormat').value,
+                outputFormat: document.getElementById('problemOutputFormat').value,
                 timeLimit: parseInt(document.getElementById('problemTimeLimit').value) || 1000,
                 memoryLimit: parseInt(document.getElementById('problemMemoryLimit').value) || 256,
                 sampleInput: document.getElementById('problemSampleInput').value,
@@ -1810,6 +1812,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('editProblemHackathon').value = problem.hackathonId;
         document.getElementById('editProblemDescription').value = problem.description;
         document.getElementById('editProblemConstraints').value = problem.constraints || '';
+        document.getElementById('editProblemInputFormat').value = problem.inputFormat || '';
+        document.getElementById('editProblemOutputFormat').value = problem.outputFormat || '';
         document.getElementById('editProblemTimeLimit').value = problem.timeLimit || '';
         document.getElementById('editProblemMemoryLimit').value = problem.memoryLimit || '';
         document.getElementById('editProblemSampleInput').value = problem.sampleInput || '';
@@ -1845,6 +1849,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 problems[index].hackathonId = document.getElementById('editProblemHackathon').value;
                 problems[index].description = document.getElementById('editProblemDescription').value;
                 problems[index].constraints = document.getElementById('editProblemConstraints').value;
+                problems[index].inputFormat = document.getElementById('editProblemInputFormat').value;
+                problems[index].outputFormat = document.getElementById('editProblemOutputFormat').value;
                 problems[index].timeLimit = document.getElementById('editProblemTimeLimit').value;
                 problems[index].memoryLimit = document.getElementById('editProblemMemoryLimit').value;
                 problems[index].sampleInput = document.getElementById('editProblemSampleInput').value;

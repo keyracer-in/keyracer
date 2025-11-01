@@ -227,14 +227,14 @@ class ParticipantDashboard {
                     <h3 class="problem-section-title">Output Format</h3>
                     <p>${problem.outputFormat || 'Not specified'}</p>
                 </div>
-                ${problem.exampleInput ? `
+                ${problem.sampleInput ? `
                     <div class="problem-section">
-                        <h3 class="problem-section-title">Example</h3>
+                        <h3 class="problem-section-title">Sample Input/Output</h3>
                         <div class="example-box">
-                            <h4 class="example-title">Input:</h4>
-                            <div class="code-example">${problem.exampleInput}</div>
-                            <h4 class="example-title">Output:</h4>
-                            <div class="code-example">${problem.exampleOutput || 'Not provided'}</div>
+                            <h4 class="example-title">Sample Input:</h4>
+                            <div class="code-example">${problem.sampleInput}</div>
+                            <h4 class="example-title">Sample Output:</h4>
+                            <div class="code-example">${problem.sampleOutput || 'Not provided'}</div>
                         </div>
                     </div>
                 ` : ''}
@@ -1085,6 +1085,19 @@ class ParticipantDashboard {
     }
 
     async loadInitialData() {
+        // Get parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const hackathonId = urlParams.get('hackathonId');
+        const participantId = urlParams.get('participantId');
+
+        if (hackathonId) {
+            localStorage.setItem('currentHackathonId', hackathonId);
+        }
+
+        if (participantId) {
+            localStorage.setItem('currentParticipantId', participantId);
+        }
+
         // Set participant name
         const participantName = localStorage.getItem('participantName');
         if (participantName) {
@@ -1117,10 +1130,10 @@ class ParticipantDashboard {
             difficultyElement.textContent = problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1);
         }
 
-        // Update custom input placeholder with problem example if available
+        // Update custom input placeholder with problem sample input if available
         const customInputEditor = document.getElementById('custom-input-editor');
-        if (customInputEditor && problem.exampleInput) {
-            customInputEditor.placeholder = `Enter custom input for testing your code...\n\nExample from "${problem.title}":\n${problem.exampleInput}`;
+        if (customInputEditor && problem.sampleInput) {
+            customInputEditor.placeholder = `Enter custom input for testing your code...\n\nSample Input from "${problem.title}":\n${problem.sampleInput}`;
         }
     }
 
