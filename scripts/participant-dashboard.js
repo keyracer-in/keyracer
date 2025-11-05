@@ -526,6 +526,9 @@ class ParticipantDashboard {
                 }
             });
         }
+
+        // Add event listeners for editor buttons
+        this.setupEditorButtons();
     }
 
     setupCodeExecution() {
@@ -1269,6 +1272,173 @@ class ParticipantDashboard {
             toggleIcon.className = 'fas fa-chevron-down';
             toggleText.textContent = 'Show Input';
         }
+    }
+
+    setupEditorButtons() {
+        const editorButtons = document.querySelectorAll('.editor-btn');
+        editorButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const title = button.getAttribute('title');
+                if (title === 'Reset Code') {
+                    this.resetCode();
+                } else if (title === 'Format Code') {
+                    this.formatCode();
+                }
+            });
+        });
+    }
+
+    resetCode() {
+        if (!this.codeEditor) return;
+
+        // Show confirmation modal
+        this.showResetConfirmation();
+    }
+
+    showResetConfirmation() {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+        `;
+
+        modal.innerHTML = `
+            <div style="text-align: center; padding: 40px; background: var(--card-bg); border-radius: 15px; border: 2px solid var(--accent-color); max-width: 500px;">
+                <h2 style="color: var(--accent-color); margin-bottom: 20px;">⚠️ Reset Code</h2>
+                <p style="margin-bottom: 30px; font-size: 1.1rem; line-height: 1.5;">
+                    Are you sure you want to reset your code? This will clear all your current code and cannot be undone.
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button id="cancelResetBtn" style="
+                        background: var(--danger-color);
+                        border: none;
+                        color: white;
+                        padding: 12px 25px;
+                        font-size: 1rem;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-family: 'Orbitron', sans-serif;
+                        font-weight: 600;
+                    ">Cancel</button>
+                    <button id="confirmResetBtn" style="
+                        background: linear-gradient(90deg, var(--participant-color) 0%, var(--secondary-color) 100%);
+                        border: none;
+                        color: white;
+                        padding: 12px 25px;
+                        font-size: 1rem;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-family: 'Orbitron', sans-serif;
+                        font-weight: 600;
+                    ">Reset Code</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById('cancelResetBtn').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+
+        document.getElementById('confirmResetBtn').addEventListener('click', () => {
+            document.body.removeChild(modal);
+            this.performCodeReset();
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
+    }
+
+    performCodeReset() {
+        if (this.codeEditor) {
+            this.codeEditor.setValue('');
+            this.codeEditor.focus();
+            this.codeEditor.setCursor({line: 0, ch: 0});
+            this.showNotification('Code has been reset successfully.', 'success');
+        }
+    }
+
+    formatCode() {
+        if (!this.codeEditor) return;
+
+        const code = this.codeEditor.getValue();
+        if (!code.trim()) {
+            this.showNotification('No code to format.', 'warning');
+            return;
+        }
+
+        // Basic code formatting (this could be enhanced with a proper formatter)
+        try {
+            // For JavaScript, we can use a simple approach
+            const language = document.querySelector('.language-selector').value;
+            let formattedCode = code;
+
+            if (language === 'javascript') {
+                // Basic JavaScript formatting
+                formattedCode = this.formatJavaScript(code);
+            } else if (language === 'python') {
+                formattedCode = this.formatPython(code);
+            } else if (language === 'java') {
+                formattedCode = this.formatJava(code);
+            } else if (language === 'cpp' || language === 'c') {
+                formattedCode = this.formatCpp(code);
+            }
+
+            this.codeEditor.setValue(formattedCode);
+            this.showNotification('Code has been formatted.', 'success');
+        } catch (error) {
+            this.showNotification('Failed to format code.', 'error');
+        }
+    }
+
+    formatJavaScript(code) {
+        // Basic JavaScript formatting
+        return code
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .join('\n');
+    }
+
+    formatPython(code) {
+        // Basic Python formatting
+        return code
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .join('\n');
+    }
+
+    formatJava(code) {
+        // Basic Java formatting
+        return code
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .join('\n');
+    }
+
+    formatCpp(code) {
+        // Basic C/C++ formatting
+        return code
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .join('\n');
     }
 
     setupTabScrolling() {
