@@ -244,9 +244,31 @@ document.addEventListener('DOMContentLoaded', async function() {
         }, 1000);
     };
 
+    // Load organizer problems from all hackathons
+    async function loadOrganizerProblems() {
+        organizerProblems = [];
+        for (const hackathon of organizerHackathons) {
+            try {
+                const problems = await window.HackathonAPI.getHackathonProblems(hackathon.id);
+                if (problems && problems.length > 0) {
+                    // Add hackathonId to each problem for reference
+                    const problemsWithHackathonId = problems.map(problem => ({
+                        ...problem,
+                        hackathonId: hackathon.id
+                    }));
+                    organizerProblems = organizerProblems.concat(problemsWithHackathonId);
+                }
+            } catch (error) {
+                console.error(`Error loading problems for hackathon ${hackathon.id}:`, error);
+            }
+        }
+        console.log('Loaded organizer problems:', organizerProblems);
+    }
+
     // Organizer Data Management
     let currentOrganizerCode = null;
     let organizerHackathons = [];
+    let organizerProblems = [];
 
     // Check if organizer is accessing via organizer code
     const urlParams = new URLSearchParams(window.location.search);
@@ -275,6 +297,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                 if (hackathonsFromDB && hackathonsFromDB.length > 0) {
                     organizerHackathons = hackathonsFromDB;
+                    // Load problems for all hackathons
+                    await loadOrganizerProblems();
                 }
             } else {
                 throw new Error('Hackathon not found for organizer code');
@@ -507,7 +531,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Display submissions function
     async function displaySubmissions() {
-        const hackathons = getOrganizerData('hackathons');
+        const hackathons = organizerHackathons;
         const hackathonIds = hackathons.map(h => h.id);
 
         let allSubmissions = [];
@@ -548,8 +572,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 
         allSubmissions.forEach(submission => {
-            const problems = getOrganizerData('problems');
-            const problem = problems.find(p => p.id === submission.problemId);
+            const problem = organizerProblems.find(p => p.id === submission.problemId);
             const problemTitle = problem ? problem.title : 'Unknown Problem';
 
             const submittedDate = new Date(submission.submittedAt).toLocaleString();
@@ -580,7 +603,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Display evaluations function - Participant-centric view
     async function displayEvaluations() {
-        const hackathons = getOrganizerData('hackathons');
+        const hackathons = organizerHackathons;
         const hackathonIds = hackathons.map(h => h.id);
 
         let allSubmissions = [];
@@ -705,8 +728,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 
         if (submission) {
-            const problems = getOrganizerData('problems');
-            const problem = problems.find(p => p.id === submission.problemId);
+            const problem = organizerProblems.find(p => p.id === submission.problemId);
             const problemTitle = problem ? problem.title : 'Unknown Problem';
 
             alert(`Submission Details:\n\nID: ${submission.id}\nParticipant: ${submission.participantName}\nProblem: ${problemTitle}\nLanguage: ${submission.language}\nSubmitted: ${new Date(submission.submittedAt).toLocaleString()}\nStatus: ${submission.status}\n\nCode:\n${submission.code}`);
@@ -717,7 +739,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // View participant evaluation details
     window.viewParticipantEvaluation = async function(participantId) {
-        const hackathons = getOrganizerData('hackathons');
+        const hackathons = organizerHackathons;
         const hackathonIds = hackathons.map(h => h.id);
 
         let participant = null;
@@ -766,7 +788,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const problemsContainer = document.getElementById('participant-problems');
         problemsContainer.innerHTML = '';
 
-        const problems = getOrganizerData('problems');
+        const problems = organizerProblems;
 
         participantSubmissions.forEach((submission, index) => {
             const problem = problems.find(p => p.id === submission.problemId);
@@ -830,7 +852,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Evaluate individual problem submission
     window.evaluateProblemSubmission = async function(participantId, problemId) {
-        const hackathons = getOrganizerData('hackathons');
+        const hackathons = organizerHackathons;
         const hackathonIds = hackathons.map(h => h.id);
 
         let submission = null;
@@ -855,8 +877,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
 
-        const problems = getOrganizerData('problems');
-        const problem = problems.find(p => p.id === submission.problemId);
+        const problem = organizerProblems.find(p => p.id === submission.problemId);
         const problemTitle = problem ? problem.title : 'Unknown Problem';
 
         // Populate problem evaluation modal
@@ -1042,7 +1063,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Quick action functions
     window.evaluateAllPending = async function() {
         try {
-            const hackathons = getOrganizerData('hackathons');
+            const hackathons = organizerHackathons;
             const hackathonIds = hackathons.map(h => h.id);
 
             let allSubmissions = [];
@@ -1083,7 +1104,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             // Build the bulk evaluation UI
             let html = '';
-            const problems = getOrganizerData('problems');
+            const problems = organizerProblems;
 
             Object.keys(submissionsByHackathon).forEach(hackathonId => {
                 const hackathon = hackathons.find(h => h.id === hackathonId);
@@ -1154,7 +1175,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     window.exportParticipantResults = async function() {
         try {
-            const hackathons = getOrganizerData('hackathons');
+            const hackathons = organizerHackathons;
             const hackathonIds = hackathons.map(h => h.id);
 
             let allSubmissions = [];
@@ -1250,7 +1271,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Display participants function
     async function displayParticipants() {
         // Get all participants for this organizer's hackathons from API
-        const hackathons = getOrganizerData('hackathons');
+        const hackathons = organizerHackathons;
         const hackathonIds = hackathons.map(h => h.id);
 
         let allParticipants = [];
@@ -1348,7 +1369,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Display leaderboard function
     async function displayLeaderboard() {
-        const hackathons = getOrganizerData('hackathons');
+        const hackathons = organizerHackathons;
         const hackathonIds = hackathons.map(h => h.id);
 
         let allSubmissions = [];
@@ -1472,10 +1493,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (saveHackathonBtn) {
         saveHackathonBtn.addEventListener('click', async function() {
             const index = parseInt(document.getElementById('editHackathonIndex').value);
-            const hackathons = getOrganizerData('hackathons');
 
-            if (index >= 0 && index < hackathons.length) {
-                const hackathon = hackathons[index];
+            if (index >= 0 && index < organizerHackathons.length) {
+                const hackathon = organizerHackathons[index];
 
                 // Prepare update data
                 const updateData = {
@@ -1498,9 +1518,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                     const result = await window.HackathonAPI.updateHackathon(hackathon.id, updateData);
                     console.log('Hackathon updated successfully:', result);
 
-                    // Update local storage
-                    Object.assign(hackathons[index], result);
-                    setOrganizerData('hackathons', hackathons);
+                    // Update in-memory array
+                    Object.assign(organizerHackathons[index], result);
 
                     // Close modal
                     const editModal = bootstrap.Modal.getInstance(document.getElementById('editHackathonModal'));
@@ -1548,7 +1567,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Problem Management Functions
     function loadHackathonsIntoSelect() {
-        const hackathons = getOrganizerData('hackathons');
+        const hackathons = organizerHackathons;
         const addProblemSelect = document.getElementById('problemHackathon');
         const editProblemSelect = document.getElementById('editProblemHackathon');
 
@@ -1638,10 +1657,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 // Ensure hackathonId is set for local storage
                 addedProblem.hackathonId = hackathonId;
 
-                // Save problem to organizer-specific storage
-                let problems = getOrganizerData('problems');
-                problems.push(addedProblem);
-                setOrganizerData('problems', problems);
+                // Add problem to in-memory array
+                addedProblem.hackathonId = hackathonId;
+                organizerProblems.push(addedProblem);
 
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('addProblemModal'));
@@ -1671,8 +1689,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Display problems in table
     function displayProblems() {
-        const problems = getOrganizerData('problems');
-        const hackathons = getOrganizerData('hackathons');
+        const problems = organizerProblems;
+        const hackathons = organizerHackathons;
         const tableBody = document.getElementById('problems-table-body');
 
         if (!tableBody) return;
@@ -1727,16 +1745,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Problem action functions
     window.viewProblem = function(index) {
-        const problems = getOrganizerData('problems');
-        const problem = problems[index];
+        const problem = organizerProblems[index];
         if (problem) {
             alert(`Problem: ${problem.title}\nDifficulty: ${problem.difficulty}\nCategory: ${problem.category}\nDescription: ${problem.description.substring(0, 100)}...`);
         }
     };
 
     window.editProblem = function(index) {
-        const problems = getOrganizerData('problems');
-        const problem = problems[index];
+        const problem = organizerProblems[index];
 
         if (!problem) return;
 
@@ -1763,8 +1779,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.deleteProblem = async function(index) {
         if (confirm('Are you sure you want to delete this problem?')) {
             try {
-                const problems = getOrganizerData('problems');
-                const problem = problems[index];
+                const problem = organizerProblems[index];
 
                 if (!problem) {
                     alert('Problem not found');
@@ -1774,9 +1789,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 // Delete from database via API
                 await window.HackathonAPI.deleteProblem(problem.hackathonId, problem.id);
 
-                // Remove from local storage
-                problems.splice(index, 1);
-                setOrganizerData('problems', problems);
+                // Remove from in-memory array
+                organizerProblems.splice(index, 1);
 
                 // Refresh problems table
                 displayProblems();
@@ -1802,10 +1816,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (saveProblemBtn) {
         saveProblemBtn.addEventListener('click', async function() {
             const index = parseInt(document.getElementById('editProblemIndex').value);
-            const problems = getOrganizerData('problems');
 
-            if (index >= 0 && index < problems.length) {
-                const problem = problems[index];
+            if (index >= 0 && index < organizerProblems.length) {
+                const problem = organizerProblems[index];
                 const updateData = {
                     title: document.getElementById('editProblemTitle').value,
                     difficulty: document.getElementById('editProblemDifficulty').value,
@@ -1826,9 +1839,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                     const updatedProblem = await window.HackathonAPI.updateProblem(problem.hackathonId, problem.id, updateData);
                     console.log('Problem updated in database:', updatedProblem);
 
-                    // Update local storage
-                    Object.assign(problems[index], updatedProblem);
-                    setOrganizerData('problems', problems);
+                    // Update in-memory array
+                    Object.assign(organizerProblems[index], updatedProblem);
 
                     // Close modal
                     const editModal = bootstrap.Modal.getInstance(document.getElementById('editProblemModal'));
@@ -1856,20 +1868,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Logout function
     window.logoutOrganizer = function() {
-        // Clear organizer-specific data
-        localStorage.removeItem('currentOrganizerCode');
-        localStorage.removeItem('currentHackathonId');
-
-        // Clear any other organizer-related data from localStorage
-        const allKeys = Object.keys(localStorage);
-        allKeys.forEach(key => {
-            if (key.includes('_hackathons') || key.includes('_problems') || key.includes('_participants')) {
-                // Only clear if it matches the current organizer's data
-                if (key.startsWith(currentOrganizerCode + '_')) {
-                    localStorage.removeItem(key);
-                }
-            }
-        });
+        // Clear organizer-specific data from memory
+        currentOrganizerCode = null;
+        organizerHackathons = [];
+        organizerProblems = [];
 
         // Redirect to main page
         window.location.href = 'hackathon.html';
@@ -1902,7 +1904,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Participant action functions
     window.viewParticipant = function(participantId) {
         // Get all participants for this organizer's hackathons
-        const hackathons = getOrganizerData('hackathons');
+        const hackathons = organizerHackathons;
         const hackathonIds = hackathons.map(h => h.id);
 
         let participant = null;
@@ -1947,7 +1949,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Export participants function
     window.exportParticipants = function() {
-        const hackathons = getOrganizerData('hackathons');
+        const hackathons = organizerHackathons;
         let csvContent = 'Name,Email,Hackathon,Joined,Status,Submissions\n';
 
         hackathons.forEach(hackathon => {
@@ -2016,5 +2018,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     displaySubmissions().catch(error => console.error('Error loading submissions:', error));
     displayEvaluations().catch(error => console.error('Error loading evaluations:', error));
     displayLeaderboard().catch(error => console.error('Error loading leaderboard:', error));
+
+    // Update TODO.md to mark tasks as completed
+    // All localStorage usage has been removed and replaced with MongoDB API calls
 
 });
