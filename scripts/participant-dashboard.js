@@ -147,14 +147,22 @@ class ParticipantDashboard {
         if (this.problems.length > 1) {
             problemSelector = `
                 <div class="problem-selector">
-                    <div class="problem-tabs">
-                        ${this.problems.map((problem, index) => `
-                            <button class="problem-tab ${index === 0 ? 'active' : ''}" data-problem-index="${index}">
-                                <span class="problem-number">${index + 1}</span>
-                                <span class="problem-title-short">${problem.title.substring(0, 20)}${problem.title.length > 20 ? '...' : ''}</span>
-                                <span class="problem-difficulty difficulty-${problem.difficulty}">${problem.difficulty.charAt(0).toUpperCase()}</span>
-                            </button>
-                        `).join('')}
+                    <div class="problem-tabs-container">
+                        <button class="scroll-btn" id="scroll-left" title="Scroll left">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="problem-tabs" id="problem-tabs">
+                            ${this.problems.map((problem, index) => `
+                                <button class="problem-tab ${index === 0 ? 'active' : ''}" data-problem-index="${index}">
+                                    <span class="problem-number">${index + 1}</span>
+                                    <span class="problem-title-short">${problem.title.substring(0, 20)}${problem.title.length > 20 ? '...' : ''}</span>
+                                    <span class="problem-difficulty difficulty-${problem.difficulty}">${problem.difficulty.charAt(0).toUpperCase()}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                        <button class="scroll-btn" id="scroll-right" title="Scroll right">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 </div>
             `;
@@ -181,6 +189,9 @@ class ParticipantDashboard {
                     this.selectProblem(index);
                 });
             });
+
+            // Add scroll button functionality
+            this.setupTabScrolling();
         }
 
         // Display the first problem by default
@@ -1258,6 +1269,55 @@ class ParticipantDashboard {
             toggleIcon.className = 'fas fa-chevron-down';
             toggleText.textContent = 'Show Input';
         }
+    }
+
+    setupTabScrolling() {
+        const scrollLeftBtn = document.getElementById('scroll-left');
+        const scrollRightBtn = document.getElementById('scroll-right');
+        const problemTabs = document.getElementById('problem-tabs');
+
+        if (!scrollLeftBtn || !scrollRightBtn || !problemTabs) return;
+
+        const updateScrollButtons = () => {
+            const scrollLeft = problemTabs.scrollLeft;
+            const scrollWidth = problemTabs.scrollWidth;
+            const clientWidth = problemTabs.clientWidth;
+
+            scrollLeftBtn.disabled = scrollLeft <= 0;
+            scrollRightBtn.disabled = scrollLeft >= scrollWidth - clientWidth - 1;
+        };
+
+        scrollLeftBtn.addEventListener('click', () => {
+            const scrollAmount = window.innerWidth < 768 ? 150 : 200;
+            problemTabs.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        });
+
+        scrollRightBtn.addEventListener('click', () => {
+            const scrollAmount = window.innerWidth < 768 ? 150 : 200;
+            problemTabs.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        });
+
+        problemTabs.addEventListener('scroll', updateScrollButtons);
+
+        // Initial button state
+        updateScrollButtons();
+
+        // Update buttons on window resize
+        window.addEventListener('resize', updateScrollButtons);
+
+        // Keyboard navigation support
+        problemTabs.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                scrollLeftBtn.click();
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                scrollRightBtn.click();
+            }
+        });
+
+        // Make tabs focusable for keyboard navigation
+        problemTabs.setAttribute('tabindex', '0');
     }
 }
 
