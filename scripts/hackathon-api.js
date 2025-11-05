@@ -305,6 +305,24 @@ class HackathonAPI {
             throw error;
         }
     }
+
+    async removeParticipant(hackathonId, participantId) {
+        try {
+            const response = await fetch(`${this.baseURL}/${hackathonId}/participants/${participantId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to remove participant');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Error removing participant:', error);
+            throw error;
+        }
+    }
 }
 
 // Create global instance

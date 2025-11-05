@@ -472,6 +472,35 @@ router.get('/organizer/:organizerCode', async (req, res) => {
   }
 });
 
+// Remove participant from hackathon
+router.delete('/:hackathonId/participants/:participantId', async (req, res) => {
+  try {
+    const { hackathonId, participantId } = req.params;
+
+    const hackathon = await Hackathon.findOne({ id: hackathonId });
+    if (!hackathon) {
+      return res.status(404).json({ error: 'Hackathon not found' });
+    }
+
+    const participantIndex = hackathon.participants.findIndex(p => p.id === participantId);
+    if (participantIndex === -1) {
+      return res.status(404).json({ error: 'Participant not found' });
+    }
+
+    // Remove participant from array
+    hackathon.participants.splice(participantIndex, 1);
+    await hackathon.save();
+
+    res.json({
+      success: true,
+      message: 'Participant removed successfully'
+    });
+  } catch (error) {
+    console.error('Error removing participant:', error);
+    res.status(500).json({ error: 'Failed to remove participant' });
+  }
+});
+
 // Update hackathon
 router.put('/:hackathonId', async (req, res) => {
   try {

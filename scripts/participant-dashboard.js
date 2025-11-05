@@ -836,7 +836,7 @@ class ParticipantDashboard {
         }
     }
 
-    startTimer() {
+    async startTimer() {
         const timerElement = document.getElementById('countdown-timer');
         if (!timerElement) return;
 
@@ -846,23 +846,78 @@ class ParticipantDashboard {
             return;
         }
 
-        // For demo purposes, set a 2.5 hour timer
-        let timeLeft = 2.5 * 60 * 60; // 2.5 hours in seconds
+        try {
+            // Fetch hackathon details to get start and end times
+            const hackathon = await window.HackathonAPI.findHackathon(currentHackathonId);
 
-        this.timerInterval = setInterval(() => {
-            const hours = Math.floor(timeLeft / 3600);
-            const minutes = Math.floor((timeLeft % 3600) / 60);
-            const seconds = timeLeft % 60;
+            if (!hackathon || !hackathon.startTime || !hackathon.endTime) {
+                console.error('Hackathon start/end times not available');
+                timerElement.textContent = '00:00:00';
+                return;
+            }
 
-            timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            // Parse start and end times
+            const startTime = new Date(`${hackathon.date}T${hackathon.startTime}`);
+            const endTime = new Date(`${hackathon.date}T${hackathon.endTime}`);
+            const now = new Date();
 
-            if (timeLeft <= 0) {
-                clearInterval(this.timerInterval);
+            // Calculate total duration in seconds
+            const totalDuration = Math.floor((endTime - startTime) / 1000);
+
+            // Calculate remaining time from now
+            let timeLeft;
+            if (now < startTime) {
+                // Hackathon hasn't started yet
+                timeLeft = totalDuration;
+                timerElement.textContent = 'Not started';
+                this.showNotification('Hackathon has not started yet. Timer will begin when it starts.', 'info');
+                return;
+            } else if (now >= endTime) {
+                // Hackathon has ended
+                timeLeft = 0;
                 timerElement.textContent = '00:00:00';
                 this.showNotification('Hackathon time is up!', 'warning');
+                return;
+            } else {
+                // Hackathon is in progress
+                timeLeft = Math.floor((endTime - now) / 1000);
             }
-            timeLeft--;
-        }, 1000);
+
+            this.timerInterval = setInterval(() => {
+                const hours = Math.floor(timeLeft / 3600);
+                const minutes = Math.floor((timeLeft % 3600) / 60);
+                const seconds = timeLeft % 60;
+
+                timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(this.timerInterval);
+                    timerElement.textContent = '00:00:00';
+                    this.showNotification('Hackathon time is up!', 'warning');
+                }
+                timeLeft--;
+            }, 1000);
+
+        } catch (error) {
+            console.error('Error fetching hackathon details for timer:', error);
+            // Fallback to a default timer if API fails
+            let timeLeft = 2 * 60 * 60; // 2 hours fallback
+
+            this.timerInterval = setInterval(() => {
+                const hours = Math.floor(timeLeft / 3600);
+                const minutes = Math.floor((timeLeft % 3600) / 60);
+                const seconds = timeLeft % 60;
+
+                timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(this.timerInterval);
+                    timerElement.textContent = '00:00:00';
+                    this.showNotification('Hackathon time is up!', 'warning');
+                }
+                timeLeft--;
+            }, 1000);
+        }
     }
 
     showFullscreenModal() {

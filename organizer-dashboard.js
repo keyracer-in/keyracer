@@ -447,11 +447,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             const participantCount = hackathon.participants ? hackathon.participants.length : 0;
             const statusClass = hackathon.status === 'active' ? 'active' : hackathon.status === 'completed' ? 'completed' : 'upcoming';
 
+            const startTime = hackathon.startTime || 'N/A';
+            const endTime = hackathon.endTime || 'N/A';
+            const timeDisplay = startTime === 'N/A' && endTime === 'N/A' ? 'Time not set' : `${startTime} - ${endTime}`;
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${hackathon.title}</td>
                 <td>${hackathon.date}</td>
-                <td>${hackathon.startTime} - ${hackathon.endTime}</td>
+                <td>${timeDisplay}</td>
                 <td><span class="badge bg-primary">${participantCount}</span></td>
                 <td><span class="status ${statusClass}">${hackathon.status.charAt(0).toUpperCase() + hackathon.status.slice(1)}</span></td>
                 <td>
@@ -1940,10 +1944,45 @@ document.addEventListener('DOMContentLoaded', async function() {
         alert('Message feature is currently disabled');
     };
 
-    window.removeParticipant = function(participantId) {
-        if (confirm('Are you sure you want to remove this participant from the hackathon?')) {
-            // This would require backend implementation to properly remove participant
-            alert('Participant removal requires backend implementation. Participant ID: ' + participantId);
+    window.removeParticipant = async function(participantId) {
+        if (!confirm('Are you sure you want to remove this participant from the hackathon? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            // Find the hackathon ID for this participant
+            let hackathonId = null;
+            let participantName = 'Unknown';
+
+            // Search through all organizer hackathons to find the participant
+            for (const hackathon of organizerHackathons) {
+                const participant = hackathon.participants.find(p => p.id === participantId);
+                if (participant) {
+                    hackathonId = hackathon.id;
+                    participantName = participant.name;
+                    break;
+                }
+            }
+
+            if (!hackathonId) {
+                alert('Participant not found in any hackathon');
+                return;
+            }
+
+            // Call API to remove participant
+            const result = await window.HackathonAPI.removeParticipant(hackathonId, participantId);
+
+            if (result.success) {
+                alert(`Participant "${participantName}" has been successfully removed from the hackathon.`);
+
+                // Refresh the participants display
+                await displayParticipants();
+            } else {
+                alert('Failed to remove participant. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error removing participant:', error);
+            alert('An error occurred while removing the participant. Please try again.');
         }
     };
 
