@@ -435,7 +435,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         organizerHackathons.forEach((hackathon, index) => {
             const participantCount = hackathon.participants ? hackathon.participants.length : 0;
-            const statusClass = hackathon.status === 'active' ? 'active' : hackathon.status === 'completed' ? 'completed' : 'upcoming';
+            const status = hackathon.status || 'upcoming';
+            const statusClass = status === 'active' ? 'active' : status === 'completed' ? 'completed' : 'upcoming';
 
             const startTime = hackathon.startTime || 'N/A';
             const endTime = hackathon.endTime || 'N/A';
@@ -447,7 +448,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 <td>${hackathon.date}</td>
                 <td>${timeDisplay}</td>
                 <td><span class="badge bg-primary">${participantCount}</span></td>
-                <td><span class="status ${statusClass}">${hackathon.status.charAt(0).toUpperCase() + hackathon.status.slice(1)}</span></td>
+                <td><span class="status ${statusClass}">${status.charAt(0).toUpperCase() + status.slice(1)}</span></td>
                 <td>
                     <div class="actions">
                         <button class="action-btn view" title="View Details" onclick="viewHackathon(${index})">
