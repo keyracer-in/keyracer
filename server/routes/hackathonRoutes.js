@@ -7,11 +7,13 @@ router.post('/create', async (req, res) => {
   try {
     const hackathonData = req.body;
 
-    // Generate unique ID
-    const id = 'HK' + Math.random().toString(36).substr(2, 6).toUpperCase();
+    // Use the IDs provided by frontend (they are already generated)
+    const id = hackathonData.id;
+    const organizerCode = hackathonData.organizerCode;
 
-    // Use provided organizer code or generate one
-    const organizerCode = hackathonData.organizerCode || 'ORG' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    if (!id || !organizerCode) {
+      return res.status(400).json({ error: 'Hackathon ID and Organizer Code are required' });
+    }
 
     const hackathon = new Hackathon({
       ...hackathonData,

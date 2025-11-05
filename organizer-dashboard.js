@@ -280,35 +280,30 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('organizer-name').textContent = organizerNameFromUrl;
     }
 
-    // If organizer code exists, validate it and load hackathons
+    // If organizer code exists, load hackathons (new organizers won't have any yet)
     if (organizerCode) {
         try {
-            console.log('Validating organizer code:', organizerCode);
-            const hackathon = await window.HackathonAPI.findHackathon(organizerCode);
+            currentOrganizerCode = organizerCode;
+            console.log('Setting organizer code:', organizerCode);
 
-            if (hackathon) {
-                currentOrganizerCode = organizerCode;
-                console.log('Validated organizer code:', organizerCode, 'for hackathon:', hackathon.id);
+            // Load all hackathons for this organizer from MongoDB
+            console.log('Loading hackathons from MongoDB for organizer code:', currentOrganizerCode);
+            const hackathonsFromDB = await window.HackathonAPI.getHackathonsByOrganizer(currentOrganizerCode);
+            console.log('Hackathons loaded from DB:', hackathonsFromDB);
 
-                // Load all hackathons for this organizer from MongoDB
-                console.log('Loading hackathons from MongoDB for organizer code:', currentOrganizerCode);
-                const hackathonsFromDB = await window.HackathonAPI.getHackathonsByOrganizer(currentOrganizerCode);
-                console.log('Hackathons loaded from DB:', hackathonsFromDB);
-
-                if (hackathonsFromDB && hackathonsFromDB.length > 0) {
-                    organizerHackathons = hackathonsFromDB;
-                    // Load problems for all hackathons
-                    await loadOrganizerProblems();
-                }
+            if (hackathonsFromDB && hackathonsFromDB.length > 0) {
+                organizerHackathons = hackathonsFromDB;
+                // Load problems for all hackathons
+                await loadOrganizerProblems();
             } else {
-                throw new Error('Hackathon not found for organizer code');
+                console.log('No existing hackathons found for organizer - this is normal for new organizers');
+                organizerHackathons = [];
             }
         } catch (error) {
-            console.error('Error validating organizer code:', error);
-            // Invalid organizer code
-            alert('Invalid organizer code. Please check and try again.');
-            window.location.href = 'hackathon.html';
-            return;
+            console.error('Error loading organizer data:', error);
+            // For new organizers, API errors are expected - just proceed with empty data
+            console.log('Proceeding with empty hackathon list for new organizer');
+            organizerHackathons = [];
         }
     } else {
         // No organizer code provided
@@ -367,6 +362,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             // Save hackathon to MongoDB via API
             try {
                 const result = await window.HackathonAPI.createHackathon({
+                    id: hackathonId,
                     title: hackathon.title,
                     date: hackathon.date,
                     startTime: hackathon.startTime,
@@ -382,19 +378,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                 // Add the created hackathon to the in-memory array
                 organizerHackathons.push(result.hackathon);
-
-                alert(`Hackathon "${hackathon.title}" created successfully!\n\nHackathon ID: ${hackathon.id}\nOrganizer Code: ${hackathon.organizerCode}`);
             } catch (error) {
                 console.error('Failed to create hackathon:', error);
                 alert('Failed to create hackathon. Please try again.');
                 return;
             }
-
-            // Store organizer code for this session (if needed for other functionality)
-            // Note: Removed localStorage usage for hackathon data
-
-            // Also store the organizer code in the hackathon data for future access
-            hackathon.organizerCode = organizerCode;
 
             // Close the create modal
             const createModal = bootstrap.Modal.getInstance(document.getElementById('createHackathonModal'));
