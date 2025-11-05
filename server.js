@@ -20,7 +20,12 @@ app.use(express.json());
 app.use(express.static('.'));
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/keyracer');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/keyracer', {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  connectTimeoutMS: 10000,
+  maxPoolSize: 10,
+});
 
 // Routes
 const hackathonRoutes = require('./server/routes/hackathonRoutes');

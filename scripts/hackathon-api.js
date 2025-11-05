@@ -243,6 +243,68 @@ class HackathonAPI {
             throw error;
         }
     }
+
+    async updateProblem(hackathonId, problemId, updateData) {
+        try {
+            const response = await fetch(`${this.baseURL}/${hackathonId}/problems/${problemId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to update problem');
+            }
+
+            return data.problem;
+        } catch (error) {
+            console.error('Error updating problem:', error);
+            throw error;
+        }
+    }
+
+    async deleteProblem(hackathonId, problemId) {
+        try {
+            const response = await fetch(`${this.baseURL}/${hackathonId}/problems/${problemId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to delete problem');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Error deleting problem:', error);
+            throw error;
+        }
+    }
+
+    async updateHackathon(hackathonId, updateData) {
+        try {
+            const response = await fetch(`${this.baseURL}/${hackathonId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to update hackathon');
+            }
+
+            return data.hackathon;
+        } catch (error) {
+            console.error('Error updating hackathon:', error);
+            throw error;
+        }
+    }
 }
 
 // Create global instance

@@ -387,6 +387,58 @@ router.post('/:hackathonId/evaluate', async (req, res) => {
   }
 });
 
+// Update problem
+router.put('/:hackathonId/problems/:problemId', async (req, res) => {
+  try {
+    const { hackathonId, problemId } = req.params;
+    const updateData = req.body;
+
+    const hackathon = await Hackathon.findOne({ id: hackathonId });
+    if (!hackathon) {
+      return res.status(404).json({ error: 'Hackathon not found' });
+    }
+
+    const problem = hackathon.problems.find(p => p.id === problemId);
+    if (!problem) {
+      return res.status(404).json({ error: 'Problem not found' });
+    }
+
+    Object.assign(problem, updateData);
+    await hackathon.save();
+
+    res.json({
+      success: true,
+      problem
+    });
+  } catch (error) {
+    console.error('Error updating problem:', error);
+    res.status(500).json({ error: 'Failed to update problem' });
+  }
+});
+
+// Delete problem
+router.delete('/:hackathonId/problems/:problemId', async (req, res) => {
+  try {
+    const { hackathonId, problemId } = req.params;
+
+    const hackathon = await Hackathon.findOne({ id: hackathonId });
+    if (!hackathon) {
+      return res.status(404).json({ error: 'Hackathon not found' });
+    }
+
+    hackathon.problems = hackathon.problems.filter(p => p.id !== problemId);
+    await hackathon.save();
+
+    res.json({
+      success: true,
+      message: 'Problem deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting problem:', error);
+    res.status(500).json({ error: 'Failed to delete problem' });
+  }
+});
+
 // Get hackathons by organizer code
 router.get('/organizer/:organizerCode', async (req, res) => {
   try {
@@ -409,6 +461,53 @@ router.get('/organizer/:organizerCode', async (req, res) => {
   } catch (error) {
     console.error('Error getting hackathons by organizer:', error);
     res.status(500).json({ error: 'Failed to get hackathons by organizer' });
+  }
+});
+
+// Update hackathon
+router.put('/:hackathonId', async (req, res) => {
+  try {
+    const { hackathonId } = req.params;
+    const updateData = req.body;
+
+    const hackathon = await Hackathon.findOne({ id: hackathonId });
+    if (!hackathon) {
+      return res.status(404).json({ error: 'Hackathon not found' });
+    }
+
+    // Update allowed fields
+    const allowedFields = [
+      'title', 'date', 'startTime', 'endTime', 'rules', 'allowedTechStack',
+      'autoStart', 'antiCheating', 'status'
+    ];
+
+    allowedFields.forEach(field => {
+      if (updateData[field] !== undefined) {
+        hackathon[field] = updateData[field];
+      }
+    });
+
+    await hackathon.save();
+
+    res.json({
+      success: true,
+      hackathon: {
+        id: hackathon.id,
+        organizerCode: hackathon.organizerCode,
+        title: hackathon.title,
+        date: hackathon.date,
+        startTime: hackathon.startTime,
+        endTime: hackathon.endTime,
+        status: hackathon.status,
+        rules: hackathon.rules,
+        allowedTechStack: hackathon.allowedTechStack,
+        autoStart: hackathon.autoStart,
+        antiCheating: hackathon.antiCheating
+      }
+    });
+  } catch (error) {
+    console.error('Error updating hackathon:', error);
+    res.status(500).json({ error: 'Failed to update hackathon' });
   }
 });
 

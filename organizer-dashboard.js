@@ -245,23 +245,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
 
     // Organizer Data Management
-    let currentOrganizerCode = localStorage.getItem('currentOrganizerCode');
+    let currentOrganizerCode = null;
+    let organizerHackathons = [];
 
     // Check if organizer is accessing via organizer code
     const urlParams = new URLSearchParams(window.location.search);
-    const organizerCode = urlParams.get('organizerCode') || localStorage.getItem('currentOrganizerCode');
+    const organizerCode = urlParams.get('organizerCode');
 
-    // Set organizer name from URL parameters or localStorage
+    // Set organizer name from URL parameters
     const organizerNameFromUrl = urlParams.get('organizerName');
     if (organizerNameFromUrl) {
-        localStorage.setItem('organizerName', organizerNameFromUrl);
         document.getElementById('organizer-name').textContent = organizerNameFromUrl;
-    } else {
-        // Try to get from localStorage
-        const storedName = localStorage.getItem('organizerName');
-        if (storedName) {
-            document.getElementById('organizer-name').textContent = storedName;
-        }
     }
 
     // If organizer code exists, validate it and load hackathons
@@ -272,7 +266,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             if (hackathon) {
                 currentOrganizerCode = organizerCode;
-                localStorage.setItem('currentOrganizerCode', organizerCode);
                 console.log('Validated organizer code:', organizerCode, 'for hackathon:', hackathon.id);
 
                 // Load all hackathons for this organizer from MongoDB
@@ -281,19 +274,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 console.log('Hackathons loaded from DB:', hackathonsFromDB);
 
                 if (hackathonsFromDB && hackathonsFromDB.length > 0) {
-                    // Store hackathons in localStorage for UI display
-                    setOrganizerData('hackathons', hackathonsFromDB);
-
-                    // Also store problems and participants data for each hackathon
-                    hackathonsFromDB.forEach(hackathon => {
-                        if (hackathon.problems && hackathon.problems.length > 0) {
-                            setOrganizerData('problems', hackathon.problems);
-                        }
-                        if (hackathon.participants && hackathon.participants.length > 0) {
-                            // Store participants data if needed for other functions
-                            console.log(`Loaded ${hackathon.participants.length} participants for hackathon ${hackathon.id}`);
-                        }
-                    });
+                    organizerHackathons = hackathonsFromDB;
                 }
             } else {
                 throw new Error('Hackathon not found for organizer code');
@@ -305,57 +286,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             window.location.href = 'hackathon.html';
             return;
         }
-    }
-
-    // If no organizer code was provided, try to load hackathons from MongoDB using stored code
-    if (!organizerCode && currentOrganizerCode) {
-        try {
-            console.log('Loading hackathons from MongoDB for stored organizer code:', currentOrganizerCode);
-            const hackathonsFromDB = await window.HackathonAPI.getHackathonsByOrganizer(currentOrganizerCode);
-            console.log('Hackathons loaded from DB:', hackathonsFromDB);
-
-            if (hackathonsFromDB && hackathonsFromDB.length > 0) {
-                // Store hackathons in localStorage for UI display
-                setOrganizerData('hackathons', hackathonsFromDB);
-
-                // Also store problems and participants data for each hackathon
-                hackathonsFromDB.forEach(hackathon => {
-                    if (hackathon.problems && hackathon.problems.length > 0) {
-                        setOrganizerData('problems', hackathon.problems);
-                    }
-                    if (hackathon.participants && hackathon.participants.length > 0) {
-                        // Store participants data if needed for other functions
-                        console.log(`Loaded ${hackathon.participants.length} participants for hackathon ${hackathon.id}`);
-                    }
-                });
-            }
-        } catch (error) {
-            console.error('Error loading hackathons from DB:', error);
-            // Fallback to localStorage if DB fails
-            const storedHackathons = getOrganizerData('hackathons');
-            if (storedHackathons.length > 0) {
-                console.log('Fallback: Loaded hackathons from localStorage');
-            }
-        }
-    }
-
-    // Helper functions for organizer-specific data
-    function getOrganizerKey(key) {
-        return `${currentOrganizerCode}_${key}`;
-    }
-
-    function getOrganizerData(key) {
-        const keyName = getOrganizerKey(key);
-        const data = localStorage.getItem(keyName);
-        console.log(`Getting data for key: ${keyName}, data:`, data);
-        return data ? JSON.parse(data) : [];
-    }
-
-    function setOrganizerData(key, data) {
-        const keyName = getOrganizerKey(key);
-        console.log(`Setting data for key: ${keyName}, data:`, data);
-        localStorage.setItem(keyName, JSON.stringify(data));
-        console.log(`After setting, localStorage[${keyName}]:`, localStorage.getItem(keyName));
+    } else {
+        // No organizer code provided
+        alert('No organizer code provided. Please access via a valid organizer link.');
+        window.location.href = 'hackathon.html';
+        return;
     }
 
     // Create Hackathon Button
@@ -421,13 +356,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                 console.log('Hackathon created successfully:', result);
 
-                // Store the created hackathon info in localStorage for UI display
-                hackathon.id = result.hackathon.id;
-                hackathon.organizerCode = result.hackathon.organizerCode;
-
-                let hackathons = getOrganizerData('hackathons');
-                hackathons.push(hackathon);
-                setOrganizerData('hackathons', hackathons);
+                // Add the created hackathon to the in-memory array
+                organizerHackathons.push(result.hackathon);
 
                 alert(`Hackathon "${hackathon.title}" created successfully!\n\nHackathon ID: ${hackathon.id}\nOrganizer Code: ${hackathon.organizerCode}`);
             } catch (error) {
@@ -436,9 +366,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return;
             }
 
-            // Store organizer code for this session
-            localStorage.setItem('currentOrganizerCode', organizerCode);
-            localStorage.setItem('currentHackathonId', hackathonId);
+            // Store organizer code for this session (if needed for other functionality)
+            // Note: Removed localStorage usage for hackathon data
 
             // Also store the organizer code in the hackathon data for future access
             hackathon.organizerCode = organizerCode;
@@ -477,21 +406,20 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Display hackathons in table
     function displayHackathons() {
-        const hackathons = getOrganizerData('hackathons');
         const tableBody = document.getElementById('hackathons-table-body');
 
         if (!tableBody) return;
 
         tableBody.innerHTML = '';
 
-        if (hackathons.length === 0) {
+        if (organizerHackathons.length === 0) {
             const emptyRow = document.createElement('tr');
             emptyRow.innerHTML = `<td colspan="6" class="text-center">No hackathons created yet</td>`;
             tableBody.appendChild(emptyRow);
             return;
         }
 
-        hackathons.forEach((hackathon, index) => {
+        organizerHackathons.forEach((hackathon, index) => {
             const participantCount = hackathon.participants ? hackathon.participants.length : 0;
             const statusClass = hackathon.status === 'active' ? 'active' : hackathon.status === 'completed' ? 'completed' : 'upcoming';
 
@@ -522,16 +450,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Hackathon action functions
     window.viewHackathon = function(index) {
-        const hackathons = getOrganizerData('hackathons');
-        const hackathon = hackathons[index];
+        const hackathon = organizerHackathons[index];
         if (hackathon) {
             alert(`Hackathon: ${hackathon.title}\nID: ${hackathon.id}\nOrganizer Code: ${hackathon.organizerCode}\nParticipants: ${hackathon.participants ? hackathon.participants.length : 0}`);
         }
     };
 
     window.editHackathon = function(index) {
-        const hackathons = getOrganizerData('hackathons');
-        const hackathon = hackathons[index];
+        const hackathon = organizerHackathons[index];
 
         if (!hackathon) return;
 
@@ -564,9 +490,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     window.deleteHackathon = function(index) {
         if (confirm('Are you sure you want to delete this hackathon?')) {
-            let hackathons = getOrganizerData('hackathons');
-            hackathons.splice(index, 1);
-            setOrganizerData('hackathons', hackathons);
+            organizerHackathons.splice(index, 1);
             displayHackathons();
             alert('Hackathon deleted successfully!');
         }
@@ -1546,41 +1470,50 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Save hackathon changes
     const saveHackathonBtn = document.getElementById('saveHackathonBtn');
     if (saveHackathonBtn) {
-        saveHackathonBtn.addEventListener('click', function() {
+        saveHackathonBtn.addEventListener('click', async function() {
             const index = parseInt(document.getElementById('editHackathonIndex').value);
             const hackathons = getOrganizerData('hackathons');
 
             if (index >= 0 && index < hackathons.length) {
-                // Update hackathon data
-                hackathons[index].title = document.getElementById('editHackathonTitle').value;
-                hackathons[index].date = document.getElementById('editHackathonDate').value;
-                hackathons[index].startTime = document.getElementById('editStartTime').value;
-                hackathons[index].endTime = document.getElementById('editEndTime').value;
-                hackathons[index].rules = document.getElementById('editHackathonRules').value;
-                hackathons[index].autoStart = document.getElementById('editAutoStart').checked;
+                const hackathon = hackathons[index];
 
-                // Update tech stack
-                const techStackSelect = document.getElementById('editAllowedTechStack');
-                hackathons[index].allowedTechStack = Array.from(techStackSelect.selectedOptions).map(option => option.value);
-
-                // Update anti-cheating settings
-                hackathons[index].antiCheating = {
-                    screenshotCheck: document.getElementById('editScreenshotCheck').checked,
-                    webcamPermission: document.getElementById('editWebcamPermission').checked,
-                    tabSwitchMonitoring: document.getElementById('editTabSwitchMonitoring').checked
+                // Prepare update data
+                const updateData = {
+                    title: document.getElementById('editHackathonTitle').value,
+                    date: document.getElementById('editHackathonDate').value,
+                    startTime: document.getElementById('editStartTime').value,
+                    endTime: document.getElementById('editEndTime').value,
+                    rules: document.getElementById('editHackathonRules').value,
+                    autoStart: document.getElementById('editAutoStart').checked,
+                    allowedTechStack: Array.from(document.getElementById('editAllowedTechStack').selectedOptions).map(option => option.value),
+                    antiCheating: {
+                        screenshotCheck: document.getElementById('editScreenshotCheck').checked,
+                        webcamPermission: document.getElementById('editWebcamPermission').checked,
+                        tabSwitchMonitoring: document.getElementById('editTabSwitchMonitoring').checked
+                    }
                 };
 
-                // Save to organizer-specific storage
-                setOrganizerData('hackathons', hackathons);
+                try {
+                    // Update hackathon via API
+                    const result = await window.HackathonAPI.updateHackathon(hackathon.id, updateData);
+                    console.log('Hackathon updated successfully:', result);
 
-                // Close modal
-                const editModal = bootstrap.Modal.getInstance(document.getElementById('editHackathonModal'));
-                editModal.hide();
+                    // Update local storage
+                    Object.assign(hackathons[index], result);
+                    setOrganizerData('hackathons', hackathons);
 
-                // Refresh table
-                displayHackathons();
+                    // Close modal
+                    const editModal = bootstrap.Modal.getInstance(document.getElementById('editHackathonModal'));
+                    editModal.hide();
 
-                alert('Hackathon updated successfully!');
+                    // Refresh table
+                    displayHackathons();
+
+                    alert('Hackathon updated successfully!');
+                } catch (error) {
+                    console.error('Failed to update hackathon:', error);
+                    alert('Failed to update hackathon. Please try again.');
+                }
             }
         });
     }
@@ -1701,6 +1634,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 // Save problem to database via API
                 const addedProblem = await window.HackathonAPI.addProblem(hackathonId, problemData);
                 console.log('Problem added to database:', addedProblem);
+
+                // Ensure hackathonId is set for local storage
+                addedProblem.hackathonId = hackathonId;
 
                 // Save problem to organizer-specific storage
                 let problems = getOrganizerData('problems');
@@ -1824,46 +1760,25 @@ document.addEventListener('DOMContentLoaded', async function() {
         editModal.show();
     };
 
-    window.deleteProblem = function(index) {
+    window.deleteProblem = async function(index) {
         if (confirm('Are you sure you want to delete this problem?')) {
-            let problems = getOrganizerData('problems');
-            problems.splice(index, 1);
-            setOrganizerData('problems', problems);
-            displayProblems();
-            alert('Problem deleted successfully!');
-        }
-    };
+            try {
+                const problems = getOrganizerData('problems');
+                const problem = problems[index];
 
-    // Save problem changes
-    const saveProblemBtn = document.getElementById('saveProblemBtn');
-    if (saveProblemBtn) {
-        saveProblemBtn.addEventListener('click', function() {
-            const index = parseInt(document.getElementById('editProblemIndex').value);
-            const problems = getOrganizerData('problems');
+                if (!problem) {
+                    alert('Problem not found');
+                    return;
+                }
 
-            if (index >= 0 && index < problems.length) {
-                // Update problem data
-                problems[index].title = document.getElementById('editProblemTitle').value;
-                problems[index].difficulty = document.getElementById('editProblemDifficulty').value;
-                problems[index].category = document.getElementById('editProblemCategory').value;
-                problems[index].hackathonId = document.getElementById('editProblemHackathon').value;
-                problems[index].description = document.getElementById('editProblemDescription').value;
-                problems[index].constraints = document.getElementById('editProblemConstraints').value;
-                problems[index].inputFormat = document.getElementById('editProblemInputFormat').value;
-                problems[index].outputFormat = document.getElementById('editProblemOutputFormat').value;
-                problems[index].timeLimit = document.getElementById('editProblemTimeLimit').value;
-                problems[index].memoryLimit = document.getElementById('editProblemMemoryLimit').value;
-                problems[index].sampleInput = document.getElementById('editProblemSampleInput').value;
-                problems[index].sampleOutput = document.getElementById('editProblemSampleOutput').value;
+                // Delete from database via API
+                await window.HackathonAPI.deleteProblem(problem.hackathonId, problem.id);
 
-                // Save to organizer-specific storage
+                // Remove from local storage
+                problems.splice(index, 1);
                 setOrganizerData('problems', problems);
 
-                // Close modal
-                const editModal = bootstrap.Modal.getInstance(document.getElementById('editProblemModal'));
-                editModal.hide();
-
-                // Refresh table
+                // Refresh problems table
                 displayProblems();
 
                 // Trigger problem sync for participants
@@ -1874,7 +1789,67 @@ document.addEventListener('DOMContentLoaded', async function() {
                     window.triggerProblemUpdate();
                 }
 
-                alert('Problem updated successfully!');
+                alert('Problem deleted successfully!');
+            } catch (error) {
+                console.error('Failed to delete problem:', error);
+                alert('Failed to delete problem. Please try again.');
+            }
+        }
+    };
+
+    // Save problem changes
+    const saveProblemBtn = document.getElementById('saveProblemBtn');
+    if (saveProblemBtn) {
+        saveProblemBtn.addEventListener('click', async function() {
+            const index = parseInt(document.getElementById('editProblemIndex').value);
+            const problems = getOrganizerData('problems');
+
+            if (index >= 0 && index < problems.length) {
+                const problem = problems[index];
+                const updateData = {
+                    title: document.getElementById('editProblemTitle').value,
+                    difficulty: document.getElementById('editProblemDifficulty').value,
+                    category: document.getElementById('editProblemCategory').value,
+                    hackathonId: document.getElementById('editProblemHackathon').value,
+                    description: document.getElementById('editProblemDescription').value,
+                    constraints: document.getElementById('editProblemConstraints').value,
+                    inputFormat: document.getElementById('editProblemInputFormat').value,
+                    outputFormat: document.getElementById('editProblemOutputFormat').value,
+                    timeLimit: document.getElementById('editProblemTimeLimit').value,
+                    memoryLimit: document.getElementById('editProblemMemoryLimit').value,
+                    sampleInput: document.getElementById('editProblemSampleInput').value,
+                    sampleOutput: document.getElementById('editProblemSampleOutput').value
+                };
+
+                try {
+                    // Update problem in database via API
+                    const updatedProblem = await window.HackathonAPI.updateProblem(problem.hackathonId, problem.id, updateData);
+                    console.log('Problem updated in database:', updatedProblem);
+
+                    // Update local storage
+                    Object.assign(problems[index], updatedProblem);
+                    setOrganizerData('problems', problems);
+
+                    // Close modal
+                    const editModal = bootstrap.Modal.getInstance(document.getElementById('editProblemModal'));
+                    editModal.hide();
+
+                    // Refresh table
+                    displayProblems();
+
+                    // Trigger problem sync for participants
+                    if (window.problemSync) {
+                        window.problemSync.broadcastProblems();
+                    }
+                    if (window.triggerProblemUpdate) {
+                        window.triggerProblemUpdate();
+                    }
+
+                    alert('Problem updated successfully!');
+                } catch (error) {
+                    console.error('Failed to update problem:', error);
+                    alert('Failed to update problem. Please try again.');
+                }
             }
         });
     }
