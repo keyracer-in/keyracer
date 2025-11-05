@@ -213,6 +213,14 @@ router.post('/:hackathonId/submit', async (req, res) => {
       return res.status(404).json({ error: 'Participant not found' });
     }
 
+    // Check if participant already submitted for this problem
+    const existingSubmission = participant.submissions.find(s => s.problemId === problemId);
+    if (existingSubmission) {
+      return res.status(400).json({
+        error: 'You can only submit one solution per problem. You have already submitted a solution for this problem.'
+      });
+    }
+
     const submission = {
       problemId,
       code,

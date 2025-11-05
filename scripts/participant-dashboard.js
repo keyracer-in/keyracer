@@ -203,6 +203,9 @@ class ParticipantDashboard {
 
         // Update submission page with selected problem details
         this.updateSubmissionPage(problem);
+
+        // Check if already submitted for this problem and disable submit button
+        this.checkAndDisableSubmittedProblems();
     }
 
     displayProblem(problem) {
@@ -655,6 +658,41 @@ class ParticipantDashboard {
                 this.submitSolution();
             });
         }
+
+        // Check and disable submit button for problems already submitted
+        this.checkAndDisableSubmittedProblems();
+    }
+
+    disableSubmitForProblem(problemId) {
+        const submitBtn = document.querySelector('.btn-primary-custom');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Already Submitted';
+            submitBtn.style.opacity = '0.6';
+            submitBtn.style.cursor = 'not-allowed';
+        }
+    }
+
+    async checkAndDisableSubmittedProblems() {
+        try {
+            const currentHackathonId = localStorage.getItem('currentHackathonId');
+            const currentParticipantId = localStorage.getItem('currentParticipantId');
+
+            if (!currentHackathonId || !currentParticipantId) {
+                return;
+            }
+
+            const submissions = await window.HackathonAPI.getParticipantSubmissions(currentHackathonId, currentParticipantId);
+            const submittedProblemIds = submissions.map(s => s.problemId);
+
+            // Get current problem
+            const currentProblem = this.getCurrentProblem();
+            if (currentProblem && submittedProblemIds.includes(currentProblem.id)) {
+                this.disableSubmitForProblem(currentProblem.id);
+            }
+        } catch (error) {
+            console.error('Error checking submitted problems:', error);
+        }
     }
 
     async submitSolution() {
@@ -776,12 +814,25 @@ class ParticipantDashboard {
             // Reload submission history to show the new submission
             await this.loadSubmissionHistory();
 
+            // Disable submit button for this problem
+            this.disableSubmitForProblem(currentProblem.id);
+
             // Show success message with problem name
-            this.showNotification(`Solution for "${currentProblem.title}" submitted successfully!`, 'success');
+            this.showNotification(`Solution for "${currentProblem.title}" submitted successfully! You cannot submit another solution for this problem.`, 'success');
 
         } catch (error) {
             console.error('Error submitting solution:', error);
-            this.showNotification('Failed to submit solution', 'error');
+            // Check if error is due to already submitted
+            if (error.message && error.message.includes('You can only submit one solution per problem')) {
+                this.showNotification('You have already submitted a solution for this problem. You can only submit once per problem.', 'warning');
+                // Disable submit button for this problem
+                const currentProblem = this.getCurrentProblem();
+                if (currentProblem) {
+                    this.disableSubmitForProblem(currentProblem.id);
+                }
+            } else {
+                this.showNotification('Failed to submit solution', 'error');
+            }
         }
     }
 
