@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Check if organizer is accessing via organizer code
     const urlParams = new URLSearchParams(window.location.search);
-    const organizerCode = urlParams.get('organizerCode');
+    let organizerCode = urlParams.get('organizerCode');
 
     // Set organizer name from URL parameters
     const organizerNameFromUrl = urlParams.get('organizerName');
@@ -280,36 +280,38 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('organizer-name').textContent = organizerNameFromUrl;
     }
 
-    // If organizer code exists, load hackathons (new organizers won't have any yet)
-    if (organizerCode) {
-        try {
-            currentOrganizerCode = organizerCode;
-            console.log('Setting organizer code:', organizerCode);
+    // If no organizer code provided, generate one for new organizers
+    if (!organizerCode) {
+        organizerCode = generateOrganizerCode();
+        console.log('Generated new organizer code for new organizer:', organizerCode);
+        // Update URL to include the generated organizer code
+        const newUrl = `${window.location.pathname}?organizerCode=${organizerCode}${organizerNameFromUrl ? `&organizerName=${encodeURIComponent(organizerNameFromUrl)}` : ''}`;
+        window.history.replaceState(null, null, newUrl);
+    }
 
-            // Load all hackathons for this organizer from MongoDB
-            console.log('Loading hackathons from MongoDB for organizer code:', currentOrganizerCode);
-            const hackathonsFromDB = await window.HackathonAPI.getHackathonsByOrganizer(currentOrganizerCode);
-            console.log('Hackathons loaded from DB:', hackathonsFromDB);
+    // Set current organizer code and load hackathons
+    currentOrganizerCode = organizerCode;
+    console.log('Using organizer code:', organizerCode);
 
-            if (hackathonsFromDB && hackathonsFromDB.length > 0) {
-                organizerHackathons = hackathonsFromDB;
-                // Load problems for all hackathons
-                await loadOrganizerProblems();
-            } else {
-                console.log('No existing hackathons found for organizer - this is normal for new organizers');
-                organizerHackathons = [];
-            }
-        } catch (error) {
-            console.error('Error loading organizer data:', error);
-            // For new organizers, API errors are expected - just proceed with empty data
-            console.log('Proceeding with empty hackathon list for new organizer');
+    try {
+        // Load all hackathons for this organizer from MongoDB
+        console.log('Loading hackathons from MongoDB for organizer code:', currentOrganizerCode);
+        const hackathonsFromDB = await window.HackathonAPI.getHackathonsByOrganizer(currentOrganizerCode);
+        console.log('Hackathons loaded from DB:', hackathonsFromDB);
+
+        if (hackathonsFromDB && hackathonsFromDB.length > 0) {
+            organizerHackathons = hackathonsFromDB;
+            // Load problems for all hackathons
+            await loadOrganizerProblems();
+        } else {
+            console.log('No existing hackathons found for organizer - this is normal for new organizers');
             organizerHackathons = [];
         }
-    } else {
-        // No organizer code provided
-        alert('No organizer code provided. Please access via a valid organizer link.');
-        window.location.href = 'hackathon.html';
-        return;
+    } catch (error) {
+        console.error('Error loading organizer data:', error);
+        // For new organizers, API errors are expected - just proceed with empty data
+        console.log('Proceeding with empty hackathon list for new organizer');
+        organizerHackathons = [];
     }
 
     // Create Hackathon Button
