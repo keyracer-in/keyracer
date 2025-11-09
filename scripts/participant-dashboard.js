@@ -215,7 +215,7 @@ class ParticipantDashboard {
         // Update submission page with selected problem details
         this.updateSubmissionPage(problem);
 
-        // Check if already submitted for this problem and disable submit button
+        // Check if already submitted for this problem and disable/enable submit button accordingly
         this.checkAndDisableSubmittedProblems();
     }
 
@@ -687,6 +687,16 @@ class ParticipantDashboard {
         }
     }
 
+    enableSubmitForProblem() {
+        const submitBtn = document.querySelector('.btn-primary-custom');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Solution';
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+        }
+    }
+
     async checkAndDisableSubmittedProblems() {
         try {
             const currentHackathonId = localStorage.getItem('currentHackathonId');
@@ -701,8 +711,12 @@ class ParticipantDashboard {
 
             // Get current problem
             const currentProblem = this.getCurrentProblem();
-            if (currentProblem && submittedProblemIds.includes(currentProblem.id)) {
-                this.disableSubmitForProblem(currentProblem.id);
+            if (currentProblem) {
+                if (submittedProblemIds.includes(currentProblem.id)) {
+                    this.disableSubmitForProblem(currentProblem.id);
+                } else {
+                    this.enableSubmitForProblem();
+                }
             }
         } catch (error) {
             console.error('Error checking submitted problems:', error);
@@ -833,6 +847,9 @@ class ParticipantDashboard {
 
             // Show success message with problem name
             this.showNotification(`Solution for "${currentProblem.title}" submitted successfully! You cannot submit another solution for this problem.`, 'success');
+
+            // Re-check submission status for all problems to ensure UI is updated correctly
+            await this.checkAndDisableSubmittedProblems();
 
         } catch (error) {
             console.error('Error submitting solution:', error);
@@ -1231,6 +1248,8 @@ class ParticipantDashboard {
         // Initialize submission page with first problem if available
         if (this.problems.length > 0) {
             this.updateSubmissionPage(this.problems[0]);
+            // Check submission status for the first problem
+            await this.checkAndDisableSubmittedProblems();
         }
     }
 
