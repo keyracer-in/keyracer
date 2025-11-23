@@ -435,6 +435,11 @@ class AptitudeManager {
 
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Please login to submit test');
+                return;
+            }
+            
             const response = await fetch('/api/aptitude/submit', {
                 method: 'POST',
                 headers: {
@@ -516,6 +521,11 @@ class AptitudeManager {
     async loadLeaderboard(period = 'all-time') {
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                console.log('No token available for leaderboard');
+                return;
+            }
+            
             const response = await fetch(`/api/aptitude/leaderboard?period=${period}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`

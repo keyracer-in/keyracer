@@ -3,13 +3,19 @@ const User = require('../models/User');
 
 const requireAuth = async (req, res, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const authHeader = req.header('Authorization');
         
-        if (!token) {
-            return res.status(401).json({ success: false, message: 'No token provided' });
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ success: false, message: 'No valid token provided' });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const token = authHeader.replace('Bearer ', '').trim();
+        
+        if (!token || token === 'null' || token === 'undefined') {
+            return res.status(401).json({ success: false, message: 'Invalid token format' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
         const user = await User.findById(decoded.userId);
         
         if (!user) {
@@ -19,7 +25,14 @@ const requireAuth = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        res.status(401).json({ success: false, message: 'Invalid token' });
+        console.error('Auth error:', error.message);
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ success: false, message: 'Malformed token' });
+        }
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ success: false, message: 'Token expired' });
+        }
+        res.status(401).json({ success: false, message: 'Authentication failed' });
     }
 };
 
