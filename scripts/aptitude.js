@@ -6,8 +6,8 @@ class AptitudeManager {
         this.currentQuestionIndex = 0;
         this.userAnswers = [];
         this.timer = null;
-        this.timeRemaining = 0;
-        this.testStartTime = null;
+        this.elapsedTime = 0;
+        this.questionStartTime = null;
         this.init();
     }
 
@@ -44,13 +44,8 @@ class AptitudeManager {
             });
         }
 
-        // Timer controls
-        document.querySelectorAll('.timer-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const duration = parseInt(e.target.dataset.duration);
-                this.setTimer(duration);
-            });
-        });
+        // Start timer when questions are loaded
+        this.startQuestionTimer();
 
         // Navigation controls
         const prevBtn = document.querySelector('.prev-btn');
@@ -64,29 +59,144 @@ class AptitudeManager {
 
     switchTopic(topic) {
         this.currentTopic = topic;
-        
+
         // Update active state
         document.querySelectorAll('.topic-link').forEach(link => {
             link.classList.remove('active');
         });
         document.querySelector(`[data-topic="${topic}"]`).classList.add('active');
-        
+
         this.loadTopicContent(topic);
     }
 
-    loadTopicContent(topic) {
+    loadTopicContent(topic, subsection = null) {
         if (!this.content || !this.content[topic]) return;
-        
+
         const contentTitle = document.querySelector('.content-title');
         const learningContent = document.querySelector('.learning-content');
-        
+
         if (contentTitle) {
-            contentTitle.textContent = this.content[topic].title;
+            contentTitle.textContent = subsection ? `${this.content[topic].title} - ${subsection}` : this.content[topic].title;
         }
-        
+
         if (learningContent) {
-            learningContent.innerHTML = this.parseMarkdown(this.content[topic].content);
+            if (subsection) {
+                // Load specific subsection
+                const sections = this.parseSections(this.content[topic].content);
+                const sectionContent = sections.find(s => s.title === subsection);
+                learningContent.innerHTML = sectionContent ? this.parseMarkdown(sectionContent.content) : 'Section not found';
+            } else {
+                // Load full topic
+                learningContent.innerHTML = this.parseMarkdown(this.content[topic].content);
+            }
         }
+
+        // Update sidebar to show subsections
+        this.populateSidebar(topic, subsection);
+    }
+
+    parseSections(content) {
+        const sections = [];
+        const lines = content.split('\n');
+        let currentSection = null;
+        let currentContent = [];
+
+        for (const line of lines) {
+            if (line.startsWith('### ')) {
+                if (currentSection) {
+                    sections.push({
+                        title: currentSection,
+                        content: currentContent.join('\n')
+                    });
+                }
+                currentSection = line.replace('### ', '').trim();
+                currentContent = [];
+            } else {
+                currentContent.push(line);
+            }
+        }
+
+        if (currentSection) {
+            sections.push({
+                title: currentSection,
+                content: currentContent.join('\n')
+            });
+        }
+
+        return sections;
+    }
+
+    populateSidebar(topic, activeSubsection = null) {
+        const topicList = document.querySelector('.topic-list');
+        if (!topicList) return;
+
+        // Clear existing content
+        topicList.innerHTML = '';
+
+        // Add main topics
+        Object.keys(this.content).forEach(topicKey => {
+            const topicItem = document.createElement('li');
+            topicItem.className = 'topic-item';
+
+            const topicLink = document.createElement('a');
+            topicLink.href = '#';
+            topicLink.className = `topic-link ${topicKey === topic && !activeSubsection ? 'active' : ''}`;
+            topicLink.dataset.topic = topicKey;
+            topicLink.innerHTML = `
+                <i class="fas fa-${this.getTopicIcon(topicKey)} topic-icon"></i>
+                ${this.content[topicKey].title}
+            `;
+
+            topicLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.switchTopic(topicKey);
+            });
+
+            topicItem.appendChild(topicLink);
+
+            // Add subsections if this is the active topic
+            if (topicKey === topic) {
+                const sections = this.parseSections(this.content[topicKey].content);
+                if (sections.length > 0) {
+                    const subsectionList = document.createElement('ul');
+                    subsectionList.className = 'subsection-list';
+
+                    sections.forEach(section => {
+                        const subsectionItem = document.createElement('li');
+                        subsectionItem.className = 'subsection-item';
+
+                        const subsectionLink = document.createElement('a');
+                        subsectionLink.href = '#';
+                        subsectionLink.className = `subsection-link ${section.title === activeSubsection ? 'active' : ''}`;
+                        subsectionLink.dataset.topic = topicKey;
+                        subsectionLink.dataset.subsection = section.title;
+                        subsectionLink.textContent = section.title;
+
+                        subsectionLink.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            this.loadTopicContent(topicKey, section.title);
+                        });
+
+                        subsectionItem.appendChild(subsectionLink);
+                        subsectionList.appendChild(subsectionItem);
+                    });
+
+                    topicItem.appendChild(subsectionList);
+                }
+            }
+
+            topicList.appendChild(topicItem);
+        });
+    }
+
+    getTopicIcon(topic) {
+        const icons = {
+            'quant': 'calculator',
+            'logical-reasoning': 'puzzle-piece',
+            'verbal': 'language',
+            'puzzles': 'lightbulb'
+        };
+        return icons[topic] || 'book';
     }
 
     parseMarkdown(markdown) {
@@ -110,11 +220,12 @@ class AptitudeManager {
         try {
             const response = await fetch(`/api/aptitude/questions/${topic}`);
             const data = await response.json();
-            
+
             if (data.success) {
                 this.questions = data.questions;
                 this.currentQuestionIndex = 0;
                 this.userAnswers = new Array(this.questions.length).fill('');
+                this.startQuestionTimer();
                 this.displayQuestion();
             }
         } catch (error) {
@@ -127,9 +238,9 @@ class AptitudeManager {
         if (!question) return;
 
         // Update question number and difficulty
-        document.querySelector('.question-number').textContent = 
+        document.querySelector('.question-number').textContent =
             `Question ${this.currentQuestionIndex + 1} of ${this.questions.length}`;
-        
+
         const difficultyEl = document.querySelector('.question-difficulty');
         difficultyEl.textContent = question.difficulty.toUpperCase();
         difficultyEl.className = `question-difficulty difficulty-${question.difficulty}`;
@@ -144,7 +255,7 @@ class AptitudeManager {
         if (question.type === 'mcq') {
             const optionsContainer = document.createElement('div');
             optionsContainer.className = 'options-container';
-            
+
             question.options.forEach((option, index) => {
                 const optionEl = document.createElement('div');
                 optionEl.className = 'option-item';
@@ -152,14 +263,14 @@ class AptitudeManager {
                     <div class="option-radio ${this.userAnswers[this.currentQuestionIndex] === option ? 'checked' : ''}"></div>
                     <span>${option}</span>
                 `;
-                
+
                 optionEl.addEventListener('click', () => {
                     this.selectOption(option);
                 });
-                
+
                 optionsContainer.appendChild(optionEl);
             });
-            
+
             container.appendChild(optionsContainer);
         } else {
             const textInput = document.createElement('input');
@@ -167,11 +278,11 @@ class AptitudeManager {
             textInput.className = 'text-input';
             textInput.placeholder = 'Enter your answer...';
             textInput.value = this.userAnswers[this.currentQuestionIndex];
-            
+
             textInput.addEventListener('input', (e) => {
                 this.userAnswers[this.currentQuestionIndex] = e.target.value;
             });
-            
+
             container.appendChild(textInput);
         }
 
@@ -182,13 +293,13 @@ class AptitudeManager {
 
     selectOption(option) {
         this.userAnswers[this.currentQuestionIndex] = option;
-        
+
         // Update visual selection
         document.querySelectorAll('.option-item').forEach(item => {
             const radio = item.querySelector('.option-radio');
             radio.classList.remove('checked');
         });
-        
+
         document.querySelectorAll('.option-item').forEach(item => {
             if (item.textContent.trim().includes(option)) {
                 item.querySelector('.option-radio').classList.add('checked');
@@ -210,43 +321,34 @@ class AptitudeManager {
         }
     }
 
-    setTimer(minutes) {
-        // Update active timer button
-        document.querySelectorAll('.timer-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
+    startQuestionTimer() {
+        this.questionStartTime = Date.now();
+        this.elapsedTime = 0;
 
-        this.timeRemaining = minutes * 60;
-        this.startTimer();
-    }
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
 
-    startTimer() {
-        this.testStartTime = Date.now();
-        
         this.timer = setInterval(() => {
-            this.timeRemaining--;
+            this.elapsedTime++;
             this.updateTimerDisplay();
-            
-            if (this.timeRemaining <= 0) {
-                this.submitTest();
-            }
         }, 1000);
     }
 
+    resetQuestionTimer() {
+        this.elapsedTime = 0;
+        this.questionStartTime = Date.now();
+        this.updateTimerDisplay();
+    }
+
     updateTimerDisplay() {
-        const minutes = Math.floor(this.timeRemaining / 60);
-        const seconds = this.timeRemaining % 60;
+        const minutes = Math.floor(this.elapsedTime / 60);
+        const seconds = this.elapsedTime % 60;
         const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        const timerDisplay = document.querySelector('.timer-display');
+
+        const timerDisplay = document.querySelector('#timer');
         if (timerDisplay) {
             timerDisplay.textContent = display;
-            
-            // Add warning color when time is low
-            if (this.timeRemaining <= 60) {
-                timerDisplay.style.color = 'var(--error-color)';
-            }
         }
     }
 
@@ -255,17 +357,14 @@ class AptitudeManager {
             clearInterval(this.timer);
         }
 
-        const timeTaken = this.testStartTime ? Math.floor((Date.now() - this.testStartTime) / 1000) : 0;
-        
         const submissionData = {
-            testType: 'timed',
-            duration: Math.floor(timeTaken / 60),
+            testType: 'individual',
             questions: this.questions.map((q, index) => ({
                 questionId: q._id,
                 userAnswer: this.userAnswers[index] || '',
-                timeSpent: Math.floor(timeTaken / this.questions.length)
+                timeSpent: this.elapsedTime
             })),
-            timeTaken
+            timeTaken: this.elapsedTime
         };
 
         try {
@@ -278,9 +377,10 @@ class AptitudeManager {
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 this.showResults(data.result);
+                this.resetQuestionTimer();
             } else {
                 alert('Error submitting test: ' + data.message);
             }
@@ -332,7 +432,7 @@ class AptitudeManager {
                 </button>
             </div>
         `;
-        
+
         document.body.appendChild(modal);
     }
 
@@ -349,7 +449,7 @@ class AptitudeManager {
         try {
             const response = await fetch(`/api/aptitude/leaderboard?period=${period}`);
             const data = await response.json();
-            
+
             if (data.success) {
                 this.displayLeaderboard(data.leaderboard);
             }
@@ -382,13 +482,13 @@ class AptitudeManager {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.aptitudeManager = new AptitudeManager();
-    
+
     // Setup leaderboard filters
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
-            
+
             const period = e.target.dataset.period;
             window.aptitudeManager.loadLeaderboard(period);
         });

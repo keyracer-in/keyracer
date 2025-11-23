@@ -1,8 +1,14 @@
-# Task: Enforce One Solution Submission Per Problem
+# Aptitude Learn Subsections Implementation
 
-## Steps to Complete
+## Tasks to Complete
 
-- [x] Modify backend submit route in `server/routes/hackathonRoutes.js` to check for existing submissions for the same problemId
-- [x] Update frontend in `scripts/participant-dashboard.js` to disable submit button after successful submission and show appropriate messaging
-- [ ] Test the submission functionality to ensure only one submission per problem is allowed
-- [ ] Verify UI updates correctly after submission
+- [x] Modify `scripts/aptitude.js` to parse topic content into subsections based on ### headings
+- [x] Update `aptitude-learn.html` to include nested sidebar structure for subsections
+- [x] Add click handlers for subsections to load specific content
+- [x] Update CSS in `styles/aptitude.css` for subsection styling if needed
+- [x] Test the functionality to ensure subsections load correctly
+
+## Notes
+- Parse markdown content to extract sections using regex for ### headings
+- Create hierarchical sidebar with topics and their subsections
+- Allow loading full topic or specific subsection content
