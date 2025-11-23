@@ -29,7 +29,9 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/keyracer'
 
 // Routes
 const hackathonRoutes = require('./server/routes/hackathonRoutes');
+const aptitudeRoutes = require('./server/routes/aptitude');
 app.use('/api/hackathons', hackathonRoutes);
+app.use('/api/aptitude', aptitudeRoutes);
 
 // User Schema
 const userSchema = new mongoose.Schema({
@@ -43,7 +45,8 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-const User = mongoose.model('User', userSchema);
+// Use the User model from the models directory instead
+const User = require('./server/models/User');
 
 // Brevo (Sendinblue) API key
 const BREVO_API_KEY = process.env.BREVO_API_KEY;

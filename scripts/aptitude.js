@@ -218,7 +218,33 @@ class AptitudeManager {
 
     async loadQuestions(topic, difficulty = 'medium') {
         try {
-            const response = await fetch('/data/aptitude-questions.json');
+            // Try API first, fallback to local JSON
+            const token = localStorage.getItem('token');
+            let response;
+            
+            if (token) {
+                try {
+                    response = await fetch(`/api/aptitude/questions/${topic}/${difficulty}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    const apiData = await response.json();
+                    if (apiData.success && apiData.questions.length > 0) {
+                        this.questions = apiData.questions;
+                        this.currentQuestionIndex = 0;
+                        this.userAnswers = new Array(this.questions.length).fill('');
+                        this.startQuestionTimer();
+                        this.displayQuestion();
+                        return;
+                    }
+                } catch (apiError) {
+                    console.log('API failed, falling back to local data');
+                }
+            }
+            
+            // Fallback to local JSON
+            response = await fetch('/data/aptitude-questions.json');
             const data = await response.json();
 
             if (data[topic] && data[topic][difficulty]) {
@@ -408,10 +434,12 @@ class AptitudeManager {
         };
 
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch('/api/aptitude/submit', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(submissionData)
             });
@@ -487,7 +515,12 @@ class AptitudeManager {
 
     async loadLeaderboard(period = 'all-time') {
         try {
-            const response = await fetch(`/api/aptitude/leaderboard?period=${period}`);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/aptitude/leaderboard?period=${period}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const data = await response.json();
 
             if (data.success) {

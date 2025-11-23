@@ -55,7 +55,28 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpires: Date,
   // Email verification fields
   verificationToken: String,
-  verificationTokenExpires: Date
+  verificationTokenExpires: Date,
+  // Aptitude test statistics
+  aptitudeStats: {
+    testsCompleted: {
+      type: Number,
+      default: 0
+    },
+    totalScore: {
+      type: Number,
+      default: 0
+    },
+    bestAccuracy: {
+      type: Number,
+      default: 0
+    },
+    badges: [{
+      type: String
+    }],
+    solvedQuestions: [{
+      type: String
+    }]
+  }
 });
 
 // Pre-save hook to hash password
