@@ -418,6 +418,49 @@ class AptitudeManager {
         }
     }
 
+    calculateLocalResults() {
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
+
+        // Calculate results locally
+        let correctAnswers = 0;
+        const results = this.questions.map((q, index) => {
+            const userAnswer = this.userAnswers[index] || '';
+            const isCorrect = userAnswer === q.correct;
+            if (isCorrect) correctAnswers++;
+            return {
+                questionId: q._id,
+                userAnswer,
+                correctAnswer: q.correct,
+                isCorrect
+            };
+        });
+
+        const accuracy = (correctAnswers / this.questions.length) * 100;
+        const score = correctAnswers * 10; // 10 points per correct answer
+        
+        // Determine badges based on performance
+        const badges = [];
+        if (accuracy >= 90) badges.push('excellent');
+        if (accuracy >= 80) badges.push('good');
+        if (this.elapsedTime < 60) badges.push('fast-thinker');
+        if (correctAnswers === this.questions.length) badges.push('perfect-score');
+
+        const result = {
+            score,
+            accuracy,
+            correctAnswers,
+            totalQuestions: this.questions.length,
+            timeTaken: this.elapsedTime,
+            badges,
+            results
+        };
+
+        this.showResults(result);
+        this.resetQuestionTimer();
+    }
+
     async submitTest() {
         if (this.timer) {
             clearInterval(this.timer);
@@ -435,10 +478,15 @@ class AptitudeManager {
 
         try {
             // Check both token and legacy auth
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token') || localStorage.getItem('authToken');
             const legacyUser = localStorage.getItem('typingTestUser');
             
-            console.log('Auth check:', { token, legacyUser }); // Debug log
+            console.log('Auth check:', { 
+                token, 
+                legacyUser, 
+                authToken: localStorage.getItem('authToken'),
+                allKeys: Object.keys(localStorage)
+            }); // Debug log
             
             if (!token && !legacyUser) {
                 alert('Please login to submit test');
@@ -446,10 +494,15 @@ class AptitudeManager {
                 return;
             }
             
-            if (!token) {
-                alert('Please use the new login system to access aptitude tests');
-                window.location.href = '/login.html';
+            // If no JWT token but user is logged in, calculate results locally
+            if (!token && legacyUser) {
+                console.log('No JWT token found, using local calculation');
+                this.calculateLocalResults();
                 return;
+            }
+            
+            if (token) {
+                console.log('Using JWT token for API submission');
             }
             
             const response = await fetch('/api/aptitude/submit', {

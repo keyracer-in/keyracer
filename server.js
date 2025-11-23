@@ -33,18 +33,6 @@ const aptitudeRoutes = require('./server/routes/aptitude');
 app.use('/api/hackathons', hackathonRoutes);
 app.use('/api/aptitude', aptitudeRoutes);
 
-// User Schema
-const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  isVerified: { type: Boolean, default: false },
-  verificationToken: String,
-  resetToken: String,
-  resetTokenExpiry: Date,
-  createdAt: { type: Date, default: Date.now }
-});
-
 // Use the User model from the models directory instead
 const User = require('./server/models/User');
 
