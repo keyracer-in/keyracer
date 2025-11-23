@@ -1,0 +1,1069 @@
+{
+  "quant": {
+    "easy": [
+      {
+        "_id": "q1",
+        "question": "What is 25% of 400?",
+        "type": "mcq",
+        "options": ["75", "100", "125", "150"],
+        "correct": "100",
+        "difficulty": "easy",
+        "topic": "percentages"
+      },
+      {
+        "_id": "q2", 
+        "question": "If a shirt costs ₹800 and is sold for ₹1000, what is the profit percentage?",
+        "type": "mcq",
+        "options": ["20%", "25%", "30%", "35%"],
+        "correct": "25%",
+        "difficulty": "easy",
+        "topic": "profit-loss"
+      },
+      {
+        "_id": "q3",
+        "question": "Find the simple interest on ₹2000 at 5% per annum for 2 years.",
+        "type": "mcq", 
+        "options": ["₹150", "₹200", "₹250", "₹300"],
+        "correct": "₹200",
+        "difficulty": "easy",
+        "topic": "interest"
+      },
+      {
+        "_id": "q7",
+        "question": "What is 15% of 80?",
+        "type": "mcq",
+        "options": ["10", "12", "15", "18"],
+        "correct": "12",
+        "difficulty": "easy",
+        "topic": "percentages"
+      },
+      {
+        "_id": "q8",
+        "question": "If 5 apples cost ₹25, what is the cost of 8 apples?",
+        "type": "mcq",
+        "options": ["₹35", "₹40", "₹45", "₹50"],
+        "correct": "₹40",
+        "difficulty": "easy",
+        "topic": "ratio-proportion"
+      },
+      {
+        "_id": "q9",
+        "question": "Find the area of a rectangle with length 8 cm and width 5 cm.",
+        "type": "mcq",
+        "options": ["30 cm²", "35 cm²", "40 cm²", "45 cm²"],
+        "correct": "40 cm²",
+        "difficulty": "easy",
+        "topic": "geometry"
+      },
+      {
+        "_id": "q10",
+        "question": "What is the average of 10, 20, 30, 40?",
+        "type": "mcq",
+        "options": ["20", "25", "30", "35"],
+        "correct": "25",
+        "difficulty": "easy",
+        "topic": "averages"
+      },
+      {
+        "_id": "q11",
+        "question": "If x + 5 = 12, what is x?",
+        "type": "mcq",
+        "options": ["5", "6", "7", "8"],
+        "correct": "7",
+        "difficulty": "easy",
+        "topic": "algebra"
+      },
+      {
+        "_id": "q21",
+        "question": "What is 30% of 150?",
+        "type": "mcq",
+        "options": ["40", "45", "50", "55"],
+        "correct": "45",
+        "difficulty": "easy",
+        "topic": "percentages"
+      },
+      {
+        "_id": "q22",
+        "question": "If 12 pens cost ₹144, what is the cost of 8 pens?",
+        "type": "mcq",
+        "options": ["₹84", "₹96", "₹108", "₹120"],
+        "correct": "₹96",
+        "difficulty": "easy",
+        "topic": "ratio-proportion"
+      },
+      {
+        "_id": "q23",
+        "question": "Find the perimeter of a rectangle with length 12 cm and width 8 cm.",
+        "type": "mcq",
+        "options": ["32 cm", "36 cm", "40 cm", "44 cm"],
+        "correct": "40 cm",
+        "difficulty": "easy",
+        "topic": "geometry"
+      },
+      {
+        "_id": "q24",
+        "question": "What is the sum of first 10 natural numbers?",
+        "type": "mcq",
+        "options": ["45", "50", "55", "60"],
+        "correct": "55",
+        "difficulty": "easy",
+        "topic": "number-theory"
+      }
+    ],
+    "medium": [
+      {
+        "_id": "q4",
+        "question": "A can complete a work in 12 days and B in 18 days. How many days will they take together?",
+        "type": "mcq",
+        "options": ["6.5 days", "7.2 days", "8 days", "9 days"],
+        "correct": "7.2 days", 
+        "difficulty": "medium",
+        "topic": "time-work"
+      },
+      {
+        "_id": "q5",
+        "question": "A train travels 150 km at 50 km/h, then 100 km at 40 km/h. Find average speed.",
+        "type": "mcq",
+        "options": ["44.5 km/h", "45.45 km/h", "46 km/h", "47 km/h"],
+        "correct": "45.45 km/h",
+        "difficulty": "medium", 
+        "topic": "speed-distance"
+      },
+      {
+        "_id": "q12",
+        "question": "If the cost price is ₹500 and selling price is ₹600, what is the profit percentage?",
+        "type": "mcq",
+        "options": ["15%", "20%", "25%", "30%"],
+        "correct": "20%",
+        "difficulty": "medium",
+        "topic": "profit-loss"
+      },
+      {
+        "_id": "q13",
+        "question": "A sum of money doubles in 8 years at simple interest. In how many years will it triple?",
+        "type": "mcq",
+        "options": ["12 years", "16 years", "20 years", "24 years"],
+        "correct": "16 years",
+        "difficulty": "medium",
+        "topic": "interest"
+      },
+      {
+        "_id": "q14",
+        "question": "The ratio of boys to girls in a class is 3:2. If there are 15 boys, how many girls are there?",
+        "type": "mcq",
+        "options": ["8", "10", "12", "15"],
+        "correct": "10",
+        "difficulty": "medium",
+        "topic": "ratio-proportion"
+      },
+      {
+        "_id": "q15",
+        "question": "Find the perimeter of a square with side 12 cm.",
+        "type": "mcq",
+        "options": ["36 cm", "44 cm", "48 cm", "52 cm"],
+        "correct": "48 cm",
+        "difficulty": "medium",
+        "topic": "geometry"
+      },
+      {
+        "_id": "q16",
+        "question": "If 2x + 3 = 15, what is the value of x?",
+        "type": "mcq",
+        "options": ["4", "5", "6", "7"],
+        "correct": "6",
+        "difficulty": "medium",
+        "topic": "algebra"
+      },
+      {
+        "_id": "q25",
+        "question": "A pipe can fill a tank in 6 hours. Another pipe can empty it in 8 hours. If both are opened, in how many hours will the tank be filled?",
+        "type": "mcq",
+        "options": ["20 hours", "22 hours", "24 hours", "26 hours"],
+        "correct": "24 hours",
+        "difficulty": "medium",
+        "topic": "pipes-cisterns"
+      },
+      {
+        "_id": "q26",
+        "question": "The average of 6 numbers is 25. If one number is excluded, the average becomes 22. What is the excluded number?",
+        "type": "mcq",
+        "options": ["38", "40", "42", "44"],
+        "correct": "40",
+        "difficulty": "medium",
+        "topic": "averages"
+      },
+      {
+        "_id": "q27",
+        "question": "A man walks 4 km east, then 3 km north. What is his distance from the starting point?",
+        "type": "mcq",
+        "options": ["4 km", "5 km", "6 km", "7 km"],
+        "correct": "5 km",
+        "difficulty": "medium",
+        "topic": "geometry"
+      },
+      {
+        "_id": "q28",
+        "question": "If 40% of a number is 80, what is 60% of the same number?",
+        "type": "mcq",
+        "options": ["100", "110", "120", "130"],
+        "correct": "120",
+        "difficulty": "medium",
+        "topic": "percentages"
+      }
+    ],
+    "hard": [
+      {
+        "_id": "q6",
+        "question": "Find the compound interest on ₹10000 at 10% per annum for 2 years.",
+        "type": "mcq",
+        "options": ["₹2000", "₹2100", "₹2200", "₹2300"],
+        "correct": "₹2100",
+        "difficulty": "hard",
+        "topic": "compound-interest"
+      },
+      {
+        "_id": "q17",
+        "question": "A, B, and C can complete a work in 6, 8, and 12 days respectively. Working together, in how many days can they complete the work?",
+        "type": "mcq",
+        "options": ["2.4 days", "2.67 days", "3 days", "3.2 days"],
+        "correct": "2.67 days",
+        "difficulty": "hard",
+        "topic": "time-work"
+      },
+      {
+        "_id": "q18",
+        "question": "A shopkeeper marks his goods 40% above cost price and gives a discount of 25%. What is his profit percentage?",
+        "type": "mcq",
+        "options": ["5%", "10%", "15%", "20%"],
+        "correct": "5%",
+        "difficulty": "hard",
+        "topic": "profit-loss"
+      },
+      {
+        "_id": "q19",
+        "question": "Two trains start from opposite ends of a 300 km track. One travels at 60 km/h and the other at 90 km/h. After how much time will they meet?",
+        "type": "mcq",
+        "options": ["1.5 hours", "2 hours", "2.5 hours", "3 hours"],
+        "correct": "2 hours",
+        "difficulty": "hard",
+        "topic": "speed-distance"
+      },
+      {
+        "_id": "q20",
+        "question": "Find the area of a triangle with base 16 cm and height 12 cm.",
+        "type": "mcq",
+        "options": ["84 cm²", "96 cm²", "108 cm²", "120 cm²"],
+        "correct": "96 cm²",
+        "difficulty": "hard",
+        "topic": "geometry"
+      },
+      {
+        "_id": "q29",
+        "question": "A sum invested at 12% per annum compound interest becomes ₹15680 in 2 years. What was the principal?",
+        "type": "mcq",
+        "options": ["₹12500", "₹12800", "₹13000", "₹13500"],
+        "correct": "₹12500",
+        "difficulty": "hard",
+        "topic": "compound-interest"
+      },
+      {
+        "_id": "q30",
+        "question": "Three partners A, B, C invest ₹12000, ₹16000, ₹20000. If profit is ₹14400, what is A's share?",
+        "type": "mcq",
+        "options": ["₹3200", "₹3400", "₹3600", "₹3800"],
+        "correct": "₹3600",
+        "difficulty": "hard",
+        "topic": "partnership"
+      },
+      {
+        "_id": "q31",
+        "question": "A boat travels 20 km upstream in 4 hours and 28 km downstream in 4 hours. Find the speed of the current.",
+        "type": "mcq",
+        "options": ["1 km/h", "1.5 km/h", "2 km/h", "2.5 km/h"],
+        "correct": "1 km/h",
+        "difficulty": "hard",
+        "topic": "boats-streams"
+      },
+      {
+        "_id": "q32",
+        "question": "If log₂ 8 = x, what is the value of x?",
+        "type": "mcq",
+        "options": ["2", "3", "4", "8"],
+        "correct": "3",
+        "difficulty": "hard",
+        "topic": "logarithms"
+      }
+    ]
+  },
+  "logical-reasoning": {
+    "easy": [
+      {
+        "_id": "lr1",
+        "question": "Find the next number in series: 2, 5, 10, 17, 26, ?",
+        "type": "mcq",
+        "options": ["35", "37", "39", "41"],
+        "correct": "37",
+        "difficulty": "easy",
+        "topic": "number-series"
+      },
+      {
+        "_id": "lr2",
+        "question": "Find the next letter: A, C, E, G, ?",
+        "type": "mcq", 
+        "options": ["H", "I", "J", "K"],
+        "correct": "I",
+        "difficulty": "easy",
+        "topic": "letter-series"
+      },
+      {
+        "_id": "lr5",
+        "question": "Find the odd one out: 3, 5, 7, 9, 11",
+        "type": "mcq",
+        "options": ["3", "5", "7", "9"],
+        "correct": "9",
+        "difficulty": "easy",
+        "topic": "odd-one-out"
+      },
+      {
+        "_id": "lr6",
+        "question": "Complete the series: 1, 4, 9, 16, ?",
+        "type": "mcq",
+        "options": ["20", "23", "25", "30"],
+        "correct": "25",
+        "difficulty": "easy",
+        "topic": "number-series"
+      },
+      {
+        "_id": "lr7",
+        "question": "If all roses are flowers and some flowers are red, then:",
+        "type": "mcq",
+        "options": ["All roses are red", "Some roses are red", "No roses are red", "Cannot be determined"],
+        "correct": "Cannot be determined",
+        "difficulty": "easy",
+        "topic": "syllogism"
+      },
+      {
+        "_id": "lr8",
+        "question": "Find the next in pattern: AB, CD, EF, ?",
+        "type": "mcq",
+        "options": ["GH", "HI", "IJ", "JK"],
+        "correct": "GH",
+        "difficulty": "easy",
+        "topic": "letter-series"
+      },
+      {
+        "_id": "lr17",
+        "question": "Find the next number: 3, 6, 11, 18, 27, ?",
+        "type": "mcq",
+        "options": ["36", "38", "40", "42"],
+        "correct": "38",
+        "difficulty": "easy",
+        "topic": "number-series"
+      },
+      {
+        "_id": "lr18",
+        "question": "If all birds can fly and penguin is a bird, then:",
+        "type": "mcq",
+        "options": ["Penguin can fly", "Penguin cannot fly", "Some penguins can fly", "Statement is contradictory"],
+        "correct": "Statement is contradictory",
+        "difficulty": "easy",
+        "topic": "syllogism"
+      },
+      {
+        "_id": "lr19",
+        "question": "Complete: 2, 8, 18, 32, ?",
+        "type": "mcq",
+        "options": ["48", "50", "52", "54"],
+        "correct": "50",
+        "difficulty": "easy",
+        "topic": "number-series"
+      },
+      {
+        "_id": "lr20",
+        "question": "Find odd one: Dog, Cat, Lion, Car, Tiger",
+        "type": "mcq",
+        "options": ["Dog", "Cat", "Car", "Tiger"],
+        "correct": "Car",
+        "difficulty": "easy",
+        "topic": "odd-one-out"
+      }
+    ],
+    "medium": [
+      {
+        "_id": "lr3",
+        "question": "If CAT = FDW, then DOG = ?",
+        "type": "mcq",
+        "options": ["GRJ", "GOL", "HQM", "FQI"],
+        "correct": "GRJ",
+        "difficulty": "medium",
+        "topic": "coding-decoding"
+      },
+      {
+        "_id": "lr9",
+        "question": "In a certain code, FRIEND is written as HUMJTK. How is CANDLE written?",
+        "type": "mcq",
+        "options": ["EDRIRL", "ECPFMG", "DCOFNG", "ECOFLG"],
+        "correct": "ECOFLG",
+        "difficulty": "medium",
+        "topic": "coding-decoding"
+      },
+      {
+        "_id": "lr10",
+        "question": "Find the missing number: 2, 6, 12, 20, 30, ?",
+        "type": "mcq",
+        "options": ["40", "42", "44", "46"],
+        "correct": "42",
+        "difficulty": "medium",
+        "topic": "number-series"
+      },
+      {
+        "_id": "lr11",
+        "question": "A is taller than B. C is shorter than B. D is taller than A. Who is the shortest?",
+        "type": "mcq",
+        "options": ["A", "B", "C", "D"],
+        "correct": "C",
+        "difficulty": "medium",
+        "topic": "ordering"
+      },
+      {
+        "_id": "lr12",
+        "question": "Complete the analogy: Book : Library :: ? : Museum",
+        "type": "mcq",
+        "options": ["Painting", "Artifact", "Visitor", "Guide"],
+        "correct": "Artifact",
+        "difficulty": "medium",
+        "topic": "analogies"
+      },
+      {
+        "_id": "lr21",
+        "question": "If WATER is coded as 12345, how is TEAR coded?",
+        "type": "mcq",
+        "options": ["3415", "3451", "4315", "4351"],
+        "correct": "3415",
+        "difficulty": "medium",
+        "topic": "coding-decoding"
+      },
+      {
+        "_id": "lr22",
+        "question": "Find missing: 5, 10, 20, 40, ?",
+        "type": "mcq",
+        "options": ["60", "70", "80", "90"],
+        "correct": "80",
+        "difficulty": "medium",
+        "topic": "number-series"
+      },
+      {
+        "_id": "lr23",
+        "question": "P is Q's brother. R is Q's mother. S is R's father. How is S related to P?",
+        "type": "mcq",
+        "options": ["Father", "Grandfather", "Uncle", "Brother"],
+        "correct": "Grandfather",
+        "difficulty": "medium",
+        "topic": "blood-relations"
+      },
+      {
+        "_id": "lr24",
+        "question": "Complete: Z, Y, X, W, V, ?",
+        "type": "mcq",
+        "options": ["T", "U", "S", "R"],
+        "correct": "U",
+        "difficulty": "medium",
+        "topic": "letter-series"
+      }
+    ],
+    "hard": [
+      {
+        "_id": "lr4", 
+        "question": "Pointing to a man, a woman says 'His mother is the only daughter of my father.' What is the relation?",
+        "type": "mcq",
+        "options": ["Brother", "Son", "Father", "Uncle"],
+        "correct": "Son",
+        "difficulty": "hard",
+        "topic": "blood-relations"
+      },
+      {
+        "_id": "lr13",
+        "question": "In a row of 25 children, A is 9th from the left and B is 10th from the right. How many children are between A and B?",
+        "type": "mcq",
+        "options": ["4", "5", "6", "7"],
+        "correct": "5",
+        "difficulty": "hard",
+        "topic": "seating-arrangement"
+      },
+      {
+        "_id": "lr14",
+        "question": "If MONDAY is coded as 123456 and TEAM is coded as 8954, how is DOME coded?",
+        "type": "mcq",
+        "options": ["4219", "4129", "5219", "4319"],
+        "correct": "4129",
+        "difficulty": "hard",
+        "topic": "coding-decoding"
+      },
+      {
+        "_id": "lr15",
+        "question": "Find the next term: 1, 8, 27, 64, ?",
+        "type": "mcq",
+        "options": ["100", "125", "144", "169"],
+        "correct": "125",
+        "difficulty": "hard",
+        "topic": "number-series"
+      },
+      {
+        "_id": "lr16",
+        "question": "A man walks 5 km north, then 3 km east, then 2 km south. How far is he from the starting point?",
+        "type": "mcq",
+        "options": ["3√2 km", "4√2 km", "5 km", "6 km"],
+        "correct": "3√2 km",
+        "difficulty": "hard",
+        "topic": "direction-sense"
+      },
+      {
+        "_id": "lr25",
+        "question": "In a family of 6, there are 2 couples. A is father of C. B is mother of D. E is brother of A. F is sister of B. How many males are there?",
+        "type": "mcq",
+        "options": ["2", "3", "4", "Cannot be determined"],
+        "correct": "Cannot be determined",
+        "difficulty": "hard",
+        "topic": "blood-relations"
+      },
+      {
+        "_id": "lr26",
+        "question": "If ROSE is coded as 6821, CHAIR is coded as 73456, what is the code for SEARCH?",
+        "type": "mcq",
+        "options": ["214673", "216473", "126473", "164273"],
+        "correct": "216473",
+        "difficulty": "hard",
+        "topic": "coding-decoding"
+      },
+      {
+        "_id": "lr27",
+        "question": "Find next: 1, 1, 2, 6, 24, ?",
+        "type": "mcq",
+        "options": ["96", "120", "144", "180"],
+        "correct": "120",
+        "difficulty": "hard",
+        "topic": "number-series"
+      },
+      {
+        "_id": "lr28",
+        "question": "Five friends sit in a row. A is not at either end. B is to the right of C. D is between A and E. Who is at the left end?",
+        "type": "mcq",
+        "options": ["B", "C", "D", "E"],
+        "correct": "C",
+        "difficulty": "hard",
+        "topic": "seating-arrangement"
+      }
+    ]
+  },
+  "verbal": {
+    "easy": [
+      {
+        "_id": "v1",
+        "question": "Choose the synonym of 'HAPPY':",
+        "type": "mcq",
+        "options": ["Sad", "Joyful", "Angry", "Tired"],
+        "correct": "Joyful",
+        "difficulty": "easy",
+        "topic": "synonyms"
+      },
+      {
+        "_id": "v2",
+        "question": "Choose the antonym of 'GENEROUS':",
+        "type": "mcq",
+        "options": ["Kind", "Stingy", "Helpful", "Nice"],
+        "correct": "Stingy", 
+        "difficulty": "easy",
+        "topic": "antonyms"
+      },
+      {
+        "_id": "v5",
+        "question": "Choose the correct spelling:",
+        "type": "mcq",
+        "options": ["Recieve", "Receive", "Receeve", "Recive"],
+        "correct": "Receive",
+        "difficulty": "easy",
+        "topic": "spelling"
+      },
+      {
+        "_id": "v6",
+        "question": "Choose the synonym of 'BRAVE':",
+        "type": "mcq",
+        "options": ["Coward", "Fearful", "Courageous", "Weak"],
+        "correct": "Courageous",
+        "difficulty": "easy",
+        "topic": "synonyms"
+      },
+      {
+        "_id": "v7",
+        "question": "What is the plural of 'child'?",
+        "type": "mcq",
+        "options": ["Childs", "Children", "Childes", "Childrens"],
+        "correct": "Children",
+        "difficulty": "easy",
+        "topic": "grammar"
+      },
+      {
+        "_id": "v8",
+        "question": "Choose the antonym of 'BRIGHT':",
+        "type": "mcq",
+        "options": ["Shiny", "Dark", "Light", "Clear"],
+        "correct": "Dark",
+        "difficulty": "easy",
+        "topic": "antonyms"
+      },
+      {
+        "_id": "v17",
+        "question": "Choose the synonym of 'QUICK':",
+        "type": "mcq",
+        "options": ["Slow", "Fast", "Lazy", "Tired"],
+        "correct": "Fast",
+        "difficulty": "easy",
+        "topic": "synonyms"
+      },
+      {
+        "_id": "v18",
+        "question": "What is the past tense of 'go'?",
+        "type": "mcq",
+        "options": ["Goes", "Gone", "Went", "Going"],
+        "correct": "Went",
+        "difficulty": "easy",
+        "topic": "grammar"
+      },
+      {
+        "_id": "v19",
+        "question": "Choose the correct spelling:",
+        "type": "mcq",
+        "options": ["Seperate", "Separate", "Seperete", "Separete"],
+        "correct": "Separate",
+        "difficulty": "easy",
+        "topic": "spelling"
+      },
+      {
+        "_id": "v20",
+        "question": "Choose the antonym of 'ANCIENT':",
+        "type": "mcq",
+        "options": ["Old", "Modern", "Historic", "Traditional"],
+        "correct": "Modern",
+        "difficulty": "easy",
+        "topic": "antonyms"
+      }
+    ],
+    "medium": [
+      {
+        "_id": "v3",
+        "question": "PEN : WRITE :: BRUSH : ?",
+        "type": "mcq",
+        "options": ["Draw", "Paint", "Clean", "Cut"],
+        "correct": "Paint",
+        "difficulty": "medium",
+        "topic": "analogies"
+      },
+      {
+        "_id": "v9",
+        "question": "Choose the word that best fits: The _____ of the mountain was covered with snow.",
+        "type": "mcq",
+        "options": ["peak", "base", "side", "foot"],
+        "correct": "peak",
+        "difficulty": "medium",
+        "topic": "vocabulary"
+      },
+      {
+        "_id": "v10",
+        "question": "DOCTOR : HOSPITAL :: TEACHER : ?",
+        "type": "mcq",
+        "options": ["Student", "School", "Book", "Class"],
+        "correct": "School",
+        "difficulty": "medium",
+        "topic": "analogies"
+      },
+      {
+        "_id": "v11",
+        "question": "Choose the synonym of 'ABUNDANT':",
+        "type": "mcq",
+        "options": ["Scarce", "Plentiful", "Limited", "Few"],
+        "correct": "Plentiful",
+        "difficulty": "medium",
+        "topic": "synonyms"
+      },
+      {
+        "_id": "v12",
+        "question": "Identify the correct sentence:",
+        "type": "mcq",
+        "options": ["He go to school daily", "He goes to school daily", "He going to school daily", "He gone to school daily"],
+        "correct": "He goes to school daily",
+        "difficulty": "medium",
+        "topic": "grammar"
+      },
+      {
+        "_id": "v21",
+        "question": "Choose the word closest in meaning to 'DILIGENT':",
+        "type": "mcq",
+        "options": ["Lazy", "Hardworking", "Careless", "Slow"],
+        "correct": "Hardworking",
+        "difficulty": "medium",
+        "topic": "synonyms"
+      },
+      {
+        "_id": "v22",
+        "question": "Complete: BIRD : FLY :: FISH : ?",
+        "type": "mcq",
+        "options": ["Water", "Swim", "Ocean", "Scales"],
+        "correct": "Swim",
+        "difficulty": "medium",
+        "topic": "analogies"
+      },
+      {
+        "_id": "v23",
+        "question": "Choose the correct preposition: She is good _____ mathematics.",
+        "type": "mcq",
+        "options": ["in", "at", "on", "with"],
+        "correct": "at",
+        "difficulty": "medium",
+        "topic": "grammar"
+      },
+      {
+        "_id": "v24",
+        "question": "What does 'procrastinate' mean?",
+        "type": "mcq",
+        "options": ["To hurry", "To delay", "To complete", "To organize"],
+        "correct": "To delay",
+        "difficulty": "medium",
+        "topic": "vocabulary"
+      }
+    ],
+    "hard": [
+      {
+        "_id": "v4",
+        "question": "Identify the error: 'She don't like apples.'",
+        "type": "mcq",
+        "options": ["She should be Her", "don't should be doesn't", "like should be likes", "No error"],
+        "correct": "don't should be doesn't",
+        "difficulty": "hard",
+        "topic": "grammar"
+      },
+      {
+        "_id": "v13",
+        "question": "Choose the word that means 'existing everywhere':",
+        "type": "mcq",
+        "options": ["Ubiquitous", "Rare", "Limited", "Specific"],
+        "correct": "Ubiquitous",
+        "difficulty": "hard",
+        "topic": "vocabulary"
+      },
+      {
+        "_id": "v14",
+        "question": "Complete the analogy: SYMPHONY : COMPOSER :: NOVEL : ?",
+        "type": "mcq",
+        "options": ["Reader", "Author", "Publisher", "Library"],
+        "correct": "Author",
+        "difficulty": "hard",
+        "topic": "analogies"
+      },
+      {
+        "_id": "v15",
+        "question": "Choose the antonym of 'EPHEMERAL':",
+        "type": "mcq",
+        "options": ["Temporary", "Brief", "Permanent", "Short"],
+        "correct": "Permanent",
+        "difficulty": "hard",
+        "topic": "antonyms"
+      },
+      {
+        "_id": "v16",
+        "question": "Identify the grammatically correct sentence:",
+        "type": "mcq",
+        "options": ["Neither of the boys were present", "Neither of the boys was present", "Neither of the boy were present", "Neither of the boy was present"],
+        "correct": "Neither of the boys was present",
+        "difficulty": "hard",
+        "topic": "grammar"
+      },
+      {
+        "_id": "v25",
+        "question": "Choose the word that means 'to make less severe':",
+        "type": "mcq",
+        "options": ["Aggravate", "Mitigate", "Complicate", "Intensify"],
+        "correct": "Mitigate",
+        "difficulty": "hard",
+        "topic": "vocabulary"
+      },
+      {
+        "_id": "v26",
+        "question": "Complete: CACOPHONY : HARSH :: MELODY : ?",
+        "type": "mcq",
+        "options": ["Loud", "Pleasant", "Music", "Sound"],
+        "correct": "Pleasant",
+        "difficulty": "hard",
+        "topic": "analogies"
+      },
+      {
+        "_id": "v27",
+        "question": "Identify the error: 'Each of the students have submitted their assignment.'",
+        "type": "mcq",
+        "options": ["Each should be All", "have should be has", "their should be his", "No error"],
+        "correct": "have should be has",
+        "difficulty": "hard",
+        "topic": "grammar"
+      },
+      {
+        "_id": "v28",
+        "question": "What does 'sanguine' mean?",
+        "type": "mcq",
+        "options": ["Pessimistic", "Optimistic", "Angry", "Confused"],
+        "correct": "Optimistic",
+        "difficulty": "hard",
+        "topic": "vocabulary"
+      }
+    ]
+  },
+  "puzzles": {
+    "easy": [
+      {
+        "_id": "p1",
+        "question": "What comes next in the pattern: ○, ○•, ○••, ○•••, ?",
+        "type": "mcq",
+        "options": ["○••••", "○•••••", "○", "○•"],
+        "correct": "○••••",
+        "difficulty": "easy",
+        "topic": "visual-patterns"
+      },
+      {
+        "_id": "p4",
+        "question": "What has keys but cannot open locks?",
+        "type": "mcq",
+        "options": ["Piano", "Door", "Car", "House"],
+        "correct": "Piano",
+        "difficulty": "easy",
+        "topic": "riddles"
+      },
+      {
+        "_id": "p5",
+        "question": "What gets wetter as it dries?",
+        "type": "mcq",
+        "options": ["Towel", "Hair", "Clothes", "Soap"],
+        "correct": "Towel",
+        "difficulty": "easy",
+        "topic": "riddles"
+      },
+      {
+        "_id": "p6",
+        "question": "I am tall when I am young and short when I am old. What am I?",
+        "type": "mcq",
+        "options": ["Tree", "Candle", "Person", "Building"],
+        "correct": "Candle",
+        "difficulty": "easy",
+        "topic": "riddles"
+      },
+      {
+        "_id": "p7",
+        "question": "What has hands but cannot clap?",
+        "type": "mcq",
+        "options": ["Clock", "Person", "Monkey", "Robot"],
+        "correct": "Clock",
+        "difficulty": "easy",
+        "topic": "riddles"
+      },
+      {
+        "_id": "p16",
+        "question": "What has a face but no eyes?",
+        "type": "mcq",
+        "options": ["Clock", "Mirror", "Coin", "Book"],
+        "correct": "Clock",
+        "difficulty": "easy",
+        "topic": "riddles"
+      },
+      {
+        "_id": "p17",
+        "question": "What goes up but never comes down?",
+        "type": "mcq",
+        "options": ["Balloon", "Age", "Airplane", "Smoke"],
+        "correct": "Age",
+        "difficulty": "easy",
+        "topic": "riddles"
+      },
+      {
+        "_id": "p18",
+        "question": "Complete the pattern: 1, 3, 6, 10, 15, ?",
+        "type": "mcq",
+        "options": ["18", "20", "21", "24"],
+        "correct": "21",
+        "difficulty": "easy",
+        "topic": "number-patterns"
+      },
+      {
+        "_id": "p19",
+        "question": "What can you hold without touching?",
+        "type": "mcq",
+        "options": ["Breath", "Water", "Fire", "Wind"],
+        "correct": "Breath",
+        "difficulty": "easy",
+        "topic": "riddles"
+      }
+    ],
+    "medium": [
+      {
+        "_id": "p2",
+        "question": "Father is 4 times son's age. After 20 years, father will be twice son's age. Find current ages.",
+        "type": "mcq",
+        "options": ["Son=8, Father=32", "Son=10, Father=40", "Son=12, Father=48", "Son=15, Father=60"],
+        "correct": "Son=10, Father=40",
+        "difficulty": "medium",
+        "topic": "age-problems"
+      },
+      {
+        "_id": "p8",
+        "question": "A man lives on the 20th floor. He takes elevator down but walks up to 10th floor, except on rainy days. Why?",
+        "type": "mcq",
+        "options": ["He likes exercise", "Elevator is broken", "He is too short to reach 20th button", "He saves electricity"],
+        "correct": "He is too short to reach 20th button",
+        "difficulty": "medium",
+        "topic": "logic-puzzles"
+      },
+      {
+        "_id": "p9",
+        "question": "What comes next: O, T, T, F, F, S, S, ?",
+        "type": "mcq",
+        "options": ["E", "N", "I", "G"],
+        "correct": "E",
+        "difficulty": "medium",
+        "topic": "pattern-recognition"
+      },
+      {
+        "_id": "p10",
+        "question": "If you have me, you want to share me. If you share me, you don't have me. What am I?",
+        "type": "mcq",
+        "options": ["Money", "Secret", "Food", "Toy"],
+        "correct": "Secret",
+        "difficulty": "medium",
+        "topic": "riddles"
+      },
+      {
+        "_id": "p11",
+        "question": "A clock shows 3:15. What is the angle between the hour and minute hands?",
+        "type": "mcq",
+        "options": ["0°", "7.5°", "15°", "22.5°"],
+        "correct": "7.5°",
+        "difficulty": "medium",
+        "topic": "clock-problems"
+      },
+      {
+        "_id": "p20",
+        "question": "A father is 3 times as old as his son. In 12 years, he will be twice as old. What are their current ages?",
+        "type": "mcq",
+        "options": ["Son=10, Father=30", "Son=12, Father=36", "Son=15, Father=45", "Son=18, Father=54"],
+        "correct": "Son=12, Father=36",
+        "difficulty": "medium",
+        "topic": "age-problems"
+      },
+      {
+        "_id": "p21",
+        "question": "What comes next: M, V, E, N, ?",
+        "type": "mcq",
+        "options": ["S", "T", "U", "R"],
+        "correct": "T",
+        "difficulty": "medium",
+        "topic": "pattern-recognition"
+      },
+      {
+        "_id": "p22",
+        "question": "I have branches but no fruit, trunk but no bark. What am I?",
+        "type": "mcq",
+        "options": ["Tree", "Bank", "River", "Library"],
+        "correct": "Bank",
+        "difficulty": "medium",
+        "topic": "riddles"
+      },
+      {
+        "_id": "p23",
+        "question": "At 6:00, the angle between clock hands is:",
+        "type": "mcq",
+        "options": ["180°", "90°", "120°", "150°"],
+        "correct": "180°",
+        "difficulty": "medium",
+        "topic": "clock-problems"
+      }
+    ],
+    "hard": [
+      {
+        "_id": "p3",
+        "question": "SEND + MORE = MONEY. If S=9, E=5, N=6, D=7, M=1, O=0, R=8, what is Y?",
+        "type": "mcq",
+        "options": ["1", "2", "3", "4"],
+        "correct": "2",
+        "difficulty": "hard",
+        "topic": "cryptarithmetic"
+      },
+      {
+        "_id": "p12",
+        "question": "You have 12 balls, 11 identical and 1 different in weight. Using a balance scale only 3 times, how do you find the different ball?",
+        "type": "mcq",
+        "options": ["Divide into groups of 4", "Divide into groups of 3", "Divide into groups of 6", "Cannot be done"],
+        "correct": "Divide into groups of 4",
+        "difficulty": "hard",
+        "topic": "logic-puzzles"
+      },
+      {
+        "_id": "p13",
+        "question": "A prisoner is told: 'If you tell a lie, we will hang you. If you tell the truth, we will shoot you.' What should he say to escape?",
+        "type": "mcq",
+        "options": ["I am innocent", "You will hang me", "I don't know", "I am guilty"],
+        "correct": "You will hang me",
+        "difficulty": "hard",
+        "topic": "paradox"
+      },
+      {
+        "_id": "p14",
+        "question": "In a 100-story building, you drop an egg from floor X. If it breaks, you know floors X and above will break eggs. If it doesn't break, floors below X won't break eggs. What's the minimum number of drops to find the highest safe floor?",
+        "type": "mcq",
+        "options": ["10", "14", "19", "50"],
+        "correct": "14",
+        "difficulty": "hard",
+        "topic": "optimization"
+      },
+      {
+        "_id": "p15",
+        "question": "Three switches control three bulbs in another room. You can flip switches but can only check the bulbs once. How do you determine which switch controls which bulb?",
+        "type": "mcq",
+        "options": ["Turn on first switch for 5 min, then off. Turn on second switch and check", "Turn on all switches", "Turn on one switch only", "Cannot be determined"],
+        "correct": "Turn on first switch for 5 min, then off. Turn on second switch and check",
+        "difficulty": "hard",
+        "topic": "logic-puzzles"
+      },
+      {
+        "_id": "p24",
+        "question": "You have 8 balls, 7 identical and 1 heavier. Using a balance scale twice, how do you find the heavier ball?",
+        "type": "mcq",
+        "options": ["Divide into groups of 4", "Divide into groups of 3,3,2", "Divide into groups of 2", "Cannot be done in 2 weighings"],
+        "correct": "Divide into groups of 3,3,2",
+        "difficulty": "hard",
+        "topic": "logic-puzzles"
+      },
+      {
+        "_id": "p25",
+        "question": "A man says: 'Brothers and sisters have I none, but this man's father is my father's son.' Who is 'this man'?",
+        "type": "mcq",
+        "options": ["His son", "His brother", "Himself", "His father"],
+        "correct": "His son",
+        "difficulty": "hard",
+        "topic": "logic-puzzles"
+      },
+      {
+        "_id": "p26",
+        "question": "If today is Monday, what day will it be 100 days from now?",
+        "type": "mcq",
+        "options": ["Monday", "Tuesday", "Wednesday", "Thursday"],
+        "correct": "Tuesday",
+        "difficulty": "hard",
+        "topic": "calendar-problems"
+      },
+      {
+        "_id": "p27",
+        "question": "A snail climbs 3 feet up a 10-foot wall each day but slides back 2 feet each night. On which day will it reach the top?",
+        "type": "mcq",
+        "options": ["8th day", "9th day", "10th day", "11th day"],
+        "correct": "8th day",
+        "difficulty": "hard",
+        "topic": "logic-puzzles"
+      }
+    ]
+  }
+}

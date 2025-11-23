@@ -216,20 +216,60 @@ class AptitudeManager {
             .replace(/<\/div><\/p>/g, '</div>');
     }
 
-    async loadQuestions(topic) {
+    async loadQuestions(topic, difficulty = 'medium') {
         try {
-            const response = await fetch(`/api/aptitude/questions/${topic}`);
+            const response = await fetch('/data/aptitude-questions.json');
             const data = await response.json();
 
-            if (data.success) {
-                this.questions = data.questions;
+            if (data[topic] && data[topic][difficulty]) {
+                this.questions = data[topic][difficulty];
                 this.currentQuestionIndex = 0;
                 this.userAnswers = new Array(this.questions.length).fill('');
                 this.startQuestionTimer();
                 this.displayQuestion();
+            } else {
+                this.showNoQuestionsMessage(topic, difficulty);
             }
         } catch (error) {
             console.error('Error loading questions:', error);
+            this.showErrorMessage();
+        }
+    }
+
+    showNoQuestionsMessage(topic, difficulty) {
+        const questionText = document.getElementById('question-text');
+        const answerContainer = document.getElementById('answer-container');
+        
+        if (questionText) {
+            questionText.textContent = `No questions available for ${topic} - ${difficulty}`;
+        }
+        
+        if (answerContainer) {
+            answerContainer.innerHTML = `
+                <div class="no-questions-message">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--warning-color); margin-bottom: 15px;"></i>
+                    <p>Questions for this topic and difficulty are coming soon!</p>
+                    <p>Try selecting a different challenge from the sidebar.</p>
+                </div>
+            `;
+        }
+    }
+
+    showErrorMessage() {
+        const questionText = document.getElementById('question-text');
+        const answerContainer = document.getElementById('answer-container');
+        
+        if (questionText) {
+            questionText.textContent = 'Error loading questions';
+        }
+        
+        if (answerContainer) {
+            answerContainer.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: var(--error-color); margin-bottom: 15px;"></i>
+                    <p>Unable to load questions. Please try again later.</p>
+                </div>
+            `;
         }
     }
 

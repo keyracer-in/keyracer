@@ -38,31 +38,115 @@
 
     <div class="container">
         <div class="aptitude-container">
-            <aside class="aptitude-sidebar">
-                <h2 class="sidebar-title">Select Topic</h2>
-                <ul class="topic-list">
-                    <li class="topic-item">
-                        <a href="#" class="topic-link active" data-topic="quant">
+            <aside class="aptitude-sidebar challenge-sidebar">
+                <h2 class="sidebar-title">Challenge Mode</h2>
+                <ul class="challenge-list">
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link active" data-topic="quant" data-difficulty="easy">
                             <i class="fas fa-calculator topic-icon"></i>
-                            Quantitative
+                            <div class="challenge-info">
+                                <span class="challenge-name">Quantitative</span>
+                                <span class="difficulty-badge easy">Easy</span>
+                            </div>
                         </a>
                     </li>
-                    <li class="topic-item">
-                        <a href="#" class="topic-link" data-topic="logical-reasoning">
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link" data-topic="quant" data-difficulty="medium">
+                            <i class="fas fa-calculator topic-icon"></i>
+                            <div class="challenge-info">
+                                <span class="challenge-name">Quantitative</span>
+                                <span class="difficulty-badge medium">Medium</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link" data-topic="quant" data-difficulty="hard">
+                            <i class="fas fa-calculator topic-icon"></i>
+                            <div class="challenge-info">
+                                <span class="challenge-name">Quantitative</span>
+                                <span class="difficulty-badge hard">Hard</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link" data-topic="logical-reasoning" data-difficulty="easy">
                             <i class="fas fa-puzzle-piece topic-icon"></i>
-                            Logical Reasoning
+                            <div class="challenge-info">
+                                <span class="challenge-name">Logical Reasoning</span>
+                                <span class="difficulty-badge easy">Easy</span>
+                            </div>
                         </a>
                     </li>
-                    <li class="topic-item">
-                        <a href="#" class="topic-link" data-topic="verbal">
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link" data-topic="logical-reasoning" data-difficulty="medium">
+                            <i class="fas fa-puzzle-piece topic-icon"></i>
+                            <div class="challenge-info">
+                                <span class="challenge-name">Logical Reasoning</span>
+                                <span class="difficulty-badge medium">Medium</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link" data-topic="logical-reasoning" data-difficulty="hard">
+                            <i class="fas fa-puzzle-piece topic-icon"></i>
+                            <div class="challenge-info">
+                                <span class="challenge-name">Logical Reasoning</span>
+                                <span class="difficulty-badge hard">Hard</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link" data-topic="verbal" data-difficulty="easy">
                             <i class="fas fa-language topic-icon"></i>
-                            Verbal Ability
+                            <div class="challenge-info">
+                                <span class="challenge-name">Verbal Ability</span>
+                                <span class="difficulty-badge easy">Easy</span>
+                            </div>
                         </a>
                     </li>
-                    <li class="topic-item">
-                        <a href="#" class="topic-link" data-topic="puzzles">
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link" data-topic="verbal" data-difficulty="medium">
+                            <i class="fas fa-language topic-icon"></i>
+                            <div class="challenge-info">
+                                <span class="challenge-name">Verbal Ability</span>
+                                <span class="difficulty-badge medium">Medium</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link" data-topic="verbal" data-difficulty="hard">
+                            <i class="fas fa-language topic-icon"></i>
+                            <div class="challenge-info">
+                                <span class="challenge-name">Verbal Ability</span>
+                                <span class="difficulty-badge hard">Hard</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link" data-topic="puzzles" data-difficulty="easy">
                             <i class="fas fa-lightbulb topic-icon"></i>
-                            Puzzles
+                            <div class="challenge-info">
+                                <span class="challenge-name">Puzzles</span>
+                                <span class="difficulty-badge easy">Easy</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link" data-topic="puzzles" data-difficulty="medium">
+                            <i class="fas fa-lightbulb topic-icon"></i>
+                            <div class="challenge-info">
+                                <span class="challenge-name">Puzzles</span>
+                                <span class="difficulty-badge medium">Medium</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li class="challenge-item">
+                        <a href="#" class="challenge-link" data-topic="puzzles" data-difficulty="hard">
+                            <i class="fas fa-lightbulb topic-icon"></i>
+                            <div class="challenge-info">
+                                <span class="challenge-name">Puzzles</span>
+                                <span class="difficulty-badge hard">Hard</span>
+                            </div>
                         </a>
                     </li>
                 </ul>
@@ -83,12 +167,16 @@
                         <span class="question-difficulty difficulty-medium">MEDIUM</span>
                     </div>
                     
-                    <div class="question-text">
-                        Select a topic from the sidebar to start the challenge.
+                    <div class="question-text" id="question-text">
+                        Select a challenge from the sidebar to start.
                     </div>
                     
-                    <div class="answer-container">
-                        <!-- Options or text input will be inserted here -->
+                    <div class="answer-container" id="answer-container">
+                        <div class="welcome-message">
+                            <i class="fas fa-brain" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 20px;"></i>
+                            <h3>Ready to Challenge Yourself?</h3>
+                            <p>Choose a topic and difficulty level from the sidebar to begin your aptitude challenge.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -131,14 +219,34 @@
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
         
-        // Load questions when topic is selected
-        document.querySelectorAll('.topic-link').forEach(link => {
+        // Load questions when challenge is selected
+        document.querySelectorAll('.challenge-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const topic = e.currentTarget.dataset.topic;
-                window.aptitudeManager.loadQuestions(topic);
+                const difficulty = e.currentTarget.dataset.difficulty;
+                
+                // Update active state
+                document.querySelectorAll('.challenge-link').forEach(l => l.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                
+                // Update title
+                const title = document.querySelector('.content-title');
+                if (title) {
+                    title.textContent = `${topic.charAt(0).toUpperCase() + topic.slice(1)} - ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`;
+                }
+                
+                window.aptitudeManager.loadQuestions(topic, difficulty);
             });
         });
+        
+        // Auto-load first challenge on page load
+        setTimeout(() => {
+            const firstChallenge = document.querySelector('.challenge-link.active');
+            if (firstChallenge) {
+                firstChallenge.click();
+            }
+        }, 500);
     </script>
 </body>
 </html>
