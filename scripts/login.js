@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (response.ok) {
                     // Store user info and token
+                    localStorage.setItem('token', data.token);
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('typingTestUser', data.user.username);
                     localStorage.setItem('typingTestUserEmail', data.user.email);
@@ -387,6 +388,8 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('typingTestUserEmail');
             localStorage.removeItem('typingTestUserData');
             localStorage.removeItem('preferencesComplete');
+            localStorage.removeItem('token');
+            localStorage.removeItem('authToken');
             
             // Reload the page to show normal login form
             window.location.reload();

@@ -434,9 +434,21 @@ class AptitudeManager {
         };
 
         try {
+            // Check both token and legacy auth
             const token = localStorage.getItem('token');
-            if (!token) {
+            const legacyUser = localStorage.getItem('typingTestUser');
+            
+            console.log('Auth check:', { token, legacyUser }); // Debug log
+            
+            if (!token && !legacyUser) {
                 alert('Please login to submit test');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            if (!token) {
+                alert('Please use the new login system to access aptitude tests');
+                window.location.href = '/login.html';
                 return;
             }
             
