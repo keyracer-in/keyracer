@@ -476,6 +476,13 @@ class AptitudeManager {
                 body: JSON.stringify(submissionData)
             });
 
+            if (!response.ok) {
+                console.error('HTTP Error:', response.status, response.statusText);
+                const text = await response.text();
+                console.error('Response body:', text);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
             const data = await response.json();
             if (data.success) {
                 this.showResults(data.result);
