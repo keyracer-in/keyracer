@@ -565,9 +565,15 @@ class AptitudeManager {
                         </div>
                     </div>
                 ` : ''}
-                <button class="close-results" onclick="this.parentElement.parentElement.remove()">
-                    Close
-                </button>
+                <div class="results-actions">
+                    <button class="view-leaderboard-btn" onclick="window.location.href='/aptitude-leaderboard.html'">
+                        <i class="fas fa-trophy"></i>
+                        View Leaderboard
+                    </button>
+                    <button class="close-results" onclick="this.parentElement.parentElement.remove()">
+                        Close
+                    </button>
+                </div>
             </div>
         `;
 
@@ -576,18 +582,39 @@ class AptitudeManager {
 
     getBadgeName(badge) {
         const names = {
-            'math-whiz': 'Math Whiz',
+            'excellent': 'Excellent',
+            'good': 'Good',
             'fast-thinker': 'Fast Thinker',
+            'perfect-score': 'Perfect Score',
+            'math-whiz': 'Math Whiz',
             'puzzle-master': 'Puzzle Master'
         };
-        return names[badge] || badge;
+        return names[badge] || badge.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    displayNoDataMessage(message) {
+        const tbody = document.querySelector('.leaderboard-table tbody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-color);">
+                    <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 15px; color: var(--warning-color);"></i>
+                    <br>
+                    ${message}
+                </td>
+            </tr>
+        `;
     }
 
     async loadLeaderboard(period = 'all-time') {
         try {
             const token = localStorage.getItem('token');
+            console.log('Loading leaderboard with token:', token ? 'present' : 'missing');
+            
             if (!token) {
                 console.log('No token available for leaderboard');
+                this.displayNoDataMessage('Please login to view leaderboard');
                 return;
             }
             
@@ -596,19 +623,40 @@ class AptitudeManager {
                     'Authorization': `Bearer ${token}`
                 }
             });
+            
+            console.log('Leaderboard response status:', response.status);
             const data = await response.json();
+            console.log('Leaderboard data:', data);
 
             if (data.success) {
                 this.displayLeaderboard(data.leaderboard);
+            } else {
+                console.error('Leaderboard API error:', data.message);
+                this.displayNoDataMessage(data.message || 'Failed to load leaderboard');
             }
         } catch (error) {
             console.error('Error loading leaderboard:', error);
+            this.displayNoDataMessage('Error loading leaderboard');
         }
     }
 
     displayLeaderboard(leaderboard) {
         const tbody = document.querySelector('.leaderboard-table tbody');
         if (!tbody) return;
+
+        if (!leaderboard || leaderboard.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-color);">
+                        <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <br>
+                        No leaderboard data available yet.<br>
+                        Complete some challenges to see rankings!
+                    </td>
+                </tr>
+            `;
+            return;
+        }
 
         tbody.innerHTML = leaderboard.map((entry, index) => `
             <tr>
@@ -618,7 +666,7 @@ class AptitudeManager {
                 <td>${Math.floor(entry.timeTaken / 60)}:${(entry.timeTaken % 60).toString().padStart(2, '0')}</td>
                 <td>${entry.accuracy.toFixed(1)}%</td>
                 <td>
-                    ${entry.badges.map(badge => `
+                    ${(entry.badges || []).map(badge => `
                         <span class="badge-mini">${this.getBadgeName(badge)}</span>
                     `).join('')}
                 </td>
