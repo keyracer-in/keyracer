@@ -1,11 +1,11 @@
 /* Aptitude Section Styles */
 .aptitude-container {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 20px;
     display: flex;
     gap: 30px;
-    min-height: calc(100vh - 200px);
+    min-height: calc(100vh - 120px);
 }
 
 /* Sidebar Styles */
@@ -108,8 +108,11 @@
     flex: 1;
     background: var(--card-bg);
     border-radius: 16px;
-    padding: 30px;
+    padding: 35px;
     border: 1px solid rgba(0, 194, 255, 0.2);
+    min-width: 0;
+    height: calc(100vh - 140px);
+    overflow-y: auto;
 }
 
 .content-header {
@@ -320,9 +323,12 @@
 .question-container {
     background: rgba(7, 11, 24, 0.7);
     border-radius: 12px;
-    padding: 25px;
+    padding: 30px;
     margin-bottom: 25px;
     border: 1px solid rgba(0, 194, 255, 0.1);
+    height: 600px;
+    display: flex;
+    flex-direction: column;
 }
 
 .question-header {
@@ -350,16 +356,23 @@
 .difficulty-hard { background: rgba(228, 27, 23, 0.2); color: var(--primary-color); }
 
 .question-text {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 20px;
+    font-size: 1.2rem;
+    line-height: 1.7;
+    margin-bottom: 25px;
     color: var(--text-color);
+    height: 120px;
+    overflow-y: auto;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    padding-right: 10px;
 }
 
 .options-container {
     display: grid;
     gap: 12px;
     margin-bottom: 20px;
+    height: 280px;
+    overflow-y: auto;
 }
 
 .option-item {

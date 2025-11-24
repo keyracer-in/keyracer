@@ -240,13 +240,7 @@
             });
         });
         
-        // Auto-load first challenge on page load
-        setTimeout(() => {
-            const firstChallenge = document.querySelector('.challenge-link.active');
-            if (firstChallenge) {
-                firstChallenge.click();
-            }
-        }, 500);
+        // Don't auto-load challenges - let user select when ready
     </script>
 </body>
 </html>

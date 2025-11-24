@@ -91,8 +91,7 @@ class AptitudeManager {
             }
         }
 
-        // Update sidebar to show subsections
-        this.populateSidebar(topic, subsection);
+        this.populateSidebar(topic);
     }
 
     parseSections(content) {
@@ -126,21 +125,19 @@ class AptitudeManager {
         return sections;
     }
 
-    populateSidebar(topic, activeSubsection = null) {
+    populateSidebar(topic) {
         const topicList = document.querySelector('.topic-list');
         if (!topicList) return;
 
-        // Clear existing content
         topicList.innerHTML = '';
 
-        // Add main topics
         Object.keys(this.content).forEach(topicKey => {
             const topicItem = document.createElement('li');
             topicItem.className = 'topic-item';
 
             const topicLink = document.createElement('a');
             topicLink.href = '#';
-            topicLink.className = `topic-link ${topicKey === topic && !activeSubsection ? 'active' : ''}`;
+            topicLink.className = `topic-link ${topicKey === topic ? 'active' : ''}`;
             topicLink.dataset.topic = topicKey;
             topicLink.innerHTML = `
                 <i class="fas fa-${this.getTopicIcon(topicKey)} topic-icon"></i>
@@ -153,38 +150,6 @@ class AptitudeManager {
             });
 
             topicItem.appendChild(topicLink);
-
-            // Add subsections if this is the active topic
-            if (topicKey === topic) {
-                const sections = this.parseSections(this.content[topicKey].content);
-                if (sections.length > 0) {
-                    const subsectionList = document.createElement('ul');
-                    subsectionList.className = 'subsection-list';
-
-                    sections.forEach(section => {
-                        const subsectionItem = document.createElement('li');
-                        subsectionItem.className = 'subsection-item';
-
-                        const subsectionLink = document.createElement('a');
-                        subsectionLink.href = '#';
-                        subsectionLink.className = `subsection-link ${section.title === activeSubsection ? 'active' : ''}`;
-                        subsectionLink.dataset.topic = topicKey;
-                        subsectionLink.dataset.subsection = section.title;
-                        subsectionLink.textContent = section.title;
-
-                        subsectionLink.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            this.loadTopicContent(topicKey, section.title);
-                        });
-
-                        subsectionItem.appendChild(subsectionLink);
-                        subsectionList.appendChild(subsectionItem);
-                    });
-
-                    topicItem.appendChild(subsectionList);
-                }
-            }
-
             topicList.appendChild(topicItem);
         });
     }
@@ -218,47 +183,66 @@ class AptitudeManager {
 
     async loadQuestions(topic, difficulty = 'medium') {
         try {
-            // Try API first, fallback to local JSON
-            const token = localStorage.getItem('token');
-            let response;
+            const userEmail = localStorage.getItem('typingTestUserEmail') || `${localStorage.getItem('typingTestUser')}@guest.local`;
             
-            if (token) {
-                try {
-                    response = await fetch(`/api/aptitude/questions/${topic}/${difficulty}`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
-                    const apiData = await response.json();
-                    if (apiData.success && apiData.questions.length > 0) {
-                        this.questions = apiData.questions;
-                        this.currentQuestionIndex = 0;
-                        this.userAnswers = new Array(this.questions.length).fill('');
-                        this.startQuestionTimer();
-                        this.displayQuestion();
-                        return;
-                    }
-                } catch (apiError) {
-                    console.log('API failed, falling back to local data');
+            // Try API first with user email to exclude solved questions
+            try {
+                const response = await fetch(`/api/aptitude/questions/${topic}/${difficulty}?email=${encodeURIComponent(userEmail)}`);
+                const apiData = await response.json();
+                if (apiData.success && apiData.questions.length > 0) {
+                    this.questions = apiData.questions;
+                    this.currentQuestionIndex = 0;
+                    this.userAnswers = new Array(this.questions.length).fill('');
+                    this.showStartButton(topic, difficulty);
+                    return;
                 }
+            } catch (apiError) {
+                console.log('API failed, falling back to local data');
             }
             
             // Fallback to local JSON
-            response = await fetch('/data/aptitude-questions.json');
+            const response = await fetch('/data/aptitude-questions.json');
             const data = await response.json();
 
             if (data[topic] && data[topic][difficulty]) {
                 this.questions = data[topic][difficulty];
                 this.currentQuestionIndex = 0;
                 this.userAnswers = new Array(this.questions.length).fill('');
-                this.startQuestionTimer();
-                this.displayQuestion();
+                this.showStartButton(topic, difficulty);
             } else {
                 this.showNoQuestionsMessage(topic, difficulty);
             }
         } catch (error) {
             console.error('Error loading questions:', error);
             this.showErrorMessage();
+        }
+    }
+
+    showStartButton(topic, difficulty) {
+        const questionText = document.getElementById('question-text');
+        const answerContainer = document.getElementById('answer-container');
+        
+        if (questionText) {
+            questionText.textContent = `Ready to start ${topic} - ${difficulty} challenge?`;
+        }
+        
+        if (answerContainer) {
+            answerContainer.innerHTML = `
+                <div class="start-challenge-container" style="text-align: center; padding: 40px;">
+                    <i class="fas fa-play-circle" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 20px;"></i>
+                    <h3 style="color: var(--text-color); margin-bottom: 15px;">Challenge Ready!</h3>
+                    <p style="color: rgba(225, 230, 242, 0.8); margin-bottom: 25px;">You have ${this.questions.length} questions to solve. Timer will start when you begin.</p>
+                    <button class="start-challenge-btn" style="background: linear-gradient(135deg, var(--accent-color), #0099cc); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1.1rem;">
+                        <i class="fas fa-rocket"></i> Start Challenge
+                    </button>
+                </div>
+            `;
+            
+            const startBtn = answerContainer.querySelector('.start-challenge-btn');
+            startBtn.addEventListener('click', () => {
+                this.startQuestionTimer();
+                this.displayQuestion();
+            });
         }
     }
 
@@ -377,6 +361,7 @@ class AptitudeManager {
         if (this.currentQuestionIndex > 0) {
             this.currentQuestionIndex--;
             this.displayQuestion();
+            this.resetQuestionTimer();
         }
     }
 
@@ -384,6 +369,7 @@ class AptitudeManager {
         if (this.currentQuestionIndex < this.questions.length - 1) {
             this.currentQuestionIndex++;
             this.displayQuestion();
+            this.resetQuestionTimer();
         }
     }
 
@@ -466,65 +452,40 @@ class AptitudeManager {
             clearInterval(this.timer);
         }
 
+        const currentUser = localStorage.getItem('typingTestUser');
+        const userEmail = localStorage.getItem('typingTestUserEmail') || `${currentUser}@guest.local`;
+        
+        if (!currentUser) {
+            alert('Please login to submit test');
+            window.location.href = '/login.html';
+            return;
+        }
+
         const submissionData = {
-            testType: 'individual',
-            questions: this.questions.map((q, index) => ({
-                questionId: q._id,
-                userAnswer: this.userAnswers[index] || '',
-                timeSpent: this.elapsedTime
-            })),
-            timeTaken: this.elapsedTime
+            email: userEmail,
+            displayName: currentUser,
+            answers: this.userAnswers,
+            timeTaken: this.elapsedTime,
+            questionIds: this.questions.map(q => q._id || q.id)
         };
 
         try {
-            // Check both token and legacy auth
-            const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-            const legacyUser = localStorage.getItem('typingTestUser');
-            
-            console.log('Auth check:', { 
-                token, 
-                legacyUser, 
-                authToken: localStorage.getItem('authToken'),
-                allKeys: Object.keys(localStorage)
-            }); // Debug log
-            
-            if (!token && !legacyUser) {
-                alert('Please login to submit test');
-                window.location.href = '/login.html';
-                return;
-            }
-            
-            // If no JWT token but user is logged in, calculate results locally
-            if (!token && legacyUser) {
-                console.log('No JWT token found, using local calculation');
-                this.calculateLocalResults();
-                return;
-            }
-            
-            if (token) {
-                console.log('Using JWT token for API submission');
-            }
-            
-            const response = await fetch('/api/aptitude/submit', {
+            const response = await fetch('/api/aptitude/submit-secure', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(submissionData)
             });
 
             const data = await response.json();
-
             if (data.success) {
                 this.showResults(data.result);
                 this.resetQuestionTimer();
             } else {
-                alert('Error submitting test: ' + data.message);
+                alert('Error: ' + data.message);
             }
         } catch (error) {
-            console.error('Error submitting test:', error);
-            alert('Error submitting test. Please try again.');
+            console.error('Submit error:', error);
+            this.calculateLocalResults(); // Fallback
         }
     }
 
@@ -570,7 +531,7 @@ class AptitudeManager {
                         <i class="fas fa-trophy"></i>
                         View Leaderboard
                     </button>
-                    <button class="close-results" onclick="this.parentElement.parentElement.remove()">
+                    <button class="close-results" onclick="document.body.removeChild(this.closest('.results-modal'))">
                         Close
                     </button>
                 </div>
@@ -609,20 +570,7 @@ class AptitudeManager {
 
     async loadLeaderboard(period = 'all-time') {
         try {
-            const token = localStorage.getItem('token');
-            console.log('Loading leaderboard with token:', token ? 'present' : 'missing');
-            
-            if (!token) {
-                console.log('No token available for leaderboard');
-                this.displayNoDataMessage('Please login to view leaderboard');
-                return;
-            }
-            
-            const response = await fetch(`/api/aptitude/leaderboard?period=${period}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const response = await fetch(`/api/aptitude/leaderboard?period=${period}`);
             
             console.log('Leaderboard response status:', response.status);
             const data = await response.json();

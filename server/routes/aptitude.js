@@ -4,7 +4,86 @@ const AptitudeQuestion = require('../models/AptitudeQuestion');
 const User = require('../models/User');
 const { requireAuth } = require('../middleware/auth');
 
-// Submit aptitude test
+// Secure aptitude submission (no auth required but server validates)
+router.post('/submit-secure', async (req, res) => {
+    try {
+        const { email, displayName, answers, timeTaken, questionIds } = req.body;
+        
+        if (!email || !displayName || !answers || !questionIds) {
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
+        }
+
+        // Find or create user
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = new User({ 
+                email, 
+                username: displayName,
+                displayName,
+                isVerified: true 
+            });
+            await user.save();
+        }
+
+        // Server-side score calculation
+        let correctAnswers = 0;
+        let totalScore = 0;
+        
+        for (let i = 0; i < questionIds.length; i++) {
+            const question = await AptitudeQuestion.findById(questionIds[i]);
+            if (question && answers[i] === question.correctAnswer) {
+                correctAnswers++;
+                totalScore += question.points || 2;
+            }
+        }
+
+        const accuracy = (correctAnswers / questionIds.length) * 100;
+        const badges = [];
+        if (accuracy >= 90) badges.push('excellent');
+        if (accuracy >= 80) badges.push('good');
+        if (timeTaken < 60) badges.push('fast-thinker');
+        if (correctAnswers === questionIds.length) badges.push('perfect-score');
+
+        // Update user stats
+        if (!user.aptitudeStats) {
+            user.aptitudeStats = { testsCompleted: 0, totalScore: 0, bestAccuracy: 0, badges: [], solvedQuestions: [] };
+        }
+        
+        user.aptitudeStats.testsCompleted += 1;
+        user.aptitudeStats.totalScore += totalScore;
+        user.aptitudeStats.bestAccuracy = Math.max(user.aptitudeStats.bestAccuracy, accuracy);
+        
+        // Add correctly answered questions to solved list
+        for (let i = 0; i < questionIds.length; i++) {
+            if (answers[i]) {
+                const question = await AptitudeQuestion.findById(questionIds[i]);
+                if (question && answers[i] === question.correctAnswer) {
+                    if (!user.aptitudeStats.solvedQuestions.includes(questionIds[i])) {
+                        user.aptitudeStats.solvedQuestions.push(questionIds[i]);
+                    }
+                }
+            }
+        }
+        
+        badges.forEach(badge => {
+            if (!user.aptitudeStats.badges.includes(badge)) {
+                user.aptitudeStats.badges.push(badge);
+            }
+        });
+        
+        await user.save();
+
+        res.json({ 
+            success: true, 
+            result: { score: totalScore, accuracy, correctAnswers, totalQuestions: questionIds.length, timeTaken, badges }
+        });
+    } catch (error) {
+        console.error('Submit error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// Original submit (keep for JWT users)
 router.post('/submit', requireAuth, async (req, res) => {
     try {
         const { testType, questions, timeTaken } = req.body;
@@ -109,22 +188,24 @@ router.get('/leaderboard', async (req, res) => {
     }
 });
 
-// Get questions by topic and difficulty
-router.get('/questions/:topic/:difficulty', requireAuth, async (req, res) => {
+// Get questions by topic and difficulty (no auth required)
+router.get('/questions/:topic/:difficulty', async (req, res) => {
     try {
         const { topic, difficulty } = req.params;
-        const userId = req.user._id;
+        const { email } = req.query;
         
-        // Get user's solved questions
-        const user = await User.findById(userId);
-        const solvedQuestions = user.aptitudeStats?.solvedQuestions || [];
+        let solvedQuestions = [];
+        if (email) {
+            const user = await User.findOne({ email });
+            solvedQuestions = user?.aptitudeStats?.solvedQuestions || [];
+        }
         
         const questions = await AptitudeQuestion.find({
             topic,
             difficulty,
             isActive: true,
-            _id: { $nin: solvedQuestions } // Exclude already solved questions
-        }).select('-correctAnswer'); // Don't send correct answers to client
+            _id: { $nin: solvedQuestions }
+        }).select('-correctAnswer');
 
         res.json({ success: true, questions });
     } catch (error) {
