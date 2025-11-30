@@ -47,6 +47,7 @@ router.post('/aptitude/submit-secure', async (req, res) => {
         email, 
         username: displayName,
         displayName,
+        authMethod: 'google',
         isVerified: true 
       });
       await user.save();
