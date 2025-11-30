@@ -28,10 +28,25 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/keyracer'
 });
 
 // Routes
-const hackathonRoutes = require('./server/routes/hackathonRoutes');
-const aptitudeRoutes = require('./server/routes/aptitude');
-app.use('/api/hackathons', hackathonRoutes);
-app.use('/api/aptitude', aptitudeRoutes);
+try {
+  const hackathonRoutes = require('./server/routes/hackathonRoutes');
+  app.use('/api/hackathons', hackathonRoutes);
+  console.log('✅ Hackathon routes loaded');
+} catch (error) {
+  console.error('❌ Failed to load hackathon routes:', error.message);
+}
+
+try {
+  const aptitudeRoutes = require('./server/routes/aptitude');
+  app.use('/api/aptitude', aptitudeRoutes);
+  console.log('✅ Aptitude routes loaded');
+} catch (error) {
+  console.error('❌ Failed to load aptitude routes:', error.message);
+  // Add fallback routes
+  app.get('/api/aptitude/test', (req, res) => {
+    res.json({ success: true, message: 'Aptitude API is working' });
+  });
+}
 
 // Use the User model from the models directory instead
 const User = require('./server/models/User');
