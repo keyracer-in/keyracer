@@ -228,6 +228,39 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: 'Internal server error' });
 });
 
+// Debug endpoint for aptitude API
+app.get('/api/debug/aptitude', async (req, res) => {
+  try {
+    const AptitudeQuestion = require('./server/models/AptitudeQuestion');
+    const questionCount = await AptitudeQuestion.countDocuments();
+    const sampleQuestions = await AptitudeQuestion.find().limit(3);
+    
+    res.json({
+      success: true,
+      debug: {
+        totalQuestions: questionCount,
+        sampleQuestions: sampleQuestions.map(q => ({
+          id: q._id,
+          topic: q.topic,
+          difficulty: q.difficulty,
+          question: q.question.substring(0, 50) + '...'
+        })),
+        routes: {
+          questions: '/api/aptitude/questions/:topic/:difficulty',
+          submit: '/api/aptitude/submit-secure',
+          leaderboard: '/api/aptitude/leaderboard'
+        }
+      }
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      error: error.message,
+      debug: 'Database connection or model issue'
+    });
+  }
+});
+
 // 404 handler for API routes
 app.use('/api/*', (req, res) => {
   res.status(404).json({ success: false, message: 'API endpoint not found' });
@@ -236,4 +269,9 @@ app.use('/api/*', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Debug endpoint: http://localhost:${PORT}/api/debug/aptitude`);
+  console.log(`Aptitude API endpoints:`);
+  console.log(`  GET /api/aptitude/questions/:topic/:difficulty`);
+  console.log(`  POST /api/aptitude/submit-secure`);
+  console.log(`  GET /api/aptitude/leaderboard`);
 });
