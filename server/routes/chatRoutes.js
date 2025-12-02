@@ -1,8 +1,24 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
+const jwt = require('jsonwebtoken');
 const conversationService = require('../services/conversationService');
 
 const router = express.Router();
+
+// Optional authentication - uses existing KeyRacer auth system
+const optionalAuth = (req, res, next) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  
+  if (token && process.env.JWT_SECRET) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.userId = decoded.userId;
+    } catch (error) {
+      // Invalid token, continue as anonymous
+    }
+  }
+  next();
+};
 
 // Production rate limiting
 const chatLimiter = rateLimit({
@@ -32,7 +48,7 @@ const sanitizeInput = (req, res, next) => {
  * POST /api/chat
  * Handle chat messages from users
  */
-router.post('/chat', chatLimiter, sanitizeInput, async (req, res) => {
+router.post('/chat', optionalAuth, chatLimiter, sanitizeInput, async (req, res) => {
   try {
     const { message, sessionId } = req.body;
     const ipAddress = req.ip || req.connection.remoteAddress;
@@ -53,8 +69,8 @@ router.post('/chat', chatLimiter, sanitizeInput, async (req, res) => {
       });
     }
 
-    // Process the message with client info
-    const response = await conversationService.processMessage(sessionId, message, ipAddress, userAgent);
+    // Process the message with client info and optional user ID
+    const response = await conversationService.processMessage(sessionId, message, ipAddress, userAgent, req.userId);
 
     // Log for production monitoring with agent context
     if (process.env.NODE_ENV === 'production') {

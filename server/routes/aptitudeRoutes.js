@@ -58,10 +58,18 @@ router.post('/aptitude/submit-secure', async (req, res) => {
     let totalScore = 0;
     
     for (let i = 0; i < questionIds.length; i++) {
-      const question = await AptitudeQuestion.findById(questionIds[i]);
-      if (question && answers[i] === question.correctAnswer) {
-        correctAnswers++;
-        totalScore += question.points || 2;
+      try {
+        const question = await AptitudeQuestion.findById(questionIds[i]);
+        if (question && answers[i] === question.correctAnswer) {
+          correctAnswers++;
+          totalScore += question.points || 2;
+        }
+      } catch (qError) {
+        console.log(`Question ${questionIds[i]} not found in database`);
+        // For local JSON questions, just award points if answer exists
+        if (answers[i]) {
+          totalScore += 2;
+        }
       }
     }
 
@@ -84,8 +92,15 @@ router.post('/aptitude/submit-secure', async (req, res) => {
     // Add correctly answered questions to solved list
     for (let i = 0; i < questionIds.length; i++) {
       if (answers[i]) {
-        const question = await AptitudeQuestion.findById(questionIds[i]);
-        if (question && answers[i] === question.correctAnswer) {
+        try {
+          const question = await AptitudeQuestion.findById(questionIds[i]);
+          if (question && answers[i] === question.correctAnswer) {
+            if (!user.aptitudeStats.solvedQuestions.includes(questionIds[i])) {
+              user.aptitudeStats.solvedQuestions.push(questionIds[i]);
+            }
+          }
+        } catch (qError) {
+          // For local JSON questions, just track the question ID
           if (!user.aptitudeStats.solvedQuestions.includes(questionIds[i])) {
             user.aptitudeStats.solvedQuestions.push(questionIds[i]);
           }

@@ -42,11 +42,11 @@ fi
 
 # Check if GEMINI_API_KEY is set in .env
 if ! grep -q "GEMINI_API_KEY=" .env; then
-    echo "🔑 Adding GEMINI_API_KEY to .env file..."
+    echo "🔑 Adding GEMINI_API_KEY placeholder to .env file..."
     echo "" >> .env
     echo "# AI Career Guidance Chatbot Configuration" >> .env
-    echo "GEMINI_API_KEY=AIzaSyDCNHM3GR3F0t84VJq_JXj6uZmplc8ToC0" >> .env
-    echo "✅ GEMINI_API_KEY added to .env"
+    echo "GEMINI_API_KEY=your_gemini_api_key_here" >> .env
+    echo "⚠️  Please add your Gemini API key to .env file"
 else
     echo "✅ GEMINI_API_KEY already configured in .env"
 fi

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - KeyRacer</title>
+    
+    <!-- Markdown and Syntax Highlighting -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/markdown-content.css">
+    <link rel="stylesheet" href="styles/search-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0f1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .tutorial-header {
+            background: linear-gradient(135deg, #1a1f35 0%, #0a0f1a 100%);
+            padding: 1rem 2rem;
+            border-bottom: 2px solid rgba(0, 255, 221, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo-img {
+            height: 40px;
+        }
+        
+        .main-nav {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-item {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item:hover {
+            background: rgba(0, 255, 221, 0.1);
+            color: #00FFDD;
+        }
+        
+        .tutorial-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .tutorial-sidebar {
+            background: #141b2d;
+            border-right: 1px solid rgba(0, 255, 221, 0.1);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 80px);
+        }
+        
+        .tutorial-content {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .tutorial-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .tutorial-sidebar {
+                position: static;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="tutorial-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="preference.html">
+                    <img src="assets/images/logo.png" alt="Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="main-nav">
+                <a href="code-racer.html" class="nav-item"><i class="fas fa-home"></i> Home</a>
+                <a href="challenges.html" class="nav-item"><i class="fas fa-code"></i> Challenges</a>
+                <a href="leaderboard.html" class="nav-item"><i class="fas fa-trophy"></i> Leaderboard</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="tutorial-container">
+        <aside class="tutorial-sidebar" id="sidebar">
+            <!-- Navigation and TOC will be loaded here -->
+        </aside>
+
+        <main class="tutorial-content">
+            <div id="main-content">
+                <!-- Markdown content will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <script src="scripts/markdown-renderer.js"></script>
+    <script src="scripts/content-search.js"></script>
+</body>
+</html>

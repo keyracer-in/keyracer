@@ -7,6 +7,9 @@ class ConversationService {
     this.userSessions = new Map();
     this.useDatabase = process.env.NODE_ENV === 'production';
     
+    // Start periodic cleanup
+    this.startCleanupScheduler();
+    
     // Conversation flow configuration
     this.conversationFlow = [
       {
@@ -47,15 +50,17 @@ class ConversationService {
    * @param {string} sessionId - Unique session identifier
    * @param {string} ipAddress - Client IP address
    * @param {string} userAgent - Client user agent
+   * @param {string} userId - Optional authenticated user ID
    * @returns {Promise<Object>} User session data
    */
-  async getUserSession(sessionId, ipAddress = '', userAgent = '') {
+  async getUserSession(sessionId, ipAddress = '', userAgent = '', userId = null) {
     if (this.useDatabase) {
       try {
         let session = await ChatSession.findOne({ sessionId });
         if (!session) {
           session = new ChatSession({
             sessionId,
+            userId,
             ipAddress,
             userAgent,
             currentStep: 0,
@@ -63,6 +68,9 @@ class ConversationService {
             isComplete: false,
             roadmapGenerated: false
           });
+          await session.save();
+        } else if (userId && !session.userId) {
+          session.userId = userId;
           await session.save();
         }
         return session;
@@ -91,11 +99,12 @@ class ConversationService {
    * @param {string} message - User's message
    * @param {string} ipAddress - Client IP address
    * @param {string} userAgent - Client user agent
+   * @param {string} userId - Optional authenticated user ID
    * @returns {Promise<Object>} Response object
    */
-  async processMessage(sessionId, message, ipAddress = '', userAgent = '') {
+  async processMessage(sessionId, message, ipAddress = '', userAgent = '', userId = null) {
     try {
-      const session = await this.getUserSession(sessionId, ipAddress, userAgent);
+      const session = await this.getUserSession(sessionId, ipAddress, userAgent, userId);
       
       // If roadmap is already generated, handle follow-up questions
       if (session.roadmapGenerated) {
@@ -414,6 +423,17 @@ class ConversationService {
         this.userSessions.delete(sessionId);
       }
     }
+  }
+
+  /**
+   * Start automatic session cleanup
+   */
+  startCleanupScheduler() {
+    // Run cleanup every hour
+    setInterval(() => {
+      this.cleanupOldSessions(24);
+      console.log('Session cleanup completed');
+    }, 60 * 60 * 1000);
   }
 
   /**

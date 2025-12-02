@@ -8,6 +8,8 @@ class CareerChatWidget {
         this.isLoading = false;
         this.profileComplete = false;
         this.agentCapabilities = null;
+        this.authToken = localStorage.getItem('authToken') || localStorage.getItem('token');
+        this.currentUser = localStorage.getItem('typingTestUser');
         
         this.initializeElements();
         this.attachEventListeners();
@@ -104,16 +106,32 @@ class CareerChatWidget {
         this.setLoading(true);
 
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (this.authToken) {
+                headers['Authorization'] = `Bearer ${this.authToken}`;
+            }
+
             const response = await fetch('/api/chat', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers,
                 body: JSON.stringify({
                     message: message,
                     sessionId: this.sessionId
-                })
+                }),
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
 
             const data = await response.json();
             
@@ -130,7 +148,17 @@ class CareerChatWidget {
             }
         } catch (error) {
             console.error('Error sending message:', error);
-            this.addMessage('Sorry, I\'m having trouble connecting. Please check your internet connection and try again.', 'bot');
+            let errorMessage = 'Sorry, I\'m having trouble connecting.';
+            
+            if (error.name === 'AbortError') {
+                errorMessage = 'Request timed out. Please try again.';
+            } else if (!navigator.onLine) {
+                errorMessage = 'No internet connection. Please check your network.';
+            } else if (error.message.includes('429')) {
+                errorMessage = 'Too many requests. Please wait a moment and try again.';
+            }
+            
+            this.addMessage(errorMessage, 'bot');
         } finally {
             this.setLoading(false);
         }

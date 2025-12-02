@@ -29,6 +29,14 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/keyracer'
 
 // Routes
 try {
+  const chatRoutes = require('./server/routes/chatRoutes');
+  app.use('/api', chatRoutes);
+  console.log('✅ Chat routes loaded');
+} catch (error) {
+  console.error('❌ Failed to load chat routes:', error.message);
+}
+
+try {
   const hackathonRoutes = require('./server/routes/hackathonRoutes');
   app.use('/api/hackathons', hackathonRoutes);
   console.log('✅ Hackathon routes loaded');

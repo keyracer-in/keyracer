@@ -1,0 +1,54 @@
+{
+  "Python Tutorial": [
+    {
+      "title": "Introduction",
+      "path": "tutorials/python/introduction"
+    },
+    {
+      "title": "Getting Started",
+      "path": "tutorials/python/getting-started"
+    },
+    {
+      "title": "Python Syntax",
+      "path": "tutorials/python/syntax"
+    },
+    {
+      "title": "Comments",
+      "path": "tutorials/python/comments"
+    },
+    {
+      "title": "Variables",
+      "path": "tutorials/python/variables"
+    },
+    {
+      "title": "Data Types",
+      "path": "tutorials/python/data-types"
+    },
+    {
+      "title": "Numbers",
+      "path": "tutorials/python/numbers"
+    },
+    {
+      "title": "Lists",
+      "path": "tutorials/python/lists"
+    },
+    {
+      "title": "Dictionaries",
+      "path": "tutorials/python/dictionaries"
+    },
+    {
+      "title": "Functions",
+      "path": "tutorials/python/functions"
+    }
+  ],
+  "Guides": [
+    {
+      "title": "Installation Guide",
+      "path": "guides/installation"
+    },
+    {
+      "title": "Troubleshooting",
+      "path": "guides/troubleshooting"
+    }
+  ]
+}
