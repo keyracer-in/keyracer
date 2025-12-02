@@ -1,7 +1,7 @@
 const GeminiService = class {
   constructor() {
     this.apiKey = process.env.GEMINI_API_KEY;
-    this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+    this.modelName = 'gemini-1.5-flash-latest';
     this.maxRetries = 3;
     this.retryDelay = 1000;
     this.isConfigured = !!this.apiKey;
@@ -21,7 +21,8 @@ const GeminiService = class {
 
   async generateWithRetry(prompt, retryCount = 0) {
     try {
-      const response = await fetch(`${this.baseUrl}?key=${this.apiKey}`, {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.modelName}:generateContent?key=${this.apiKey}`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
