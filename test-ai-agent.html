@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AI Career Agent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: #4285f4;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #3367d6;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .success { border-left: 4px solid #34a853; }
+        .error { border-left: 4px solid #ea4335; }
+    </style>
+</head>
+<body>
+    <h1>🤖 AI Career Agent - API Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Chat API (Market Mode)</h2>
+        <button onclick="testMarketMode()">Test Market Mode</button>
+        <div id="market-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Chat API (Roadmap Mode)</h2>
+        <button onclick="testRoadmapMode()">Test Roadmap Mode</button>
+        <div id="roadmap-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Chat API (Interview Mode)</h2>
+        <button onclick="testInterviewMode()">Test Interview Mode</button>
+        <div id="interview-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Resume Analysis</h2>
+        <input type="file" id="resume-file" accept=".pdf">
+        <button onclick="testResumeAnalysis()">Analyze Resume</button>
+        <div id="resume-result" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        async function testMarketMode() {
+            const resultDiv = document.getElementById('market-result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: 'What are the current trends in web development?',
+                        history: [],
+                        mode: 'market'
+                    })
+                });
+                
+                const data = await response.json();
+                resultDiv.className = 'result ' + (data.success ? 'success' : 'error');
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function testRoadmapMode() {
+            const resultDiv = document.getElementById('roadmap-result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: 'Create a 4-week roadmap to learn React',
+                        history: [],
+                        mode: 'roadmap'
+                    })
+                });
+                
+                const data = await response.json();
+                resultDiv.className = 'result ' + (data.success ? 'success' : 'error');
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function testInterviewMode() {
+            const resultDiv = document.getElementById('interview-result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: 'Start the interview',
+                        history: [],
+                        mode: 'interview'
+                    })
+                });
+                
+                const data = await response.json();
+                resultDiv.className = 'result ' + (data.success ? 'success' : 'error');
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function testResumeAnalysis() {
+            const fileInput = document.getElementById('resume-file');
+            const resultDiv = document.getElementById('resume-result');
+            
+            if (!fileInput.files[0]) {
+                alert('Please select a PDF file first');
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Analyzing...';
+            
+            const formData = new FormData();
+            formData.append('resume', fileInput.files[0]);
+            
+            try {
+                const response = await fetch('/api/analyze-resume', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                resultDiv.className = 'result ' + (data.success ? 'success' : 'error');
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

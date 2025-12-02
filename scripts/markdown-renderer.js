@@ -62,45 +62,12 @@ class MarkdownRenderer {
     }
 
     generateTOC(container) {
-        const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        const sidebar = document.getElementById('sidebar');
-        if (!sidebar) return;
-
-        // Remove existing TOC
-        const existingTOC = document.getElementById('table-of-contents');
-        if (existingTOC) existingTOC.remove();
-        
-        // Don't create TOC if no headings or content not found
+        const headings = container.querySelectorAll('h2, h3');
         if (headings.length === 0) return;
-        
-        // Check if content is "Content Not Found"
-        const firstHeading = headings[0];
-        if (firstHeading && firstHeading.textContent.includes('Content Not Found')) return;
-
-        const tocDiv = document.createElement('div');
-        tocDiv.id = 'table-of-contents';
-        tocDiv.innerHTML = '<h3>Table of Contents</h3>';
-        
-        const tocList = document.createElement('ul');
-        tocList.className = 'toc-list';
 
         headings.forEach((heading, index) => {
-            const id = `heading-${index}`;
-            heading.id = id;
-            
-            const li = document.createElement('li');
-            li.className = `toc-level-${heading.tagName.toLowerCase()}`;
-            
-            const link = document.createElement('a');
-            link.href = `#${id}`;
-            link.textContent = heading.textContent;
-            
-            li.appendChild(link);
-            tocList.appendChild(li);
+            heading.id = `heading-${index}`;
         });
-
-        tocDiv.appendChild(tocList);
-        sidebar.appendChild(tocDiv);
     }
 }
 
@@ -134,6 +101,7 @@ class ContentNavigator {
             
             const title = document.createElement('h3');
             title.textContent = category;
+            title.className = 'nav-category-title';
             section.appendChild(title);
             
             const list = document.createElement('ul');
@@ -142,11 +110,20 @@ class ContentNavigator {
                 const link = document.createElement('a');
                 link.href = `#${item.path}`;
                 link.textContent = item.title;
+                link.dataset.path = item.path;
                 link.onclick = (e) => {
                     e.preventDefault();
                     this.loadContent(item.path);
+                    this.setActiveLink(link);
                 };
                 li.appendChild(link);
+                
+                // Add subsection container
+                const subsectionList = document.createElement('ul');
+                subsectionList.className = 'nav-subsections';
+                subsectionList.style.display = 'none';
+                li.appendChild(subsectionList);
+                
                 list.appendChild(li);
             });
             
@@ -158,10 +135,50 @@ class ContentNavigator {
         sidebarElement.appendChild(nav);
     }
 
+    setActiveLink(activeLink) {
+        document.querySelectorAll('.content-navigation a').forEach(link => {
+            link.classList.remove('active');
+        });
+        activeLink.classList.add('active');
+    }
+
+    updateSubsections(contentPath) {
+        // Clear all subsections
+        document.querySelectorAll('.nav-subsections').forEach(sub => {
+            sub.innerHTML = '';
+            sub.style.display = 'none';
+        });
+
+        // Find active link and populate its subsections
+        const activeLink = document.querySelector(`a[data-path="${contentPath}"]`);
+        if (!activeLink) return;
+
+        const subsectionContainer = activeLink.parentElement.querySelector('.nav-subsections');
+        const headings = document.querySelectorAll('#main-content h2');
+        
+        if (headings.length > 0) {
+            headings.forEach((heading, index) => {
+                const li = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = `#heading-${index}`;
+                link.textContent = heading.textContent;
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    document.getElementById(`heading-${index}`).scrollIntoView({ behavior: 'smooth' });
+                };
+                li.appendChild(link);
+                subsectionContainer.appendChild(li);
+            });
+            subsectionContainer.style.display = 'block';
+        }
+    }
+
     loadContent(contentPath) {
         const renderer = new MarkdownRenderer();
         const contentElement = document.getElementById('main-content');
-        renderer.renderToElement(contentPath, contentElement);
+        renderer.renderToElement(contentPath, contentElement).then(() => {
+            this.updateSubsections(contentPath);
+        });
         
         // Update URL without page reload
         history.pushState({ contentPath }, '', `#${contentPath}`);
@@ -179,13 +196,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Load navigation first, then content
     navigator.renderSidebar(document.getElementById('sidebar')).then(() => {
-        renderer.renderToElement(initialContent, document.getElementById('main-content'));
+        renderer.renderToElement(initialContent, document.getElementById('main-content')).then(() => {
+            navigator.updateSubsections(initialContent);
+            const activeLink = document.querySelector(`a[data-path="${initialContent}"]`);
+            if (activeLink) navigator.setActiveLink(activeLink);
+        });
     });
     
     // Handle browser back/forward
     window.addEventListener('popstate', (event) => {
         if (event.state && event.state.contentPath) {
-            renderer.renderToElement(event.state.contentPath, document.getElementById('main-content'));
+            renderer.renderToElement(event.state.contentPath, document.getElementById('main-content')).then(() => {
+                navigator.updateSubsections(event.state.contentPath);
+            });
         }
     });
 });

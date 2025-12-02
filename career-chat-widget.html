@@ -12,9 +12,75 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Career Guidance Chat</title>
-    <link rel="stylesheet" href="styles/career-chat.css">
+    <title>AI Career Agent - KeyRacer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/ai-career-agent-enhanced.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .mode-switcher {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e8eaed;
+            flex-wrap: wrap;
+        }
+        .mode-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 20px;
+            border: 2px solid #dadce0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .mode-btn:hover {
+            border-color: #4285f4;
+            background: #f8f9fa;
+        }
+        .mode-btn.active {
+            background: #4285f4;
+            color: white;
+            border-color: #4285f4;
+        }
+        .resume-upload-section {
+            padding: 15px;
+            background: #e8f0fe;
+            border-bottom: 1px solid #dadce0;
+            text-align: center;
+        }
+        .upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #1a73e8;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .upload-btn:hover {
+            background: #1557b0;
+        }
+        .system-message .message-content {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        .error-message .message-content {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+    </style>
 </head>
 <body>
     <!-- Main Container -->
@@ -24,7 +90,7 @@
             <div class="header-content">
                 <div class="logo-section">
                     <img src="assets/images/logo.png" alt="KeyRacer" class="logo-img">
-                    <h1>KeyRacer AI Career Guidance</h1>
+                    <h1>KeyRacer AI Career Agent</h1>
                 </div>
                 <div class="header-actions">
                     <button id="reset-chat" class="action-btn" title="New Chat">
@@ -37,6 +103,31 @@
             </div>
         </header>
 
+        <!-- Mode Switcher -->
+        <div class="mode-switcher">
+            <button class="mode-btn active" data-mode="market">
+                <i class="fas fa-chart-line"></i>
+                Market Insights
+            </button>
+            <button class="mode-btn" data-mode="roadmap">
+                <i class="fas fa-map"></i>
+                Learning Roadmap
+            </button>
+            <button class="mode-btn" data-mode="interview">
+                <i class="fas fa-briefcase"></i>
+                Interview Prep
+            </button>
+        </div>
+
+        <!-- Resume Upload -->
+        <div class="resume-upload-section">
+            <label for="resume-upload" class="upload-btn">
+                <i class="fas fa-file-pdf"></i>
+                Upload Resume for Analysis
+            </label>
+            <input type="file" id="resume-upload" accept=".pdf" style="display: none;">
+        </div>
+
         <div class="main-content">
             <!-- History Sidebar -->
             <aside class="chat-history-sidebar">
@@ -48,38 +139,9 @@
 
             <!-- Chat Container -->
             <div class="chat-container">
-                <!-- Welcome Screen -->
-                <div id="welcome-screen" class="welcome-screen">
-                    <div class="welcome-content">
-                        <div class="welcome-icon">
-                            <i class="fas fa-rocket"></i>
-                        </div>
-                        <h2>Welcome to KeyRacer AI Career Agent</h2>
-                        <p>Get personalized career advice, roadmaps, and intelligent guidance powered by advanced AI</p>
-                        <div class="quick-actions">
-                            <button class="quick-btn" data-prompt="Help me create a personalized career roadmap">
-                                <i class="fas fa-map"></i>
-                                <span>AI Career Roadmap</span>
-                            </button>
-                            <button class="quick-btn" data-prompt="What skills should I learn for my career goals?">
-                                <i class="fas fa-graduation-cap"></i>
-                                <span>Smart Skill Analysis</span>
-                            </button>
-                            <button class="quick-btn" data-prompt="Help me prepare for job interviews with AI guidance">
-                                <i class="fas fa-briefcase"></i>
-                                <span>Interview AI Coach</span>
-                            </button>
-                            <button class="quick-btn" data-prompt="Show me current industry trends and opportunities">
-                                <i class="fas fa-chart-line"></i>
-                                <span>Market Intelligence</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Chat Messages -->
-                <div id="chat-messages" class="chat-messages" style="display: none;">
-                    <!-- Messages will be added here -->
+                <div id="chat-messages" class="chat-messages">
+                    <!-- Messages will be added here dynamically -->
                 </div>
             </div>
         </div>
@@ -121,7 +183,7 @@
         </div>
     </div>
 
-    <!-- Chat Widget Script -->
-    <script src="scripts/career-chat.js"></script>
+    <!-- AI Career Agent Script -->
+    <script src="scripts/ai-career-agent.js"></script>
 </body>
 </html>
