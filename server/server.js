@@ -21,7 +21,7 @@ const session = require('express-session');
 const { URLSearchParams } = require('url');
 const rateLimit = require('express-rate-limit');
 const multer = require('multer');
-const pdfParse = require('pdf-parse');
+const pdf = require('pdf-parse');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Import database connection
@@ -289,10 +289,10 @@ app.post('/api/analyze-resume', upload.single('resume'), async (req, res) => {
       return res.status(400).json({ success: false, error: 'No file uploaded' });
     }
 
-    const pdfData = await pdfParse(req.file.buffer);
+    const pdfData = await pdf(req.file.buffer);
     const resumeText = pdfData.text;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-001' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const prompt = `Analyze this resume for a fresher role. Provide a detailed analysis:
 
 1. **Overall Score**: Rate 0-100 based on content, formatting, and relevance
@@ -334,7 +334,7 @@ app.post('/api/ai-chat', async (req, res) => {
     const systemInstruction = getSystemInstruction(mode);
 
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash-001',
+      model: 'gemini-1.5-flash',
       systemInstruction: systemInstruction
     });
 
