@@ -19,7 +19,7 @@ class AptitudeManager {
 
     async loadContent() {
         try {
-            const response = await fetch('/data/aptitude-content.json');
+            const response = await fetch('data/aptitude-content.json');
             this.content = await response.json();
         } catch (error) {
             console.error('Error loading content:', error);
@@ -73,7 +73,7 @@ class AptitudeManager {
         if (!this.content || !this.content[topic]) return;
 
         const contentTitle = document.querySelector('.content-title');
-        const learningContent = document.querySelector('.learning-content');
+        const learningContent = document.querySelector('.learning-content') || document.getElementById('learningContent');
 
         if (contentTitle) {
             contentTitle.textContent = subsection ? `${this.content[topic].title} - ${subsection}` : this.content[topic].title;
@@ -81,12 +81,10 @@ class AptitudeManager {
 
         if (learningContent) {
             if (subsection) {
-                // Load specific subsection
                 const sections = this.parseSections(this.content[topic].content);
                 const sectionContent = sections.find(s => s.title === subsection);
                 learningContent.innerHTML = sectionContent ? this.parseMarkdown(sectionContent.content) : 'Section not found';
             } else {
-                // Load full topic
                 learningContent.innerHTML = this.parseMarkdown(this.content[topic].content);
             }
         }
@@ -199,11 +197,11 @@ class AptitudeManager {
                     }
                 }
             } catch (apiError) {
-                console.log('API failed, using local data');
+                console.log('Using local data');
             }
             
             // Fallback to local JSON
-            const response = await fetch('/data/aptitude-questions.json');
+            const response = await fetch('data/aptitude-questions.json');
             const data = await response.json();
 
             if (data[topic] && data[topic][difficulty]) {
@@ -223,6 +221,15 @@ class AptitudeManager {
     showStartButton(topic, difficulty) {
         const questionText = document.getElementById('question-text');
         const answerContainer = document.getElementById('answer-container');
+        
+        // Update all count displays immediately
+        const totalEl = document.getElementById('totalCount');
+        const progressText = document.getElementById('progressText');
+        const answeredCount = document.getElementById('answeredCount');
+        
+        if (totalEl) totalEl.textContent = this.questions.length;
+        if (progressText) progressText.textContent = `Question 1 of ${this.questions.length}`;
+        if (answeredCount) answeredCount.textContent = '0';
         
         if (questionText) {
             questionText.textContent = `Ready to start ${topic} - ${difficulty} challenge?`;
@@ -287,30 +294,34 @@ class AptitudeManager {
 
     displayQuestion() {
         const question = this.questions[this.currentQuestionIndex];
+        
         if (!question) return;
 
-        // Update question number and difficulty
-        document.querySelector('.question-number').textContent =
-            `Question ${this.currentQuestionIndex + 1} of ${this.questions.length}`;
-
-        const difficultyEl = document.querySelector('.question-difficulty');
-        difficultyEl.textContent = question.difficulty.toUpperCase();
-        difficultyEl.className = `question-difficulty difficulty-${question.difficulty}`;
+        // Update progress text
+        const progressText = document.getElementById('progressText');
+        if (progressText) {
+            progressText.textContent = `Question ${this.currentQuestionIndex + 1} of ${this.questions.length}`;
+        }
 
         // Update question text
-        document.querySelector('.question-text').textContent = question.question;
+        const questionText = document.getElementById('question-text');
+        if (questionText) {
+            questionText.textContent = question.question;
+        }
 
         // Display options or text input
-        const container = document.querySelector('.answer-container');
+        const container = document.getElementById('answer-container');
+        if (!container) return;
+        
         container.innerHTML = '';
 
         if (question.type === 'mcq') {
-            const optionsContainer = document.createElement('div');
-            optionsContainer.className = 'options-container';
-
             question.options.forEach((option, index) => {
                 const optionEl = document.createElement('div');
                 optionEl.className = 'option-item';
+                if (this.userAnswers[this.currentQuestionIndex] === option) {
+                    optionEl.classList.add('selected');
+                }
                 optionEl.innerHTML = `
                     <div class="option-radio ${this.userAnswers[this.currentQuestionIndex] === option ? 'checked' : ''}"></div>
                     <span>${option}</span>
@@ -320,10 +331,8 @@ class AptitudeManager {
                     this.selectOption(option);
                 });
 
-                optionsContainer.appendChild(optionEl);
+                container.appendChild(optionEl);
             });
-
-            container.appendChild(optionsContainer);
         } else {
             const textInput = document.createElement('input');
             textInput.type = 'text';
@@ -339,8 +348,10 @@ class AptitudeManager {
         }
 
         // Update navigation buttons
-        document.querySelector('.prev-btn').disabled = this.currentQuestionIndex === 0;
-        document.querySelector('.next-btn').disabled = this.currentQuestionIndex === this.questions.length - 1;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        if (prevBtn) prevBtn.disabled = this.currentQuestionIndex === 0;
+        if (nextBtn) nextBtn.disabled = this.currentQuestionIndex === this.questions.length - 1;
     }
 
     selectOption(option) {
@@ -348,15 +359,30 @@ class AptitudeManager {
 
         // Update visual selection
         document.querySelectorAll('.option-item').forEach(item => {
+            item.classList.remove('selected');
             const radio = item.querySelector('.option-radio');
-            radio.classList.remove('checked');
+            if (radio) radio.classList.remove('checked');
         });
 
         document.querySelectorAll('.option-item').forEach(item => {
             if (item.textContent.trim().includes(option)) {
-                item.querySelector('.option-radio').classList.add('checked');
+                item.classList.add('selected');
+                const radio = item.querySelector('.option-radio');
+                if (radio) radio.classList.add('checked');
             }
         });
+        
+        // Update progress counter
+        this.updateProgressCounter();
+    }
+    
+    updateProgressCounter() {
+        const answered = this.userAnswers.filter(a => a && a.trim() !== '').length;
+        const answeredEl = document.getElementById('answeredCount');
+        const totalEl = document.getElementById('totalCount');
+        
+        if (answeredEl) answeredEl.textContent = answered;
+        if (totalEl) totalEl.textContent = this.questions.length;
     }
 
     previousQuestion() {
@@ -406,7 +432,7 @@ class AptitudeManager {
         }
     }
 
-    calculateLocalResults() {
+    calculateLocalResults(isGuest = false) {
         if (this.timer) {
             clearInterval(this.timer);
         }
@@ -445,59 +471,81 @@ class AptitudeManager {
             results
         };
 
-        this.showResults(result);
+        this.showResults(result, !isGuest);
         this.resetQuestionTimer();
     }
 
     async submitTest() {
+        // Check if all questions are answered
+        const unanswered = this.userAnswers.filter(a => !a || a.trim() === '').length;
+        
+        if (unanswered > 0) {
+            const confirmMsg = `You have ${unanswered} unanswered question(s). Submit anyway?`;
+            if (!confirm(confirmMsg)) return;
+        }
+        
         if (this.timer) {
             clearInterval(this.timer);
         }
 
         const currentUser = localStorage.getItem('typingTestUser');
-        const userEmail = localStorage.getItem('typingTestUserEmail') || `${currentUser}@guest.local`;
-        
-        if (!currentUser) {
-            alert('Please login to submit test');
-            window.location.href = '/login.html';
-            return;
-        }
+        const userEmail = localStorage.getItem('typingTestUserEmail') || (currentUser ? `${currentUser}@guest.local` : null);
 
-        const submissionData = {
-            email: userEmail,
-            displayName: currentUser,
-            answers: this.userAnswers,
-            timeTaken: this.elapsedTime,
-            questionIds: this.questions.map(q => q._id || q.id)
-        };
+        // Show loading state
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        submitBtn.disabled = true;
 
-        try {
-            const response = await fetch('/api/aptitude/submit-secure', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(submissionData)
-            });
+        // If user is logged in, try to submit to API
+        if (currentUser && userEmail) {
+            const submissionData = {
+                email: userEmail,
+                displayName: currentUser,
+                answers: this.userAnswers,
+                timeTaken: this.elapsedTime,
+                questionIds: this.questions.map(q => q._id || q.id)
+            };
 
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    this.showResults(data.result);
-                    return;
+            try {
+                const response = await fetch('/api/aptitude/submit-secure', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(submissionData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        this.showResults(data.result, true);
+                        return;
+                    }
                 }
+            } catch (error) {
+                console.log('API submit failed, calculating locally');
             }
-        } catch (error) {
-            console.log('API submit failed, calculating locally');
         }
         
-        this.calculateLocalResults();
+        // Calculate locally (for non-logged users or API failure)
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        this.calculateLocalResults(!currentUser);
     }
 
-    showResults(result) {
+    showResults(result, savedToLeaderboard = false) {
         const modal = document.createElement('div');
         modal.className = 'results-modal';
         modal.innerHTML = `
             <div class="results-content">
                 <h2 class="results-title">Test Results</h2>
+                ${!savedToLeaderboard ? `
+                    <div style="background: rgba(255, 199, 0, 0.1); border: 1px solid rgba(255, 199, 0, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center;">
+                        <i class="fas fa-info-circle" style="color: var(--highlight-color); margin-right: 8px;"></i>
+                        <span style="color: var(--text-color);">Login to save your score to the leaderboard!</span>
+                    </div>
+                ` : ''}
                 <div class="results-grid">
                     <div class="result-item">
                         <div class="result-label">Score</div>
@@ -509,14 +557,14 @@ class AptitudeManager {
                     </div>
                     <div class="result-item">
                         <div class="result-label">Correct</div>
-                        <div class="result-value">${result.correctAnswers}</div>
+                        <div class="result-value">${result.correctAnswers}/${result.totalQuestions}</div>
                     </div>
                     <div class="result-item">
                         <div class="result-label">Time</div>
                         <div class="result-value">${Math.floor(result.timeTaken / 60)}:${(result.timeTaken % 60).toString().padStart(2, '0')}</div>
                     </div>
                 </div>
-                ${result.badges.length > 0 ? `
+                ${result.badges && result.badges.length > 0 ? `
                     <div class="badges-section">
                         <h3 class="badges-title">Badges Earned</h3>
                         <div class="badges-list">
@@ -530,9 +578,20 @@ class AptitudeManager {
                     </div>
                 ` : ''}
                 <div class="results-actions">
-                    <button class="view-leaderboard-btn" onclick="window.location.href='/aptitude-leaderboard.html'">
-                        <i class="fas fa-trophy"></i>
-                        View Leaderboard
+                    ${!savedToLeaderboard ? `
+                        <button class="view-leaderboard-btn" onclick="window.location.href='/login.html'">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login to Save Score
+                        </button>
+                    ` : `
+                        <button class="view-leaderboard-btn" onclick="window.location.href='/aptitude-leaderboard.html'">
+                            <i class="fas fa-trophy"></i>
+                            View Leaderboard
+                        </button>
+                    `}
+                    <button class="retry-btn" onclick="window.location.reload()">
+                        <i class="fas fa-redo"></i>
+                        Try Again
                     </button>
                     <button class="close-results" onclick="document.body.removeChild(this.closest('.results-modal'))">
                         Close

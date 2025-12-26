@@ -192,10 +192,11 @@ router.get('/leaderboard', async (req, res) => {
 router.get('/questions/:topic/:difficulty', async (req, res) => {
     try {
         const { topic, difficulty } = req.params;
-        const { email } = req.query;
+        const { email, showAll } = req.query;
         
         let solvedQuestions = [];
-        if (email) {
+        // Only filter out solved questions if showAll is not true
+        if (email && showAll !== 'true') {
             const user = await User.findOne({ email });
             solvedQuestions = user?.aptitudeStats?.solvedQuestions || [];
         }
@@ -207,7 +208,7 @@ router.get('/questions/:topic/:difficulty', async (req, res) => {
             _id: { $nin: solvedQuestions }
         }).select('-correctAnswer');
 
-        res.json({ success: true, questions });
+        res.json({ success: true, questions, total: questions.length, filtered: solvedQuestions.length });
     } catch (error) {
         console.error('Error loading questions:', error);
         res.status(500).json({ success: false, message: 'Server error' });
