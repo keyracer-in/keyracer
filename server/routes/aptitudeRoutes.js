@@ -53,23 +53,55 @@ router.post('/aptitude/submit-secure', async (req, res) => {
       await user.save();
     }
 
-    // Server-side score calculation
+    // Server-side score calculation - handle local JSON questions
     let correctAnswers = 0;
     let totalScore = 0;
     
+    // Load local questions for validation
+    const fs = require('fs');
+    const path = require('path');
+    let localQuestions = {};
+    
+    try {
+      const questionsPath = path.join(__dirname, '../../data/aptitude-questions.json');
+      localQuestions = JSON.parse(fs.readFileSync(questionsPath, 'utf8'));
+    } catch (err) {
+      console.log('Could not load local questions file');
+    }
+    
     for (let i = 0; i < questionIds.length; i++) {
+      let isCorrect = false;
+      
+      // Try database first
       try {
         const question = await AptitudeQuestion.findById(questionIds[i]);
         if (question && answers[i] === question.correctAnswer) {
-          correctAnswers++;
+          isCorrect = true;
           totalScore += question.points || 2;
         }
       } catch (qError) {
-        console.log(`Question ${questionIds[i]} not found in database`);
-        // For local JSON questions, just award points if answer exists
-        if (answers[i]) {
-          totalScore += 2;
+        // Fallback to local JSON questions
+        const questionId = questionIds[i];
+        let foundQuestion = null;
+        
+        // Search through all topics and difficulties
+        for (const topic in localQuestions) {
+          for (const difficulty in localQuestions[topic]) {
+            const questions = localQuestions[topic][difficulty];
+            foundQuestion = questions.find(q => q._id === questionId);
+            if (foundQuestion) break;
+          }
+          if (foundQuestion) break;
         }
+        
+        if (foundQuestion && answers[i] === foundQuestion.correct) {
+          isCorrect = true;
+          totalScore += 2; // Default points for local questions
+        }
+      }
+      
+      if (isCorrect) {
+        correctAnswers++;
       }
     }
 
@@ -91,20 +123,8 @@ router.post('/aptitude/submit-secure', async (req, res) => {
     
     // Add correctly answered questions to solved list
     for (let i = 0; i < questionIds.length; i++) {
-      if (answers[i]) {
-        try {
-          const question = await AptitudeQuestion.findById(questionIds[i]);
-          if (question && answers[i] === question.correctAnswer) {
-            if (!user.aptitudeStats.solvedQuestions.includes(questionIds[i])) {
-              user.aptitudeStats.solvedQuestions.push(questionIds[i]);
-            }
-          }
-        } catch (qError) {
-          // For local JSON questions, just track the question ID
-          if (!user.aptitudeStats.solvedQuestions.includes(questionIds[i])) {
-            user.aptitudeStats.solvedQuestions.push(questionIds[i]);
-          }
-        }
+      if (answers[i] && !user.aptitudeStats.solvedQuestions.includes(questionIds[i])) {
+        user.aptitudeStats.solvedQuestions.push(questionIds[i]);
       }
     }
     
