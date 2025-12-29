@@ -36,7 +36,7 @@ const authRoutes = require('./routes/authRoutes');
 const challengeRoutes = require('./routes/challengeRoutes');
 const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const coderacerLeaderboardRoutes = require('./routes/coderacerLeaderboardRoutes');
-const aptitudeRoutes = require('./routes/aptitudeRoutes');
+const aptitudeRoutes = require('./routes/aptitude');
 const chatRoutes = require('./routes/chatRoutes');
 const hackathonRoutes = require('./routes/hackathonRoutes');
 
@@ -369,7 +369,7 @@ app.post('/api/ai-chat', async (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api', challengeRoutes);
 app.use('/api', leaderboardRoutes);
-app.use('/api', aptitudeRoutes);
+app.use('/api/aptitude', aptitudeRoutes);
 app.use('/api', chatRoutes);
 app.use('/api/hackathons', hackathonRoutes);
 console.log('[SERVER] All API routes registered including AI Career Agent routes');
