@@ -16,29 +16,24 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static('.'));
 
-// Configure multer for file uploads
-const upload = multer({ 
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/pdf') {
-      cb(null, true);
-    } else {
-      cb(new Error('Only PDF files are allowed'));
-    }
-  }
+// MongoDB connection
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/keyracer', {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  connectTimeoutMS: 10000,
+  maxPoolSize: 10,
 });
 
-// Initialize services without Gemini
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-require('dotenv').config();
-
-const app = express();
-
-// Middleware
-app.use(cors());
-app.use(express.json());
+// KeyRacer Agent Routes
+try {
+  const keyracerAgentRoutes = require('./server/routes/keyracerAgentRoutes');
+  app.use('/api/keyracer-agent', keyracerAgentRoutes);
+  console.log('✅ KeyRacer Agent routes loaded');
+} catch (error) {
+  console.error('❌ Failed to load KeyRacer Agent routes:', error.message);
+}
 
 try {
   const hackathonRoutes = require('./server/routes/hackathonRoutes');
@@ -54,13 +49,12 @@ try {
   console.log('✅ Aptitude routes loaded');
 } catch (error) {
   console.error('❌ Failed to load aptitude routes:', error.message);
-  // Add fallback routes
   app.get('/api/aptitude/test', (req, res) => {
     res.json({ success: true, message: 'Aptitude API is working' });
   });
 }
 
-// Use the User model from the models directory instead
+// Use the User model from the models directory
 const User = require('./server/models/User');
 
 // Brevo (Sendinblue) API key
@@ -70,7 +64,7 @@ const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 // Helper to send email via Brevo
 async function sendBrevoEmail({ to, subject, html }) {
   return axios.post(BREVO_API_URL, {
-    sender: { name: 'KeyRacer', email: 'noreply@keyracer.in' }, // updated sender
+    sender: { name: 'KeyRacer', email: 'noreply@keyracer.in' },
     to: [{ email: to }],
     subject,
     htmlContent: html
@@ -88,19 +82,14 @@ app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Check if user exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
-    
-    // Generate verification token
     const verificationToken = crypto.randomBytes(32).toString('hex');
 
-    // Create user
     const user = new User({
       username,
       email,
@@ -110,7 +99,6 @@ app.post('/api/auth/register', async (req, res) => {
 
     await user.save();
 
-    // Send verification email via Brevo
     const verificationUrl = `${req.protocol}://${req.get('host')}/api/auth/verify/${verificationToken}`;
     await sendBrevoEmail({
       to: email,
@@ -255,39 +243,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: 'Internal server error' });
 });
 
-// Debug endpoint for aptitude API
-app.get('/api/debug/aptitude', async (req, res) => {
-  try {
-    const AptitudeQuestion = require('./server/models/AptitudeQuestion');
-    const questionCount = await AptitudeQuestion.countDocuments();
-    const sampleQuestions = await AptitudeQuestion.find().limit(3);
-    
-    res.json({
-      success: true,
-      debug: {
-        totalQuestions: questionCount,
-        sampleQuestions: sampleQuestions.map(q => ({
-          id: q._id,
-          topic: q.topic,
-          difficulty: q.difficulty,
-          question: q.question.substring(0, 50) + '...'
-        })),
-        routes: {
-          questions: '/api/aptitude/questions/:topic/:difficulty',
-          submit: '/api/aptitude/submit-secure',
-          leaderboard: '/api/aptitude/leaderboard'
-        }
-      }
-    });
-  } catch (error) {
-    res.json({
-      success: false,
-      error: error.message,
-      debug: 'Database connection or model issue'
-    });
-  }
-});
-
 // 404 handler for API routes
 app.use('/api/*', (req, res) => {
   res.status(404).json({ success: false, message: 'API endpoint not found' });
@@ -296,9 +251,5 @@ app.use('/api/*', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Debug endpoint: http://localhost:${PORT}/api/debug/aptitude`);
-  console.log(`Aptitude API endpoints:`);
-  console.log(`  GET /api/aptitude/questions/:topic/:difficulty`);
-  console.log(`  POST /api/aptitude/submit-secure`);
-  console.log(`  GET /api/aptitude/leaderboard`);
+  console.log('✅ KeyRacer Agent ready');
 });
