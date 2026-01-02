@@ -22,7 +22,7 @@ const { URLSearchParams } = require('url');
 const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 const pdf = require('pdf-parse');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+// const { GoogleGenerativeAI } = require('@google/generative-ai'); // Removed - using Groq API
 
 // Import database connection
 const connectDB = require('./utils/dbConnect');
@@ -37,8 +37,9 @@ const challengeRoutes = require('./routes/challengeRoutes');
 const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const coderacerLeaderboardRoutes = require('./routes/coderacerLeaderboardRoutes');
 const aptitudeRoutes = require('./routes/aptitude');
-const chatRoutes = require('./routes/chatRoutes');
+// const chatRoutes = require('./routes/chatRoutes'); // Removed - using KeyRacer Agent instead
 const hackathonRoutes = require('./routes/hackathonRoutes');
+const keyracerAgentRoutes = require('./routes/keyracerAgentRoutes');
 
 // Import middleware
 const { authenticate } = require('./middleware/authMiddleware');
@@ -61,8 +62,8 @@ const upload = multer({
   }
 });
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Initialize Gemini AI - Removed, using Groq API instead
+// // const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // Removed - using Groq API
 
 // System instructions for different modes
 const getSystemInstruction = (mode) => {
@@ -282,7 +283,8 @@ if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
 // Static files - Serve the client app
 app.use(express.static(path.join(__dirname, '../')));
 
-// AI Career Agent - Resume Analysis Endpoint
+// AI Career Agent - Resume Analysis Endpoint - DISABLED (using KeyRacer Agent instead)
+/*
 app.post('/api/analyze-resume', upload.single('resume'), async (req, res) => {
   try {
     if (!req.file) {
@@ -321,8 +323,10 @@ Format with clear headings and bullet points. Be constructive and specific.`;
     res.status(500).json({ success: false, error: 'Failed to analyze resume: ' + error.message });
   }
 });
+*/
 
-// AI Career Agent - Multi-Mode Chat Endpoint
+// AI Career Agent - Multi-Mode Chat Endpoint - DISABLED (using KeyRacer Agent instead)
+/*
 app.post('/api/ai-chat', async (req, res) => {
   try {
     const { message, history = [], mode = 'market' } = req.body;
@@ -364,15 +368,17 @@ app.post('/api/ai-chat', async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to process message: ' + error.message });
   }
 });
+*/
 
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api', challengeRoutes);
 app.use('/api', leaderboardRoutes);
 app.use('/api/aptitude', aptitudeRoutes);
-app.use('/api', chatRoutes);
+// app.use('/api', chatRoutes); // Removed - using KeyRacer Agent instead
+app.use('/api/keyracer-agent', keyracerAgentRoutes);
 app.use('/api/hackathons', hackathonRoutes);
-console.log('[SERVER] All API routes registered including AI Career Agent routes');
+console.log('[SERVER] All API routes registered including KeyRacer Agent routes');
 
 // Global rate limiting
 const globalLimiter = rateLimit({
