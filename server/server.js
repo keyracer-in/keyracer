@@ -8,7 +8,8 @@ console.log("EMAIL_FROM_NAME:", process.env.EMAIL_FROM_NAME);
 console.log("BREVO_SMTP_HOST:", process.env.BREVO_SMTP_HOST ? "Set" : "Not Set");
 console.log("BREVO_SMTP_USER:", process.env.BREVO_SMTP_USER ? "Set" : "Not Set");
 console.log("BREVO_SMTP_PASSWORD:", process.env.BREVO_SMTP_PASSWORD ? "Set (not displayed)" : "Not Set");
-console.log("GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "Set (not displayed)" : "Not Set");
+console.log("TAVILY_API_KEY:", process.env.TAVILY_API_KEY ? "Set (not displayed)" : "Not Set");
+console.log("GROQ_API_KEY:", process.env.GROQ_API_KEY? "Set (not displayed)" : "Not Set");
 
 const express = require('express');
 const cors = require('cors');
@@ -22,7 +23,6 @@ const { URLSearchParams } = require('url');
 const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 const pdf = require('pdf-parse');
-// const { GoogleGenerativeAI } = require('@google/generative-ai'); // Removed - using Groq API
 
 // Import database connection
 const connectDB = require('./utils/dbConnect');
@@ -61,9 +61,6 @@ const upload = multer({
     }
   }
 });
-
-// Initialize Gemini AI - Removed, using Groq API instead
-// // const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // Removed - using Groq API
 
 // System instructions for different modes
 const getSystemInstruction = (mode) => {
@@ -283,8 +280,7 @@ if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
 // Static files - Serve the client app
 app.use(express.static(path.join(__dirname, '../')));
 
-// AI Career Agent - Resume Analysis Endpoint - DISABLED (using KeyRacer Agent instead)
-/*
+// AI Career Agent - Resume Analysis Endpoint
 app.post('/api/analyze-resume', upload.single('resume'), async (req, res) => {
   try {
     if (!req.file) {
@@ -323,10 +319,8 @@ Format with clear headings and bullet points. Be constructive and specific.`;
     res.status(500).json({ success: false, error: 'Failed to analyze resume: ' + error.message });
   }
 });
-*/
 
-// AI Career Agent - Multi-Mode Chat Endpoint - DISABLED (using KeyRacer Agent instead)
-/*
+// AI Career Agent - Multi-Mode Chat Endpoint
 app.post('/api/ai-chat', async (req, res) => {
   try {
     const { message, history = [], mode = 'market' } = req.body;
@@ -368,7 +362,6 @@ app.post('/api/ai-chat', async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to process message: ' + error.message });
   }
 });
-*/
 
 // API routes
 app.use('/api/auth', authRoutes);
