@@ -22,7 +22,7 @@ const session = require('express-session');
 const { URLSearchParams } = require('url');
 const rateLimit = require('express-rate-limit');
 const multer = require('multer');
-const pdf = require('pdf-parse');
+
 
 // Import database connection
 const connectDB = require('./utils/dbConnect');
