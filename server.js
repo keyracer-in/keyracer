@@ -9,7 +9,6 @@ const path = require('path');
 const axios = require('axios');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
 const app = express();
@@ -31,124 +30,15 @@ const upload = multer({
   }
 });
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Initialize services without Gemini
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+require('dotenv').config();
 
-// System instructions for different modes
-const getSystemInstruction = (mode) => {
-  const instructions = {
-    interview: `You are a strict FAANG interviewer for KeyRacer Career Agent. Ask ONE hard technical question at a time. Wait for the user's answer. Grade it (Poor/Average/Good/Excellent) with specific feedback, then ask the next question. Be challenging but fair. Focus on DSA, system design, or behavioral questions.`,
-    
-    market: `You are a Career Strategist for KeyRacer. FIRST check if you know the user's degree and tech stack. If not, ASK them directly: "To provide accurate market insights, I need to know: 1) Your degree/field 2) Your tech stack/skills". Once known, provide high-demand tech trends, salary insights, job market analysis, and career opportunities specific to their profile. Be data-driven and practical.`,
-    
-    roadmap: `You are a Learning Architect for KeyRacer. Generate strict week-by-week learning schedules with specific topics, daily hours (2-4 hours/day), resources, and milestones. Include 2-3 portfolio projects with tech stack. Format: Week 1-4: Topic, Week 5-8: Topic, etc. Be structured and actionable.`
-  };
-  return instructions[mode] || instructions.market;
-};
+const app = express();
 
-
-
-app.use(express.static('.'));
-
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/keyracer', {
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-  connectTimeoutMS: 10000,
-  maxPoolSize: 10,
-});
-
-// AI Career Agent - Resume Analysis Endpoint
-app.post('/api/analyze-resume', upload.single('resume'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: 'No file uploaded' });
-    }
-
-    const pdfData = await pdfParse(req.file.buffer);
-    const resumeText = pdfData.text;
-
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    const prompt = `Analyze this resume for a fresher role. Provide a detailed analysis:
-
-1. **Overall Score**: Rate 0-100 based on content, formatting, and relevance
-2. **Strengths**: List 3-4 strong points
-3. **Weaknesses**: List 3-4 areas needing improvement
-4. **Specific Improvements**: Provide 5-6 actionable items with examples
-5. **ATS Keywords**: List missing keywords for better ATS compatibility
-6. **Project Suggestions**: Recommend 2-3 projects to add
-
-Resume Content:
-${resumeText}
-
-Format with clear headings and bullet points. Be constructive and specific.`;
-
-    const result = await model.generateContent(prompt);
-    const analysis = result.response.text();
-
-    res.json({ 
-      success: true, 
-      analysis,
-      fileName: req.file.originalname,
-      fileSize: req.file.size
-    });
-  } catch (error) {
-    console.error('Resume analysis error:', error);
-    res.status(500).json({ success: false, error: 'Failed to analyze resume: ' + error.message });
-  }
-});
-
-// AI Career Agent - Multi-Mode Chat Endpoint
-app.post('/api/ai-chat', async (req, res) => {
-  try {
-    const { message, history = [], mode = 'market' } = req.body;
-
-    if (!message) {
-      return res.status(400).json({ success: false, error: 'Message is required' });
-    }
-
-    const systemInstruction = getSystemInstruction(mode);
-
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
-      systemInstruction: systemInstruction
-    });
-
-    const conversationHistory = history.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }]
-    }));
-
-    const chat = model.startChat({
-      history: conversationHistory,
-      generationConfig: {
-        temperature: mode === 'interview' ? 0.8 : 0.7,
-        maxOutputTokens: 2048,
-      }
-    });
-
-    const result = await chat.sendMessage(message);
-    const response = result.response.text();
-
-    res.json({ 
-      success: true, 
-      response,
-      mode 
-    });
-  } catch (error) {
-    console.error('AI Chat error:', error);
-    res.status(500).json({ success: false, error: 'Failed to process message: ' + error.message });
-  }
-});
-
-// Routes
-try {
-  const chatRoutes = require('./server/routes/chatRoutes');
-  app.use('/api', chatRoutes);
-  console.log('✅ Chat routes loaded');
-} catch (error) {
-  console.error('❌ Failed to load chat routes:', error.message);
-}
+// Middleware
+app.use(cors());
+app.use(express.json());
 
 try {
   const hackathonRoutes = require('./server/routes/hackathonRoutes');

@@ -4,12 +4,25 @@ const AptitudeQuestion = require('../models/AptitudeQuestion');
 const User = require('../models/User');
 const { requireAuth } = require('../middleware/auth');
 
+// Test endpoint to check database connection
+router.get('/test-db', async (req, res) => {
+    try {
+        const User = require('../models/User');
+        const count = await User.countDocuments();
+        res.json({ success: true, message: 'Database connected', userCount: count });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Database error: ' + error.message });
+    }
+});
+
 // Secure aptitude submission (no auth required but server validates)
 router.post('/submit-secure', async (req, res) => {
     try {
+        console.log('Submit request received:', req.body);
         const { email, displayName, answers, timeTaken, questionIds } = req.body;
         
         if (!email || !displayName || !answers || !questionIds) {
+            console.log('Missing fields:', { email: !!email, displayName: !!displayName, answers: !!answers, questionIds: !!questionIds });
             return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
 
@@ -78,8 +91,9 @@ router.post('/submit-secure', async (req, res) => {
             result: { score: totalScore, accuracy, correctAnswers, totalQuestions: questionIds.length, timeTaken, badges }
         });
     } catch (error) {
-        console.error('Submit error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        console.error('Submit error:', error.message);
+        console.error('Stack trace:', error.stack);
+        res.status(500).json({ success: false, message: 'Server error: ' + error.message });
     }
 });
 
