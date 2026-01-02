@@ -1,7 +1,6 @@
 const express = require('express');
 const multer = require('multer');
 const pdf = require('pdf-parse');
-const pdfParse = pdf.default || pdf;
 const axios = require('axios');
 
 const router = express.Router();
