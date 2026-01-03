@@ -9,6 +9,8 @@ class EnhancedAICareerAgent {
     this.isProcessing = false;
     this.userProfile = null;
     this.resumeAnalysis = null;
+    this.chatSessions = this.loadChatSessions();
+    this.currentSessionId = this.generateSessionId();
     this.initializeUI();
   }
 
@@ -66,6 +68,7 @@ class EnhancedAICareerAgent {
     // Add quick action buttons
     this.addQuickActions();
     this.showWelcomeMessage();
+    this.updateHistorySidebar();
   }
 
   addQuickActions() {
@@ -363,7 +366,7 @@ Ready to supercharge your career journey?`;
     this.showNotification('🔄 Chat reset successfully', 'info');
   }
 
-  addMessage(text, type) {
+  addMessage(text, type, saveToHistory = true) {
     const messagesContainer = document.getElementById('chat-messages');
     if (!messagesContainer) return;
 
@@ -384,7 +387,26 @@ Ready to supercharge your career journey?`;
     
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
-    contentDiv.innerHTML = this.formatMessage(text);
+    
+    // Enhanced formatting for different message types
+    let formattedText = this.formatMessage(text);
+    
+    // Add special formatting for roadmaps
+    if (text.includes('Month') && text.includes('Goal:')) {
+      formattedText = this.formatRoadmap(formattedText);
+    }
+    
+    // Add special formatting for job listings
+    if (text.includes('Company') && text.includes('Position')) {
+      formattedText = this.formatJobListings(formattedText);
+    }
+    
+    // Add special formatting for skill analysis
+    if (text.includes('Technical Strengths') || text.includes('Skill Gap')) {
+      formattedText = this.formatSkillAnalysis(formattedText);
+    }
+    
+    contentDiv.innerHTML = formattedText;
     
     messageDiv.appendChild(avatarDiv);
     messageDiv.appendChild(contentDiv);
@@ -402,23 +424,43 @@ Ready to supercharge your career journey?`;
       messageDiv.style.transform = 'translateY(0)';
     }, 50);
     
+    // Save to session if needed
+    if (saveToHistory) {
+      setTimeout(() => this.saveCurrentSession(), 500);
+    }
+    
     this.scrollToBottom();
   }
 
   formatMessage(text) {
     return text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-      .replace(/^\• (.*$)/gm, '<li>$1</li>')
-      .replace(/^- (.*$)/gm, '<li>$1</li>')
-      .replace(/^\d+\. (.*$)/gm, '<li>$1</li>')
-      .replace(/((<li>.*<\/li>\s*)+)/g, '<ul>$1</ul>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br>');
+      // Headers with better styling
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="highlight">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em class="emphasis">$1</em>')
+      .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
+      
+      // Enhanced headers with icons
+      .replace(/^### (.*$)/gm, '<h3 class="section-header"><i class="fas fa-chevron-right"></i> $1</h3>')
+      .replace(/^## (.*$)/gm, '<h2 class="main-header"><i class="fas fa-star"></i> $1</h2>')
+      .replace(/^# (.*$)/gm, '<h1 class="title-header"><i class="fas fa-crown"></i> $1</h1>')
+      
+      // Enhanced lists with better formatting
+      .replace(/^\• (.*$)/gm, '<li class="bullet-item"><i class="fas fa-check-circle"></i> $1</li>')
+      .replace(/^- (.*$)/gm, '<li class="dash-item"><i class="fas fa-arrow-right"></i> $1</li>')
+      .replace(/^\d+\. (.*$)/gm, '<li class="numbered-item"><span class="number">$&</span></li>')
+      
+      // Wrap lists in containers
+      .replace(/((<li class="bullet-item">.*<\/li>\s*)+)/g, '<ul class="enhanced-list bullet-list">$1</ul>')
+      .replace(/((<li class="dash-item">.*<\/li>\s*)+)/g, '<ul class="enhanced-list dash-list">$1</ul>')
+      .replace(/((<li class="numbered-item">.*<\/li>\s*)+)/g, '<ol class="enhanced-list numbered-list">$1</ol>')
+      
+      // Enhanced paragraphs and line breaks
+      .replace(/\n\n/g, '</p><p class="paragraph">')
+      .replace(/\n/g, '<br class="line-break">')
+      
+      // Wrap in paragraph container
+      .replace(/^(.+)/, '<p class="paragraph">$1')
+      .replace(/(.+)$/, '$1</p>');
   }
 
   setLoading(loading) {
@@ -492,6 +534,215 @@ Ready to supercharge your career journey?`;
   }
 
   // toggleSuggestions method removed - suggestions now always visible
+  
+  formatRoadmap(text) {
+    return text
+      .replace(/Month \d+-\d+:/g, '<div class="roadmap-month">$&</div>')
+      .replace(/\*\*Goal:\*\*/g, '<div class="roadmap-goal"><i class="fas fa-target"></i> <strong>Goal:</strong></div>')
+      .replace(/\*\*Projects:\*\*/g, '<div class="roadmap-projects"><i class="fas fa-code"></i> <strong>Projects:</strong></div>')
+      .replace(/\*\*Resources:\*\*/g, '<div class="roadmap-resources"><i class="fas fa-book"></i> <strong>Resources:</strong></div>');
+  }
+  
+  formatJobListings(text) {
+    // Enhanced table formatting for job listings
+    return text.replace(/<table>/g, '<div class="job-listings-container"><table class="job-listings-table">')
+               .replace(/<\/table>/g, '</table></div>');
+  }
+  
+  formatSkillAnalysis(text) {
+    return text
+      .replace(/Technical Strengths:/g, '<div class="skill-section strengths"><i class="fas fa-check-circle"></i> <strong>Technical Strengths:</strong></div>')
+      .replace(/Areas to Improve:/g, '<div class="skill-section improvements"><i class="fas fa-arrow-up"></i> <strong>Areas to Improve:</strong></div>')
+      .replace(/Recommended Actions:/g, '<div class="skill-section actions"><i class="fas fa-rocket"></i> <strong>Recommended Actions:</strong></div>');
+  }
+  
+  // Chat History Management
+  generateSessionId() {
+    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+  
+  loadChatSessions() {
+    try {
+      return JSON.parse(localStorage.getItem('keyracer_chat_sessions') || '[]');
+    } catch {
+      return [];
+    }
+  }
+  
+  saveChatSessions() {
+    try {
+      localStorage.setItem('keyracer_chat_sessions', JSON.stringify(this.chatSessions));
+    } catch (error) {
+      console.warn('Failed to save chat sessions:', error);
+    }
+  }
+  
+  saveCurrentSession() {
+    if (this.chatHistory.length === 0) return;
+    
+    const existingIndex = this.chatSessions.findIndex(s => s.id === this.currentSessionId);
+    const sessionData = {
+      id: this.currentSessionId,
+      title: this.generateSessionTitle(),
+      timestamp: new Date().toISOString(),
+      mode: this.currentMode,
+      messages: this.chatHistory.slice(),
+      resumeAnalysis: this.resumeAnalysis
+    };
+    
+    if (existingIndex >= 0) {
+      this.chatSessions[existingIndex] = sessionData;
+    } else {
+      this.chatSessions.unshift(sessionData);
+    }
+    
+    // Keep only last 20 sessions
+    this.chatSessions = this.chatSessions.slice(0, 20);
+    this.saveChatSessions();
+    this.updateHistorySidebar();
+  }
+  
+  generateSessionTitle() {
+    if (this.chatHistory.length === 0) return 'New Chat';
+    
+    const firstUserMessage = this.chatHistory.find(msg => msg.role === 'user');
+    if (firstUserMessage) {
+      const title = firstUserMessage.content.substring(0, 30);
+      return title.length < firstUserMessage.content.length ? title + '...' : title;
+    }
+    
+    return `${this.currentMode} Chat - ${new Date().toLocaleDateString()}`;
+  }
+  
+  updateHistorySidebar() {
+    const historyList = document.getElementById('chat-history-list');
+    if (!historyList) return;
+    
+    historyList.innerHTML = '';
+    
+    this.chatSessions.forEach(session => {
+      const listItem = document.createElement('li');
+      listItem.className = 'history-item';
+      if (session.id === this.currentSessionId) {
+        listItem.classList.add('active');
+      }
+      
+      listItem.innerHTML = `
+        <div class="history-item-content">
+          <div class="history-title">${session.title}</div>
+          <div class="history-meta">
+            <span class="history-mode">${session.mode}</span>
+            <span class="history-date">${this.formatDate(session.timestamp)}</span>
+          </div>
+        </div>
+        <button class="history-delete" onclick="event.stopPropagation(); window.enhancedAICareerAgent.deleteSession('${session.id}')">
+          <i class="fas fa-trash"></i>
+        </button>
+      `;
+      
+      listItem.addEventListener('click', () => this.loadSession(session.id));
+      historyList.appendChild(listItem);
+    });
+    
+    // Add "New Chat" button
+    const newChatItem = document.createElement('li');
+    newChatItem.className = 'history-item new-chat-item';
+    newChatItem.innerHTML = `
+      <div class="history-item-content">
+        <div class="history-title"><i class="fas fa-plus"></i> New Chat</div>
+      </div>
+    `;
+    newChatItem.addEventListener('click', () => this.startNewChat());
+    historyList.appendChild(newChatItem);
+  }
+  
+  formatDate(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  }
+  
+  loadSession(sessionId) {
+    const session = this.chatSessions.find(s => s.id === sessionId);
+    if (!session) return;
+    
+    // Save current session before switching
+    this.saveCurrentSession();
+    
+    // Load the selected session
+    this.currentSessionId = sessionId;
+    this.currentMode = session.mode;
+    this.chatHistory = session.messages.slice();
+    this.resumeAnalysis = session.resumeAnalysis;
+    
+    // Update UI
+    this.updateModeButtons();
+    this.displayChatHistory();
+    this.updateHistorySidebar();
+  }
+  
+  startNewChat() {
+    // Save current session
+    this.saveCurrentSession();
+    
+    // Reset to new session
+    this.currentSessionId = this.generateSessionId();
+    this.chatHistory = [];
+    this.resumeAnalysis = null;
+    
+    // Clear chat display
+    const messagesContainer = document.getElementById('chat-messages');
+    if (messagesContainer) {
+      messagesContainer.innerHTML = '';
+    }
+    
+    // Update UI
+    this.updateHistorySidebar();
+    this.showWelcomeMessage();
+  }
+  
+  deleteSession(sessionId) {
+    this.chatSessions = this.chatSessions.filter(s => s.id !== sessionId);
+    this.saveChatSessions();
+    
+    if (sessionId === this.currentSessionId) {
+      this.startNewChat();
+    } else {
+      this.updateHistorySidebar();
+    }
+  }
+  
+  updateModeButtons() {
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === this.currentMode);
+    });
+  }
+  
+  displayChatHistory() {
+    const messagesContainer = document.getElementById('chat-messages');
+    if (!messagesContainer) return;
+    
+    messagesContainer.innerHTML = '';
+    
+    this.chatHistory.forEach(msg => {
+      if (msg.role === 'user') {
+        this.addMessage(msg.content, 'user', false);
+      } else {
+        this.addMessage(msg.content, 'bot', false);
+      }
+    });
+  }
 }
 
 // Initialize when DOM is ready
