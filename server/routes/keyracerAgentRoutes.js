@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const pdf = require('pdf-parse');
+const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
 const axios = require('axios');
 
 const router = express.Router();
@@ -16,8 +16,16 @@ class KeyRacerAgentService {
   // Resume Analyzer Agent (equivalent to KeyRacerAnalyzer)
   async analyzeResume(pdfBuffer, targetRole = 'Software Engineer') {
     try {
-      const pdfData = await pdfParse(pdfBuffer);
-      const resumeText = pdfData.text;
+      const loadingTask = pdfjsLib.getDocument({ data: pdfBuffer });
+      const pdf = await loadingTask.promise;
+      let resumeText = '';
+      
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        resumeText += pageText + '\n';
+      }
 
       const prompt = `Analyze this resume for ${targetRole} role. Return structured JSON with:
       {
