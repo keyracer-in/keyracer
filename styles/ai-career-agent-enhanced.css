@@ -961,6 +961,473 @@ body {
 .message-content .section-header {
     animation: fadeInUp 0.4s ease-out;
 }
+/* Roadmap Table Formatting */
+.message-content .roadmap-summary-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-size: 1.2em;
+    font-weight: 700;
+    margin: 20px 0;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.message-content .roadmap-table-container {
+    margin: 20px 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.message-content .roadmap-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+}
+
+.message-content .roadmap-phase {
+    background: var(--bg-main);
+    border-radius: 16px;
+    padding: 24px;
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.message-content .roadmap-phase::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--primary), var(--secondary));
+}
+
+.message-content .roadmap-phase:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.2);
+    border-color: var(--primary);
+}
+
+.message-content .phase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+}
+
+.message-content .phase-timeline {
+    background: linear-gradient(135deg, var(--accent) 0%, #f59e0b 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.message-content .phase-goal {
+    color: var(--text-primary);
+    font-size: 1.1em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.message-content .phase-goal i {
+    color: var(--primary);
+}
+
+.message-content .phase-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.message-content .phase-section {
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.3s ease;
+}
+
+.message-content .phase-section:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.message-content .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.message-content .section-content {
+    color: var(--text-primary);
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.message-content .roadmap-conclusion {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--secondary);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    color: var(--text-primary);
+    font-style: italic;
+    line-height: 1.6;
+}
+
+/* Mobile Responsive for Roadmap */
+@media (max-width: 768px) {
+    .message-content .phase-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .message-content .phase-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .message-content .roadmap-timeline {
+        padding: 16px;
+    }
+    
+    .message-content .roadmap-phase {
+        padding: 16px;
+    }
+}
+
+/* Job Listings Formatting */
+.message-content .job-listings-header {
+    background: linear-gradient(135deg, var(--secondary) 0%, #059669 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-size: 1.2em;
+    font-weight: 700;
+    margin: 20px 0;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.message-content .job-listings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 20px 0;
+    padding: 20px;
+    background: var(--bg-card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+}
+
+.message-content .job-card {
+    background: var(--bg-main);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.message-content .job-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--secondary), var(--primary));
+}
+
+.message-content .job-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.2);
+    border-color: var(--secondary);
+}
+
+.message-content .job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.message-content .company-info {
+    flex: 1;
+}
+
+.message-content .company-name {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.message-content .job-location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.message-content .job-location i {
+    color: var(--accent);
+}
+
+.message-content .job-actions {
+    flex-shrink: 0;
+}
+
+.message-content .apply-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--secondary) 0%, #059669 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.message-content .apply-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.message-content .job-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.message-content .job-title {
+    font-size: 1.05em;
+    font-weight: 600;
+    color: var(--primary);
+    line-height: 1.4;
+}
+
+.message-content .job-requirements {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.message-content .requirements-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.message-content .requirements-label i {
+    color: var(--primary);
+}
+
+.message-content .requirements-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.message-content .skill-tag {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary);
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    transition: all 0.3s ease;
+}
+
+.message-content .skill-tag:hover {
+    background: rgba(99, 102, 241, 0.2);
+    transform: translateY(-1px);
+}
+
+.message-content .job-disclaimer {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 20px 0;
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.5;
+    font-style: italic;
+}
+
+/* Mobile Responsive for Job Listings */
+@media (max-width: 768px) {
+    .message-content .job-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    
+    .message-content .job-actions {
+        width: 100%;
+    }
+    
+    .message-content .apply-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .message-content .job-listings-container {
+        padding: 16px;
+    }
+    
+    .message-content .job-card {
+        padding: 16px;
+    }
+}
+
+/* Skill Analysis Formatting */
+.message-content .skill-analysis-section {
+    margin: 20px 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.message-content .skill-section-header {
+    padding: 16px 24px;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.message-content .strengths-header {
+    background: linear-gradient(135deg, var(--secondary) 0%, #059669 100%);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.message-content .improvements-header {
+    background: linear-gradient(135deg, var(--accent) 0%, #f59e0b 100%);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.message-content .actions-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.message-content .skill-items-container {
+    padding: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+}
+
+.message-content .strengths-section .skill-items-container {
+    background: rgba(16, 185, 129, 0.05);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.message-content .improvements-section .skill-items-container {
+    background: rgba(245, 158, 11, 0.05);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.message-content .actions-section .skill-items-container {
+    background: rgba(99, 102, 241, 0.05);
+    border-color: rgba(99, 102, 241, 0.2);
+}
+
+.message-content .skill-item {
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    background: var(--bg-main);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 15px;
+    line-height: 1.5;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.message-content .skill-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.message-content .strengths-section .skill-item:hover {
+    border-color: var(--secondary);
+}
+
+.message-content .improvements-section .skill-item:hover {
+    border-color: var(--accent);
+}
+
+.message-content .actions-section .skill-item:hover {
+    border-color: var(--primary);
+}
+
+.message-content .skill-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Mobile Responsive for Skill Analysis */
+@media (max-width: 768px) {
+    .message-content .skill-section-header {
+        padding: 12px 16px;
+        font-size: 1em;
+    }
+    
+    .message-content .skill-items-container {
+        padding: 16px;
+    }
+    
+    .message-content .skill-item {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+}
+
 /* Specialized Content Formatting */
 
 /* Roadmap Formatting */

@@ -433,6 +433,21 @@ Ready to supercharge your career journey?`;
   }
 
   formatMessage(text) {
+    // Check if this is a roadmap table and format it specially
+    if (text.includes('Roadmap Summary:') && text.includes('| Month |')) {
+      return this.formatRoadmapTable(text);
+    }
+    
+    // Check if this is a job listings table and format it specially
+    if (text.includes('job postings') && text.includes('| Company |')) {
+      return this.formatJobListingsTable(text);
+    }
+    
+    // Check if this is skill analysis with emoji headers
+    if (text.includes('🎯') || text.includes('⚠️') || text.includes('🚀')) {
+      return this.formatSkillAnalysisContent(text);
+    }
+    
     return text
       // Headers with better styling
       .replace(/\*\*(.*?)\*\*/g, '<strong class="highlight">$1</strong>')
@@ -461,6 +476,192 @@ Ready to supercharge your career journey?`;
       // Wrap in paragraph container
       .replace(/^(.+)/, '<p class="paragraph">$1')
       .replace(/(.+)$/, '$1</p>');
+  }
+  
+  formatRoadmapTable(text) {
+    const lines = text.split('\n');
+    let html = '';
+    let inTable = false;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (line.includes('Roadmap Summary:')) {
+        html += '<div class="roadmap-summary-header"><i class="fas fa-map"></i> <strong>Learning Roadmap Summary</strong></div>';
+      } else if (line.startsWith('| Month |')) {
+        // Start of table - create header
+        html += '<div class="roadmap-table-container">';
+        html += '<div class="roadmap-timeline">';
+        inTable = true;
+      } else if (line.startsWith('| ---')) {
+        // Skip separator line
+        continue;
+      } else if (line.startsWith('|') && inTable) {
+        // Table row
+        const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+        if (cells.length >= 4) {
+          html += `
+            <div class="roadmap-phase">
+              <div class="phase-header">
+                <div class="phase-timeline">${cells[0]}</div>
+                <div class="phase-goal"><i class="fas fa-target"></i> ${cells[1]}</div>
+              </div>
+              <div class="phase-content">
+                <div class="phase-section">
+                  <div class="section-title"><i class="fas fa-code"></i> Projects</div>
+                  <div class="section-content">${cells[2]}</div>
+                </div>
+                <div class="phase-section">
+                  <div class="section-title"><i class="fas fa-book"></i> Resources</div>
+                  <div class="section-content">${cells[3]}</div>
+                </div>
+                ${cells[4] ? `
+                  <div class="phase-section">
+                    <div class="section-title"><i class="fas fa-tools"></i> Tools</div>
+                    <div class="section-content">${cells[4]}</div>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }
+      } else if (inTable && !line.startsWith('|')) {
+        // End of table
+        html += '</div></div>';
+        inTable = false;
+        if (line) {
+          html += `<div class="roadmap-conclusion">${line}</div>`;
+        }
+      } else if (line) {
+        // Regular content
+        html += `<p class="paragraph">${line}</p>`;
+      }
+    }
+    
+    if (inTable) {
+      html += '</div></div>';
+    }
+    
+    return html;
+  }
+  
+  formatJobListingsTable(text) {
+    const lines = text.split('\n');
+    let html = '';
+    let inTable = false;
+    let jobCount = 0;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (line.includes('job postings')) {
+        const match = line.match(/(\d+)\s+active.*job postings/);
+        jobCount = match ? match[1] : '5';
+        html += `<div class="job-listings-header"><i class="fas fa-briefcase"></i> <strong>${jobCount} Active Job Opportunities Found</strong></div>`;
+      } else if (line.startsWith('| Company |')) {
+        // Start of table
+        html += '<div class="job-listings-container">';
+        inTable = true;
+      } else if (line.startsWith('|---')) {
+        // Skip separator line
+        continue;
+      } else if (line.startsWith('|') && inTable) {
+        // Table row
+        const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+        if (cells.length >= 4) {
+          const company = cells[0];
+          const position = cells[1];
+          const location = cells[2];
+          const requirements = cells[3];
+          const applyLink = cells[4] || '#';
+          
+          html += `
+            <div class="job-card">
+              <div class="job-header">
+                <div class="company-info">
+                  <div class="company-name">${company}</div>
+                  <div class="job-location"><i class="fas fa-map-marker-alt"></i> ${location}</div>
+                </div>
+                <div class="job-actions">
+                  <a href="${applyLink}" target="_blank" class="apply-btn">
+                    <i class="fas fa-external-link-alt"></i> Apply
+                  </a>
+                </div>
+              </div>
+              <div class="job-content">
+                <div class="job-title">${position}</div>
+                <div class="job-requirements">
+                  <div class="requirements-label"><i class="fas fa-code"></i> Required Skills:</div>
+                  <div class="requirements-tags">
+                    ${requirements.split(',').map(req => `<span class="skill-tag">${req.trim()}</span>`).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      } else if (inTable && !line.startsWith('|')) {
+        // End of table
+        html += '</div>';
+        inTable = false;
+        if (line && line.includes('Note:')) {
+          html += `<div class="job-disclaimer">${line}</div>`;
+        } else if (line) {
+          html += `<p class="paragraph">${line}</p>`;
+        }
+      } else if (line && !inTable) {
+        // Regular content
+        html += `<p class="paragraph">${line}</p>`;
+      }
+    }
+    
+    if (inTable) {
+      html += '</div>';
+    }
+    
+    return html;
+  }
+
+  formatSkillAnalysisContent(text) {
+    const lines = text.split('\n');
+    let html = '';
+    let currentSection = null;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (line.includes('🎯') && line.includes('Strengths')) {
+        html += '<div class="skill-analysis-section strengths-section">';
+        html += '<div class="skill-section-header strengths-header"><i class="fas fa-bullseye"></i> <strong>Your Technical Strengths</strong></div>';
+        html += '<div class="skill-items-container">';
+        currentSection = 'strengths';
+      } else if (line.includes('⚠️') && (line.includes('Improve') || line.includes('Areas'))) {
+        if (currentSection) html += '</div></div>';
+        html += '<div class="skill-analysis-section improvements-section">';
+        html += '<div class="skill-section-header improvements-header"><i class="fas fa-exclamation-triangle"></i> <strong>Areas to Improve</strong></div>';
+        html += '<div class="skill-items-container">';
+        currentSection = 'improvements';
+      } else if (line.includes('🚀') && (line.includes('Recommended') || line.includes('Actions'))) {
+        if (currentSection) html += '</div></div>';
+        html += '<div class="skill-analysis-section actions-section">';
+        html += '<div class="skill-section-header actions-header"><i class="fas fa-rocket"></i> <strong>Recommended Actions</strong></div>';
+        html += '<div class="skill-items-container">';
+        currentSection = 'actions';
+      } else if (line && !line.includes('🎯') && !line.includes('⚠️') && !line.includes('🚀')) {
+        // Content line
+        if (currentSection && line) {
+          html += `<div class="skill-item">${line}</div>`;
+        } else if (line) {
+          html += `<p class="paragraph">${line}</p>`;
+        }
+      }
+    }
+    
+    if (currentSection) {
+      html += '</div></div>';
+    }
+    
+    return html;
   }
 
   setLoading(loading) {
