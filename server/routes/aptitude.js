@@ -33,7 +33,8 @@ router.post('/submit-secure', async (req, res) => {
                 email, 
                 username: displayName,
                 displayName,
-                isVerified: true 
+                isVerified: true,
+                authMethod: 'google' // Fix: allow passwordless user for Google/guest
             });
             await user.save();
         }
