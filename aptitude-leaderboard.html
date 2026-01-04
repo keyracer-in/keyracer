@@ -141,15 +141,10 @@
 
     <script src="scripts/aptitude.js"></script>
     <script src="scripts/header-auth.js"></script>
+    <script type="module" src="client/js/aptitude-leaderboard-ui.js"></script>
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
-        
-        // Load leaderboard on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                window.aptitudeManager.loadLeaderboard('all-time');
-            }, 1000);
-        });
+        // Remove old leaderboard loading logic, handled by the new module
     </script>
 </body>
 </html>

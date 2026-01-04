@@ -182,36 +182,20 @@ class AptitudeManager {
     async loadQuestions(topic, difficulty = 'medium') {
         try {
             const userEmail = localStorage.getItem('typingTestUserEmail') || `${localStorage.getItem('typingTestUser')}@guest.local`;
-            
-            // Try API first
-            try {
-                const response = await fetch(`/api/aptitude/questions/${topic}/${difficulty}?email=${encodeURIComponent(userEmail)}`);
-                if (response.ok) {
-                    const apiData = await response.json();
-                    if (apiData.success && apiData.questions && apiData.questions.length > 0) {
-                        this.questions = apiData.questions;
-                        this.currentQuestionIndex = 0;
-                        this.userAnswers = new Array(this.questions.length).fill('');
-                        this.showStartButton(topic, difficulty);
-                        return;
-                    }
+            // Only allow backend API loading
+            const response = await fetch(`/api/aptitude/questions/${topic}/${difficulty}?email=${encodeURIComponent(userEmail)}`);
+            if (response.ok) {
+                const apiData = await response.json();
+                if (apiData.success && apiData.questions && apiData.questions.length > 0) {
+                    this.questions = apiData.questions;
+                    this.currentQuestionIndex = 0;
+                    this.userAnswers = new Array(this.questions.length).fill('');
+                    this.showStartButton(topic, difficulty);
+                    return;
                 }
-            } catch (apiError) {
-                console.log('Using local data');
             }
-            
-            // Fallback to local JSON
-            const response = await fetch('data/aptitude-questions.json');
-            const data = await response.json();
-
-            if (data[topic] && data[topic][difficulty]) {
-                this.questions = data[topic][difficulty];
-                this.currentQuestionIndex = 0;
-                this.userAnswers = new Array(this.questions.length).fill('');
-                this.showStartButton(topic, difficulty);
-            } else {
-                this.showNoQuestionsMessage(topic, difficulty);
-            }
+            // If no questions from backend, show error
+            this.showNoQuestionsMessage(topic, difficulty);
         } catch (error) {
             console.error('Error loading questions:', error);
             this.showErrorMessage();

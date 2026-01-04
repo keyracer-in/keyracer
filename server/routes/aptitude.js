@@ -29,9 +29,17 @@ router.post('/submit-secure', async (req, res) => {
         // Find or create user
         let user = await User.findOne({ email });
         if (!user) {
+            // Ensure unique username
+            let baseUsername = displayName;
+            let uniqueUsername = baseUsername;
+            let counter = 1;
+            while (await User.findOne({ username: uniqueUsername })) {
+                uniqueUsername = `${baseUsername}${counter}`;
+                counter++;
+            }
             user = new User({ 
                 email, 
-                username: displayName,
+                username: uniqueUsername,
                 displayName,
                 isVerified: true,
                 authMethod: 'google' // Fix: allow passwordless user for Google/guest
