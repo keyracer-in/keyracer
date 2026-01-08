@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const leaderboardTable = document.getElementById('aptitudeLeaderboardTable');
   if (!leaderboardTable) return;
   const data = await fetchAptitudeLeaderboard();
-  if (data.success && data.data && data.data.leaderboard) {
-    leaderboardTable.innerHTML = data.data.leaderboard.map(entry => `
+  if (data.success && data.leaderboard) {
+    leaderboardTable.innerHTML = data.leaderboard.map(entry => `
       <tr>
         <td>${entry.rank}</td>
         <td>${entry.user.name}</td>

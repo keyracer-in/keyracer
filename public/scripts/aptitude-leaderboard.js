@@ -12,6 +12,6 @@ export async function submitAptitudeResult(payload) {
 }
 
 export async function fetchAptitudeLeaderboard() {
-  const response = await fetch(`${API_BASE_URL}/aptitude-leaderboard`);
+  const response = await fetch(`${API_BASE_URL}/aptitude/leaderboard`);
   return response.json();
 }

@@ -135,6 +135,10 @@ router.post('/aptitude/submit-secure', async (req, res) => {
     });
     
     await user.save();
+    
+    // Log confirmation that data was saved to User.aptitudeStats only
+    console.log(`[Aptitude Submission] Saved to User.aptitudeStats for user: ${email}`);
+    console.log(`[Aptitude Submission] Stats: testsCompleted=${user.aptitudeStats.testsCompleted}, totalScore=${user.aptitudeStats.totalScore}, accuracy=${accuracy.toFixed(2)}%`);
 
     res.json({ 
       success: true, 
@@ -226,19 +230,27 @@ router.get('/aptitude/leaderboard', async (req, res) => {
     const users = await User.find({ 
       'aptitudeStats.testsCompleted': { $gt: 0 } 
     })
-    .select('username email aptitudeStats')
+    .select('username displayName email aptitudeStats')
     .sort({ 'aptitudeStats.totalScore': -1 })
     .limit(50);
 
-    const leaderboard = users.map(user => ({
-      name: user.username || user.email?.split('@')[0] || 'Anonymous',
-      score: user.aptitudeStats.totalScore,
-      accuracy: user.aptitudeStats.bestAccuracy,
-      timeTaken: 180, // Mock average time
-      badges: user.aptitudeStats.badges || []
+    const leaderboard = users.map((user, index) => ({
+      rank: index + 1,
+      user: {
+        name: user.displayName || user.username || user.email?.split('@')[0] || 'Anonymous'
+      },
+      stats: {
+        totalPoints: user.aptitudeStats.totalScore || 0,
+        questionsCompleted: user.aptitudeStats.solvedQuestions?.length || 0
+      }
     }));
 
-    res.json({ success: true, leaderboard });
+    res.json({ 
+      success: true, 
+      data: {
+        leaderboard 
+      }
+    });
   } catch (error) {
     console.error('Error loading leaderboard:', error);
     res.status(500).json({ success: false, message: 'Server error' });

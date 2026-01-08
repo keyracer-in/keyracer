@@ -40,7 +40,6 @@ const challengeRoutes = require('./routes/challengeRoutes');
 const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const coderacerLeaderboardRoutes = require('./routes/coderacerLeaderboardRoutes');
 const aptitudeRoutes = require('./routes/aptitude');
-const aptitudeLeaderboardRoutes = require('./routes/aptitudeLeaderboardRoutes');
 const hackathonRoutes = require('./routes/hackathonRoutes');
 const keyracerAgentRoutes = require('./routes/keyracerAgentRoutes');
 
@@ -477,7 +476,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api', challengeRoutes);
 app.use('/api', leaderboardRoutes);
 app.use('/api/aptitude', aptitudeRoutes);
-app.use('/api', aptitudeLeaderboardRoutes);
 app.use('/api/keyracer-agent', keyracerAgentRoutes);
 app.use('/api/hackathons', hackathonRoutes);
 console.log('[SERVER] All API routes registered including KeyRacer Agent routes');
