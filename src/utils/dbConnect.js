@@ -1,7 +1,12 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb+srv://customerkeyracer:OEpaqCIwSGIyL59i@keyracer.gksksbs.mongodb.net/?retryWrites=true&w=majority&appName=keyracer';
+const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error('❌ MONGODB_URI environment variable is not set');
+  process.exit(1);
+}
 
 const connectDB = async () => {
   try {
