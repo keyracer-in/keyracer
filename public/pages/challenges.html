@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4P5RF6RD8J"></script>
+    <script src="../scripts/analytics/gtag-config.js"></script>
+    
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Challenges - KeyRacer | Programming Exercises & Contest</title>
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/code-racer.css">
+    <link rel="stylesheet" href="../styles/challenges-main.css">
+    <link rel="stylesheet" href="../styles/challenges-modal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Structured Data for Challenges Page -->
+    <script type="application/ld+json">
+        {/* ...full structured data from your original file... */}
+    </script>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <header class="tutorial-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="../index.html">
+                    <img src="../assets/images/logo.png" alt="Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="main-nav">
+                <a href="code-racer.html" class="nav-item"><i class="fas fa-home"></i> Home</a>
+                <a href="challenges.html" class="nav-item active"><i class="fas fa-code"></i> Challenges</a>
+                <a href="coderacer-leaderboard.html" class="nav-item"><i class="fas fa-trophy"></i> Leaderboard</a>
+            </nav>
+            <div class="header-actions">
+                <div class="user-section">
+                    <a href="../index.html" class="pref-btn" id="prefBtn">
+                        <i class="fas fa-cog"></i> Preference
+                    </a>
+                    <a href="login.html" class="login-btn" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="#" class="logout-btn" id="logoutBtn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <section class="hero-section" style="padding: 0 0 20px 0;">
+
+        <div class="language-selector" style="margin-bottom: 18px;">
+            <div class="language-tabs" style="display: flex; gap: 10px; justify-content: center;">
+                <button class="language-tab active" data-language="python" style="background: #00C2FF; color: #0E1E38; font-weight: 700; border-radius: 8px; padding: 10px 22px; border: none; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(0,194,255,0.12);">
+                    <i class="fab fa-python"></i> <span>Python</span>
+                </button>
+                <button class="language-tab" data-language="javascript" style="background: #FFC700; color: #0E1E38; font-weight: 700; border-radius: 8px; padding: 10px 22px; border: none; font-size: 1.1rem;">
+                    <i class="fab fa-js"></i> <span>JavaScript</span>
+                </button>
+                <button class="language-tab" data-language="java" style="background: #E41B17; color: #fff; font-weight: 700; border-radius: 8px; padding: 10px 22px; border: none; font-size: 1.1rem;">
+                    <i class="fab fa-java"></i> <span>Java</span>
+                </button>
+                <button class="language-tab" data-language="c" style="background: #A020F0; color: #fff; font-weight: 700; border-radius: 8px; padding: 10px 22px; border: none; font-size: 1.1rem;">
+                    <i class="fas fa-code"></i> <span>C</span>
+                </button>
+                <button class="language-tab" data-language="cpp" style="background: #00599C; color: #fff; font-weight: 700; border-radius: 8px; padding: 10px 22px; border: none; font-size: 1.1rem;">
+                    <i class="fas fa-code"></i> <span>C++</span>
+                </button>
+                <button class="language-tab disabled" data-language="go" style="background: #161b22; color: #8b949e; font-weight: 700; border-radius: 8px; padding: 10px 22px; border: none; font-size: 1.1rem; opacity: 0.5;">
+                    <i class="fas fa-bolt"></i> <span>Go</span>
+                </button>
+            </div>
+        </div>
+
+    </section>
+    
+    <!-- User Stats Section -->
+    <div class="user-stats-section" id="userStatsSection" style="background: rgba(0,194,255,0.08); padding: 20px 0; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,194,255,0.06);">
+        <div class="stats-container" style="max-width: 800px; margin: 0 auto; display: flex; gap: 30px; justify-content: center; align-items: center;">
+            <div class="stat-item" style="text-align: center; padding: 15px 25px; background: rgba(0,194,255,0.1); border-radius: 12px; border: 1px solid rgba(0,194,255,0.2);">
+                <div class="stat-value" id="userRank" style="font-size: 2rem; font-weight: 700; color: #00C2FF; margin-bottom: 5px;">-</div>
+                <div class="stat-label" style="font-size: 0.9rem; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;">Your Rank</div>
+            </div>
+            <div class="stat-item" style="text-align: center; padding: 15px 25px; background: rgba(255,199,0,0.1); border-radius: 12px; border: 1px solid rgba(255,199,0,0.2);">
+                <div class="stat-value" id="userPoints" style="font-size: 2rem; font-weight: 700; color: #FFC700; margin-bottom: 5px;">0</div>
+                <div class="stat-label" style="font-size: 0.9rem; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;">Total Points</div>
+            </div>
+            <div class="stat-item" style="text-align: center; padding: 15px 25px; background: rgba(228,27,23,0.1); border-radius: 12px; border: 1px solid rgba(228,27,23,0.2);">
+                <div class="stat-value" id="userChallenges" style="font-size: 2rem; font-weight: 700; color: #E41B17; margin-bottom: 5px;">0</div>
+                <div class="stat-label" style="font-size: 0.9rem; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;">Solved</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="difficulty-filter-bar" style="background: rgba(0,194,255,0.05); padding: 18px 0; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,194,255,0.04);">
+        <div class="filter-container" style="display: flex; gap: 18px; justify-content: center;">
+            <button class="difficulty-filter active" data-difficulty="all" style="background: #00C2FF; color: #0E1E38; font-weight: 700; border-radius: 8px; padding: 10px 22px; border: none; font-size: 1rem; box-shadow: 0 2px 8px rgba(0,194,255,0.12);">All Challenges</button>
+            <button class="difficulty-filter" data-difficulty="easy" style="background: #FFC700; color: #0E1E38; font-weight: 700; border-radius: 8px; padding: 10px 22px; border: none; font-size: 1rem;">Beginner <span class="points">(10pts)</span></button>
+            <button class="difficulty-filter" data-difficulty="medium" style="background: #E41B17; color: #fff; font-weight: 700; border-radius: 8px; padding: 10px 22px; border: none; font-size: 1rem;">Intermediate <span class="points">(20pts)</span></button>
+            <button class="difficulty-filter" data-difficulty="hard" style="background: #0E1E38; color: #FFC700; font-weight: 700; border-radius: 8px; padding: 10px 22px; border: none; font-size: 1rem;">Advanced <span class="points">(30pts)</span></button>
+            <button class="difficulty-filter" data-difficulty="expert" style="background: #161b22; color: #00C2FF; font-weight: 700; border-radius: 8px; padding: 10px 22px; border: none; font-size: 1rem;">Expert <span class="points">(40pts)</span></button>
+        </div>
+    </div>
+    <section id="challenges-list" class="challenges-grid" style="display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; min-height: 300px; margin-bottom: 40px;">
+        <div class="loading-container" id="loadingContainer" style="width: 100%; text-align: center; margin-top: 40px;">
+            <div class="loading-spinner" style="margin-bottom: 18px;"></div>
+            <p style="font-size: 1.2rem; color: #00C2FF;">Loading Python challenges...</p>
+        </div>
+        <!-- Challenges will be loaded dynamically -->
+    </section>
+    <!-- Tips Modal -->
+    <div id="tipsModal">
+        <div class="modal-content">
+            <h2 class="modal-title">💡 How to Use Challenges</h2>
+            <div class="modal-text">
+                <p>🎯 <strong>Click on language tabs</strong> to see challenges for that specific language</p>
+                <p>🔥 <strong>Filter by difficulty</strong> using the buttons (Beginner, Intermediate, Advanced, Expert)</p>
+                <p>⚡ <strong>Click "Start Challenge"</strong> to begin coding and solving problems</p>
+                <p>🏆 <strong>Earn points</strong> by completing challenges and climb the leaderboard!</p>
+            </div>
+            <div style="text-align: center;">
+                <button id="closeTipsBtn" class="modal-button">Got It!</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="legal-footer" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(7, 11, 24, 0.9); padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0, 194, 255, 0.3); backdrop-filter: blur(10px);">
+        <div style="display: flex; gap: 15px; align-items: center; font-size: 0.9rem;">
+            <a href="privacy-policy.html" style="color: #00FFDD; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-shield-alt" style="font-size: 0.8rem;"></i>
+                Privacy Policy
+            </a>
+            <span style="color: #555; font-size: 0.8rem;">|</span>
+            <a href="terms-conditions.html" style="color: #FFC107; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-gavel" style="font-size: 0.8rem;"></i>
+                Terms & Conditions
+            </a>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="../scripts/challenges-manager.js"></script>
+    <script src="../scripts/challenges-init.js"></script>
+    <script src="../scripts/challenges-particles.js"></script>
+    <script src="../scripts/header-auth.js"></script>
+</body>
+</html>

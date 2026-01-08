@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aptitude Challenges | KeyRacer</title>
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/aptitude.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="tutorial-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="../index.html">
+                    <img src="../assets/images/logo.png" alt="Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="main-nav">
+                <a href="aptitude-learn.html" class="nav-item"><i class="fas fa-book"></i> Learn</a>
+                <a href="aptitude-challenges.html" class="nav-item active"><i class="fas fa-brain"></i> Challenges</a>
+                <a href="aptitude-leaderboard.html" class="nav-item"><i class="fas fa-trophy"></i> Leaderboard</a>
+                <a href="../index.html" class="nav-item preference-nav"><i class="fas fa-cog"></i> Preference</a>
+            </nav>
+            <div class="header-actions">
+                <div class="user-section">
+                    <a href="login.html" class="login-btn" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="#" class="logout-btn" id="logoutBtn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="simple-challenge-wrapper">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <div class="welcome-card">
+                <i class="fas fa-brain welcome-icon"></i>
+                <h1 class="welcome-title">Aptitude Challenge</h1>
+                <p class="welcome-subtitle">Test your skills and compete with others</p>
+                
+                <div class="topic-selector">
+                    <h3 class="selector-title">Choose Your Topic</h3>
+                    <div class="topic-grid">
+                        <button class="topic-card" data-topic="quant">
+                            <i class="fas fa-calculator"></i>
+                            <span>Quantitative</span>
+                        </button>
+                        <button class="topic-card" data-topic="logical-reasoning">
+                            <i class="fas fa-puzzle-piece"></i>
+                            <span>Logical Reasoning</span>
+                        </button>
+                        <button class="topic-card" data-topic="verbal">
+                            <i class="fas fa-language"></i>
+                            <span>Verbal Ability</span>
+                        </button>
+                        <button class="topic-card" data-topic="puzzles">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Puzzles</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="difficulty-selector" style="display: none;">
+                    <h3 class="selector-title">Select Difficulty</h3>
+                    <div class="difficulty-grid">
+                        <button class="difficulty-card easy" data-difficulty="easy">
+                            <i class="fas fa-smile"></i>
+                            <span>Easy</span>
+                            <small>Questions Available</small>
+                        </button>
+                        <button class="difficulty-card medium" data-difficulty="medium">
+                            <i class="fas fa-meh"></i>
+                            <span>Medium</span>
+                            <small>Questions Available</small>
+                        </button>
+                        <button class="difficulty-card hard" data-difficulty="hard">
+                            <i class="fas fa-fire"></i>
+                            <span>Hard</span>
+                            <small>Questions Available</small>
+                        </button>
+                    </div>
+                    <button class="back-btn" id="backToTopics">
+                        <i class="fas fa-arrow-left"></i> Back to Topics
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Challenge Screen -->
+        <div class="challenge-screen" id="challengeScreen" style="display: none;">
+            <div class="challenge-topbar">
+                <button class="exit-btn" id="exitChallenge">
+                    <i class="fas fa-times"></i> Exit
+                </button>
+                <div class="challenge-info-bar">
+                    <span class="current-topic" id="currentTopic"></span>
+                    <span class="progress-text" id="progressText">Loading...</span>
+                </div>
+                <div class="timer-box">
+                    <i class="fas fa-clock"></i>
+                    <span id="timer">00:00</span>
+                </div>
+            </div>
+
+            <div class="question-area">
+                <div class="question-card">
+                    <div class="question-text" id="question-text">Loading question...</div>
+                    <div class="answer-container" id="answer-container"></div>
+                </div>
+            </div>
+
+            <div class="challenge-controls">
+                <button class="control-btn prev-btn" id="prevBtn" disabled>
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <div class="progress-indicator">
+                    <span id="answeredCount">0</span>/<span id="totalCount">0</span> Answered
+                </div>
+                <button class="control-btn submit-btn" id="submitBtn">
+                    <i class="fas fa-check"></i> Submit Test
+                </button>
+                <button class="control-btn next-btn" id="nextBtn">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="about.html" class="footer-link">About</a>
+                <a href="login.html" class="footer-link">Login</a>
+                <a href="aptitude-leaderboard.html" class="footer-link">Leaderboard</a>
+                <a href="typing-tips.html" class="footer-link">Tips</a>
+            </div>
+            <div class="copyright">
+                © <span id="current-year"></span> Key Racer - Aptitude & Reasoning
+            </div>
+        </div>
+    </footer>
+
+    <script src="../scripts/aptitude.js"></script>
+    <script src="../scripts/header-auth.js"></script>
+    <script type="module" src="../scripts/aptitude-challenge-submit.js"></script>
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        let selectedTopic = null;
+        let selectedDifficulty = null;
+        
+        // Topic selection
+        document.querySelectorAll('.topic-card').forEach(card => {
+            card.addEventListener('click', () => {
+                selectedTopic = card.dataset.topic;
+                document.querySelector('.topic-selector').style.display = 'none';
+                document.querySelector('.difficulty-selector').style.display = 'block';
+            });
+        });
+        
+        // Back to topics
+        document.getElementById('backToTopics').addEventListener('click', () => {
+            document.querySelector('.topic-selector').style.display = 'block';
+            document.querySelector('.difficulty-selector').style.display = 'none';
+        });
+        
+        // Difficulty selection and start challenge
+        document.querySelectorAll('.difficulty-card').forEach(card => {
+            card.addEventListener('click', () => {
+                selectedDifficulty = card.dataset.difficulty;
+                startChallenge();
+            });
+        });
+        
+        function startChallenge() {
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('challengeScreen').style.display = 'flex';
+            
+            const topicNames = {
+                'quant': 'Quantitative',
+                'logical-reasoning': 'Logical Reasoning',
+                'verbal': 'Verbal Ability',
+                'puzzles': 'Puzzles'
+            };
+            
+            document.getElementById('currentTopic').textContent = 
+                `${topicNames[selectedTopic]} - ${selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1)}`;
+            
+            window.aptitudeManager.loadQuestions(selectedTopic, selectedDifficulty);
+        }
+        
+        // Exit challenge
+        document.getElementById('exitChallenge').addEventListener('click', () => {
+            if (confirm('Are you sure you want to exit? Your progress will be lost.')) {
+                location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

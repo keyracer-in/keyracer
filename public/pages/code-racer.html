@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4P5RF6RD8J"></script>
+    <script src="../scripts/analytics/gtag-config.js"></script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Master programming with CodeRacer by KeyRacer. Learn to code by typing in Python, JavaScript, HTML, and CSS with interactive tutorials.">
+    <meta name="keywords" content="KeyRacer, code racer, learn programming, coding tutorial, interactive programming, typing code, programming education, coding practice, typing test, learn to code, web development tutorial">
+    <meta name="author" content="KeyRacer">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://keyracer.in/code-racer.html">
+    <meta property="og:title" content="CodeRacer: Learn to Code by Typing | KeyRacer">
+    <meta property="og:description" content="Learn to code the fun way! CodeRacer offers interactive typing exercises for Python, JavaScript, HTML, and more. Start your coding journey with KeyRacer.">
+    <meta property="og:image" content="https://keyracer.in/assets/images/logo.png">
+    <meta property="og:site_name" content="KeyRacer">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://keyracer.in/code-racer.html">
+    <meta property="twitter:title" content="CodeRacer: Learn to Code by Typing | KeyRacer">
+    <meta property="twitter:description" content="Learn to code the fun way! CodeRacer offers interactive typing exercises for Python, JavaScript, HTML, and more. Start your coding journey with KeyRacer.">
+    <meta property="twitter:image" content="https://keyracer.in/assets/images/logo.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://keyracer.in/code-racer.html" />
+    
+    <!-- Structured Data for CodeRacer Page -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "CodeRacer: Learn to Code | KeyRacer",
+        "url": "https://keyracer.in/code-racer.html",
+        "description": "Master programming with CodeRacer by KeyRacer. Learn to code in Python, JavaScript, HTML, and CSS with interactive tutorials.",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "KeyRacer",
+            "url": "https://keyracer.in/"
+        },
+        "mainEntity": {
+            "@type": "Course",
+            "name": "Interactive Programming Course",
+            "description": "Learn programming languages through interactive  exercises",
+            "provider": {
+                "@type": "Organization",
+                "name": "KeyRacer"
+            },
+            "courseMode": "online",
+            "programmingLanguage": ["Python", "JavaScript", "HTML", "CSS", "Java", "C++"],
+            "educationalLevel": ["Beginner", "Intermediate", "Advanced"],
+            "teaches": ["Programming Fundamentals", "Syntax Mastery", "Code", "Software Development", "Web Development"],
+            "hasCourseInstance": [
+                {
+                    "@type": "CourseInstance",
+                    "name": "Python Programming",
+                    "description": "Learn Python through interactive exercises"
+                },
+                {
+                    "@type": "CourseInstance",
+                    "name": "JavaScript Development",
+                    "description": "Master JavaScript with hands-on coding practice"
+                }
+            ]
+        },
+        "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "https://keyracer.in/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "CodeRacer",
+                    "item": "https://keyracer.in/code-racer.html"
+                }
+            ]
+        }
+    }
+    </script>
+    
+    <title>CodeRacer: Learn to Code | KeyRacer</title>
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/code-racer.css">
+    <link rel="stylesheet" href="../styles/code-racer-main.css">
+    <link rel="stylesheet" href="../styles/code-racer-responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+<body>
+    <!-- Particle Effects Layer -->
+    <div id="particles-js"></div>
+    <header class="tutorial-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="../index.html">
+                    <img src="../assets/images/logo.png" alt="Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="main-nav">
+                <a href="code-racer.html" class="nav-item active"><i class="fas fa-home"></i> Home</a>
+                <a href="challenges.html" class="nav-item"><i class="fas fa-code"></i> Challenges</a>
+                <a href="coderacer-leaderboard.html" class="nav-item"><i class="fas fa-trophy"></i> Leaderboard</a>
+                <a href="../index.html" class="nav-item" style="background: #FFC700; color: #000; font-weight: 600; margin-right: 10px;"><i class="fas fa-cog"></i> Preference</a>
+            </nav>
+            <div class="header-actions">
+                <div class="user-section">
+                    <a href="login.html" class="login-btn" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="#" class="logout-btn" id="logoutBtn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div style="text-align: center; padding: 60px 0 40px 0;">
+        <h1 style="font-size: 3.5rem; background: linear-gradient(135deg, #00C2FF 0%, #FFC700 50%, #00FFDD 100%); -webkit-background-clip: text; background-clip: text; color: transparent; font-family: 'Orbitron', sans-serif; margin: 0; text-shadow: 0 0 30px rgba(0,194,255,0.3); letter-spacing: 2px; font-weight: 700;">Learn Programming</h1>
+        <p style="font-size: 1.2rem; color: #E1E6F2; margin: 15px 0 0 0; font-family: 'Rajdhani', sans-serif;">Master coding skills with interactive challenges</p>
+    </div>
+
+    <section id="languages" class="languages-grid">
+        <div class="language-card">
+            <i class="fab fa-python language-icon"></i>
+            <h2 class="language-name">Python</h2>
+            <p class="language-description">Start with Python - a beginner-friendly language perfect for learning programming concepts.</p>
+            <a href="tutorial-python.html" class="start-learning-btn">Start Learning Python</a>
+        </div>
+
+        <div class="language-card">
+            <i class="fab fa-js language-icon"></i>
+            <h2 class="language-name">JavaScript</h2>
+            <p class="language-description">Learn JavaScript - the language that powers the web and modern applications.</p>
+            <a href="javascript-tutorial.html" class="start-learning-btn">Start Learning JavaScript</a>
+        </div>
+
+        <div class="language-card">
+            <i class="fab fa-java language-icon"></i>
+            <h2 class="language-name">Java</h2>
+            <p class="language-description">Master Java - a versatile language used in enterprise and Android development.</p>
+            <a href="java-tutorial.html" class="start-learning-btn">Start Learning Java</a>
+        </div>
+
+        <div class="language-card">
+            <i class="fab fa-html5 language-icon"></i>
+            <h2 class="language-name">HTML</h2>
+            <p class="language-description">Learn HTML - the foundation of web development and structure of web pages.</p>
+            <button class="start-learning-btn disabled">Coming Soon</button>
+        </div>
+
+        <div class="language-card">
+            <i class="fab fa-css3-alt language-icon"></i>
+            <h2 class="language-name">CSS</h2>
+            <p class="language-description">Style your web pages with CSS - make beautiful and responsive designs.</p>
+            <button class="start-learning-btn disabled">Coming Soon</button>
+        </div>
+
+        <div class="language-card">
+            <i class="fas fa-database language-icon"></i>
+            <h2 class="language-name">SQL</h2>
+            <p class="language-description">Master SQL - query and manage databases with structured query language.</p>
+            <button class="start-learning-btn disabled">Coming Soon</button>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <h2 class="features-title">Why Code Racer?</h2>
+        <div class="features-grid">
+
+            <div class="feature-card">
+                <i class="fas fa-graduation-cap feature-icon"></i>
+                <h3 class="feature-title">Structured Learning</h3>
+                <p class="feature-description">Follow a well-designed curriculum that takes you from basics to advanced concepts.</p>
+            </div>
+
+            <div class="feature-card">
+                <i class="fas fa-chart-line feature-icon"></i>
+                <h3 class="feature-title">Track Progress</h3>
+                <p class="feature-description">Monitor your improvement with detailed statistics and performance metrics.</p>
+            </div>
+
+            <div class="feature-card">
+                <i class="fas fa-users feature-icon"></i>
+                <h3 class="feature-title">Community Learning</h3>
+                <p class="feature-description">Compare your progress with others and participate in coding challenges.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer fade-in">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="about.html" class="footer-link">About</a>
+                <a href="login.html" class="footer-link">Login</a>
+                <a href="coderacer-leaderboard.html" class="footer-link">Leaderboard</a>
+                <a href="typing-tips.html" class="footer-link">Tips</a>
+                <a href="lessons.html" class="footer-link">Training</a>
+            </div>
+
+            <div class="copyright">
+                © <span id="current-year"></span> Key Racer - By students for students
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    
+    <script src="../scripts/code-evaluator.js"></script>
+    <script src="../scripts/code-runner.js"></script>
+    <script src="../scripts/code-racer.js"></script>
+    <script src="../scripts/header-auth.js"></script>
+    <script src="../scripts/particles-config.js"></script>
+    <script src="../scripts/utils/copyright-year.js"></script>
+
+    <!-- Legal Links Footer -->
+    <div class="legal-footer" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(7, 11, 24, 0.9); padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0, 194, 255, 0.3); backdrop-filter: blur(10px);">
+        <div style="display: flex; gap: 15px; align-items: center; font-size: 0.9rem;">
+            <a href="privacy-policy.html" style="color: #00FFDD; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-shield-alt" style="font-size: 0.8rem;"></i>
+                Privacy Policy
+            </a>
+            <span style="color: #555; font-size: 0.8rem;">|</span>
+            <a href="terms-conditions.html" style="color: #FFC107; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-gavel" style="font-size: 0.8rem;"></i>
+                Terms & Conditions
+            </a>
+        </div>
+    </div>
+</body>
+</html>

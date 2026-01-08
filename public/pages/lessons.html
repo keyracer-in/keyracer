@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4P5RF6RD8J"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-4P5RF6RD8J');
+    </script>
+
+    <style>
+      body { background: #070b18 !important; color: #fff; }
+      #particles-js { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Learn typing with KeyRacer's comprehensive typing lessons. Master touch typing, improve WPM speed, and develop proper keyboard technique with structured lessons.">
+    <meta name="keywords" content="typing lessons, learn touch typing, typing tutorial, keyboard lessons, typing skills, typing course, WPM improvement, typing education">
+    <meta name="author" content="KeyRacer">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://keyracer.in/lessons.html">
+    <meta property="og:title" content="Typing Lessons - KeyRacer">
+    <meta property="og:description" content="Master touch typing with comprehensive lessons. Improve WPM speed and develop proper keyboard technique with structured typing education.">
+    <meta property="og:image" content="https://keyracer.in/assets/images/logo.png">
+    <meta property="og:site_name" content="KeyRacer">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://keyracer.in/lessons.html">
+    <meta property="twitter:title" content="Typing Lessons - KeyRacer">
+    <meta property="twitter:description" content="Master touch typing with comprehensive lessons and improve your WPM speed.">
+    <meta property="twitter:image" content="https://keyracer.in/assets/images/logo.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://keyracer.in/lessons.html" />
+    
+    <!-- Structured Data for Lessons Page -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "EducationalOrganization",
+        "mainEntity": {
+            "@type": "Course",
+            "name": "Touch Typing Lessons",
+            "description": "Comprehensive typing lessons to master touch typing, improve WPM speed, and develop proper keyboard technique",
+            "provider": {
+                "@type": "Organization",
+                "name": "KeyRacer",
+                "url": "https://keyracer.in/"
+            },
+            "url": "https://keyracer.in/lessons.html",
+            "courseMode": "online",
+            "educationalLevel": ["Beginner", "Intermediate", "Advanced"],
+            "teaches": ["Touch Typing", "Keyboard Skills", "Typing Speed", "Accuracy Improvement", "Proper Finger Placement"],
+            "courseWorkload": "PT30M",
+            "hasCourseInstance": [
+                {
+                    "@type": "CourseInstance",
+                    "name": "Basic Typing Skills",
+                    "description": "Learn fundamental typing techniques"
+                },
+                {
+                    "@type": "CourseInstance", 
+                    "name": "Advanced Typing Mastery",
+                    "description": "Master complex typing patterns and increase speed"
+                }
+            ]
+        },
+        "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "https://keyracer.in/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Typing Lessons",
+                    "item": "https://keyracer.in/lessons.html"
+                }
+            ]
+        }
+    }
+    </script>
+    
+    <title>Typing Lessons - KeyRacer | Learn Touch Typing & Improve WPM</title>
+    <!-- Critical CSS to ensure immediate content visibility -->
+    <style>
+        :root {
+            --primary-color: #FF4A4A;
+            --secondary-color: #1E2761;
+            --accent-color: #00FFDD;
+            --racing-stripe-light: #FF4A4A;
+            --racing-stripe-dark: #1E2761;
+            --card-shadow: 0 10px 25px rgba(255, 74, 74, 0.2);
+            --background-color: #070B18;
+            --text-color: #E1E6F2;
+            --heading-font: 'Orbitron', monospace;
+            --body-font: 'Rajdhani', sans-serif;
+        }
+        
+        /* Force immediate visibility for all content */
+        html, body {
+            opacity: 1 !important;
+            visibility: visible !important;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Preloader styling */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-color);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        
+        .loader {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+        
+        .loader:before {
+            content: '';
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--primary-color);
+            border-bottom-color: var(--accent-color);
+            position: absolute;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loader:after {
+            content: '';
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-left-color: #FFC700;
+            border-right-color: #FFC700;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            animation: spin 0.8s linear infinite reverse;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Hide preloader immediately if JS is disabled */
+        .no-js #preloader {
+            display: none;
+        }
+        
+        /* Add this class with JS to hide preloader */
+        .preloader-hidden {
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+        
+        /* Ensure all main content is visible with no animation delays */
+        .container, main, header, section, .lesson-selector {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        /* Training header styling */
+        .training-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, rgba(255, 74, 74, 0.1), rgba(0, 255, 221, 0.1));
+            border-radius: 16px;
+            border: 1px solid rgba(0, 194, 255, 0.2);
+        }
+        
+        .training-header h1 {
+            color: var(--accent-color);
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            font-family: var(--heading-font);
+        }
+        
+        .training-header p {
+            color: var(--text-color);
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        /* Racing car animation styles - immediately visible */
+        .racing-car {
+            position: fixed;
+            bottom: 20px;
+            left: -100px;
+            width: 80px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 10px 20px 5px 5px;
+            animation: driveAnimation 15s linear infinite;
+            z-index: 1;
+            opacity: 1 !important;
+        }
+        
+        .racing-car::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            width: 45px;
+            height: 20px;
+            background-color: var(--primary-color);
+            border-radius: 10px 15px 0 0;
+            transform: skewX(-15deg);
+        }
+        
+        .headlights {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: #FFC700;
+            border-radius: 50%;
+            top: 15px;
+            right: 5px;
+            box-shadow: 0 0 10px #FFC700;
+            animation: blinkHeadlights 0.5s infinite alternate;
+        }
+        
+        .headlights.right {
+            right: 15px;
+            animation-delay: 0.3s;
+        }
+        
+        .sports-car {
+            height: 35px;
+            background-color: #00C2FF;
+            border-radius: 5px 20px 3px 3px;
+        }
+        
+        .formula {
+            height: 25px;
+            width: 100px;
+            background-color: #FFC700;
+            border-radius: 2px 15px 2px 2px;
+        }
+        
+        @keyframes driveAnimation {
+            0% {
+                left: -100px;
+                transform: translateY(0);
+            }
+            45% {
+                transform: translateY(-5px);
+            }
+            50% {
+                transform: translateY(5px);
+            }
+            55% {
+                transform: translateY(-5px);
+            }
+            100% {
+                left: calc(100% + 100px);
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes blinkHeadlights {
+            from { opacity: 0.7; }
+            to { opacity: 1; }
+        }
+        
+        .content-section {
+            background-color: rgba(14, 30, 56, 0.5);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 20px;
+            border: 1px solid rgba(0, 194, 255, 0.2);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Lesson section boxes */
+        .lessons-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .lesson-box {
+            background-color: rgba(14, 30, 56, 0.5);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(0, 194, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .lesson-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border-color: var(--accent-color);
+            background-color: rgba(14, 30, 56, 0.7);
+        }
+
+        .lesson-box h3 {
+            color: var(--accent-color);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-family: var(--heading-font);
+        }
+
+        .lesson-box p {
+            color: var(--text-color);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* Challenge section boxes */
+        .challenges-section {
+            background-color: rgba(14, 30, 56, 0.5);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid rgba(0, 194, 255, 0.2);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+    <!-- Add no-js class to html, will be removed if JS is enabled -->
+    <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');</script>
+
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/lessons.css">
+    <link rel="stylesheet" href="../styles/keyboard-links.css">
+    <link rel="stylesheet" href="../styles/preloader.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Hackathon-style Particles.js Background -->
+    <div id="particles-js"></div>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader"></div>
+    </div>
+    
+    <!-- Remove the no-js class since JS is working -->
+    <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');</script>
+    
+    <!-- Header Section -->
+    <header>
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="../index.html">
+                    <img src="../assets/images/logo.png" alt="Key Racer Logo" class="logo-img">
+                </a>
+            </div>
+            
+            <nav class="main-nav">
+                <a href="typing-test.html" class="nav-item"><i class="fas fa-home"></i> Home</a>
+                <a href="lessons.html" class="nav-item active"><i class="fas fa-graduation-cap"></i> Training</a>
+                <a href="typing-tips.html" class="nav-item"><i class="fas fa-lightbulb"></i> Tips</a>
+                <a href="leaderboard.html" class="nav-item"><i class="fas fa-trophy"></i> Championship</a>
+            </nav>
+            
+            <div class="header-actions">
+                <a href="../index.html" class="pref-btn"><i class="fas fa-cog"></i> Preference</a>
+                <a href="login.html" id="loginBtn" class="nav-item"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="#" id="logoutBtn" class="nav-item" style="display: none;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <button class="nav-toggle" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="training-header">
+            <h1><i class="fas fa-graduation-cap"></i> Training Center</h1>
+            <p>Master your typing skills with our specialized training programs</p>
+        </div>
+
+        <main>
+            <div class="lesson-selector-container">
+                <div class="lesson-selector">
+                <div class="lesson-category">
+                    <h2><i class="fas fa-book"></i> Structured Lessons</h2>
+                    <div class="lesson-grid">
+                        <div class="lesson-card lesson-beginner" data-type="beginner">
+                            <div class="lesson-icon">
+                                <i class="fas fa-baby"></i>
+                            </div>
+                            <h3>Beginner</h3>
+                            <p>One alphabet/character at a time. Focus on key familiarity and building muscle memory.</p>
+                            <div class="lesson-level">
+                                <span class="level-dot filled"></span>
+                                <span class="level-dot"></span>
+                                <span class="level-dot"></span>
+                            </div>
+                            <button class="start-lesson-btn">Begin Lesson</button>
+                        </div>
+                        
+                        <div class="lesson-card lesson-intermediate" data-type="intermediate">
+                            <div class="lesson-icon">
+                                <i class="fas fa-running"></i>
+                            </div>
+                            <h3>Intermediate</h3>
+                            <p>One word at a time. Focus on word recognition, typing speed, and accuracy.</p>
+                            <div class="lesson-level">
+                                <span class="level-dot filled"></span>
+                                <span class="level-dot filled"></span>
+                                <span class="level-dot"></span>
+                            </div>
+                            <button class="start-lesson-btn">Begin Lesson</button>
+                        </div>
+                        
+                        <div class="lesson-card lesson-advanced" data-type="advanced">
+                            <div class="lesson-icon">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <h3>Advanced</h3>
+                            <p>Full sentence practice with punctuation, capitalization, and numbers. Real-time WPM and accuracy tracking.</p>
+                            <div class="lesson-level">
+                                <span class="level-dot filled"></span>
+                                <span class="level-dot filled"></span>
+                                <span class="level-dot filled"></span>
+                            </div>
+                            <button class="start-lesson-btn">Begin Lesson</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lesson-category">
+                    <h2><i class="fas fa-bolt"></i> Tricky Keys Challenge</h2>
+                    <div class="lesson-grid">
+                        <div class="lesson-card lesson-tricky" data-type="tricky-numbers">
+                            <div class="lesson-icon">
+                                <i class="fas fa-hashtag"></i>
+                            </div>
+                            <h3>Number Row</h3>
+                            <p>Master those tricky numbers and symbols that often slow typists down.</p>
+                            <div class="lesson-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 0%;"></div>
+                                </div>
+                                <span>0% Mastered</span>
+                            </div>
+                            <button class="start-lesson-btn">Practice Now</button>
+                        </div>
+                        
+                        <div class="lesson-card lesson-tricky" data-type="tricky-special">
+                            <div class="lesson-icon">
+                                <i class="fas fa-percent"></i>
+                            </div>
+                            <h3>Special Characters</h3>
+                            <p>Get familiar with brackets, quotes, and other special characters.</p>
+                            <div class="lesson-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 0%;"></div>
+                                </div>
+                                <span>0% Mastered</span>
+                            </div>
+                            <button class="start-lesson-btn">Practice Now</button>
+                        </div>
+                        
+                        <div class="lesson-card lesson-tricky" data-type="tricky-uncommon">
+                            <div class="lesson-icon">
+                                <i class="fas fa-puzzle-piece"></i>
+                            </div>
+                            <h3>Uncommon Combinations</h3>
+                            <p>Practice letter combinations that are difficult to type quickly.</p>
+                            <div class="lesson-progress">
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 0%;"></div>
+                                </div>
+                                <span>0% Mastered</span>
+                            </div>
+                            <button class="start-lesson-btn">Practice Now</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lesson-category">
+                    <h2><i class="fas fa-fire"></i> Bigram Blitz</h2>
+                    <p class="category-description">Bigrams are two-letter combinations that appear frequently in language. Mastering common bigrams significantly improves your typing speed.</p>
+                    
+                    <div class="bigram-container">
+                        <div class="bigram-groups">
+                            <div class="bigram-group active" data-group="common">
+                                <h3>Common Bigrams</h3>
+                                <div class="bigram-chips">
+                                    <span class="bigram-chip">th</span>
+                                    <span class="bigram-chip">he</span>
+                                    <span class="bigram-chip">in</span>
+                                    <span class="bigram-chip">er</span>
+                                    <span class="bigram-chip">an</span>
+                                    <span class="bigram-chip">re</span>
+                                    <span class="bigram-chip">on</span>
+                                    <span class="bigram-chip">at</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bigram-group" data-group="difficult">
+                                <h3>Challenging Bigrams</h3>
+                                <div class="bigram-chips">
+                                    <span class="bigram-chip">zx</span>
+                                    <span class="bigram-chip">qw</span>
+                                    <span class="bigram-chip">fp</span>
+                                    <span class="bigram-chip">bv</span>
+                                    <span class="bigram-chip">xc</span>
+                                    <span class="bigram-chip">kj</span>
+                                    <span class="bigram-chip">mn</span>
+                                    <span class="bigram-chip">zt</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bigram-group" data-group="custom">
+                                <h3>Custom Practice</h3>
+                                <div class="custom-bigram-input">
+                                    <input type="text" id="custom-bigram" placeholder="Enter bigrams..." maxlength="20">
+                                    <button id="add-custom-bigram" class="accent-btn btn-small">Add</button>
+                                </div>
+                                <div class="bigram-chips custom-chips">
+                                    <!-- Custom bigrams will be added here by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bigram-practice">
+                            <h3>Bigram Blitz Challenge</h3>
+                            <div class="bigram-stats">
+                                <div class="stat">
+                                    <span class="stat-value">0</span>
+                                    <p>WPM</p>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value">0</span>
+                                    <p>Accuracy</p>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value">0</span>
+                                    <p>Streak</p>
+                                </div>
+                            </div>
+                            <div class="bigram-display">
+                                <div class="current-bigram">th</div>
+                                <div class="next-bigrams">
+                                    <span>he</span>
+                                    <span>in</span>
+                                    <span>er</span>
+                                </div>
+                            </div>
+                            <input type="text" class="bigram-input" placeholder="Type the bigram above..." maxlength="2">
+                            <div class="bigram-timer">
+                                <div class="timer-bar">
+                                    <div class="timer-progress"></div>
+                                </div>
+                                <span class="timer-text">60s</span>
+                            </div>
+                            <button class="start-bigram-btn primary-btn">Start Bigram Blitz</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+            
+            <!-- Lesson Practice Area -->
+            <div class="lesson-practice" style="display: none;">
+                <div class="lesson-header">
+                    <h2 id="lesson-title">Lesson Title</h2>
+                    <button class="close-lesson-btn"><i class="fas fa-times"></i> Close Lesson</button>
+                </div>
+                
+                <div class="lesson-content">
+                    <div class="lesson-instructions">
+                        <p id="lesson-description">Lesson description will appear here.</p>
+                    </div>
+                    
+                    <div class="lesson-progress-indicator">
+                        <div class="progress-steps">
+                            <div class="step active">1</div>
+                            <div class="step">2</div>
+                            <div class="step">3</div>
+                            <div class="progress-line">
+                                <div class="progress-completed"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Add speedometer visual -->
+                    <div class="racing-dashboard">
+                        <div class="speedometer">
+                            <div class="speedometer-dial"></div>
+                            <div class="speedometer-center"></div>
+                            <div class="speedometer-scale">
+                                <span>0</span>
+                                <span>50</span>
+                                <span>100</span>
+                                <span>150</span>
+                            </div>
+                            <div class="speedometer-value">0 WPM</div>
+                        </div>
+                        <div class="dashboard-metrics">
+                            <div class="dashboard-metric">
+                                <span class="metric-label">Accuracy</span>
+                                <span class="metric-value" id="lesson-accuracy">100%</span>
+                            </div>
+                            <div class="dashboard-metric">
+                                <span class="metric-label">Time</span>
+                                <span class="metric-value" id="lesson-time">0s</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="typing-test-container">
+                        <div class="text-display lesson-text-display" id="lesson-text-display"></div>
+                        <textarea id="lesson-text-input" class="text-input" placeholder="Type the text above..."></textarea>
+                    </div>
+                    
+                    <div class="keyboard-container">
+                        <div class="keyboard" id="lesson-keyboard">
+                            <!-- Keyboard will be generated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="lesson-navigation">
+                        <button class="nav-btn prev-btn" disabled><i class="fas fa-arrow-left"></i> Previous</button>
+                        <button class="nav-btn next-btn">Next <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Completion Modal -->
+            <div class="completion-modal" style="display: none;">
+                <div class="modal-content">
+                    <h2>Lesson Complete!</h2>
+                    <div class="completion-stats">
+                        <div class="completion-stat">
+                            <span class="stat-value" id="completion-wpm">0</span>
+                            <p>WPM</p>
+                        </div>
+                        <div class="completion-stat">
+                            <span class="stat-value" id="completion-accuracy">0</span>
+                            <p>Accuracy</p>
+                        </div>
+                        <div class="completion-stat">
+                            <span class="stat-value" id="completion-time">0</span>
+                            <p>Time (s)</p>
+                        </div>
+                    </div>
+                    <div class="completion-message">
+                        <p id="completion-feedback">Great job! You've completed this lesson successfully.</p>
+                    </div>
+                    <div class="completion-actions">
+                        <button class="restart-lesson-btn">Restart Lesson</button>
+                        <button class="next-lesson-btn">Next Lesson</button>
+                        <button class="return-lessons-btn">Return to Lessons</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="site-footer fade-in">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="about.html" class="footer-link">About</a>
+                <a href="login.html" class="footer-link">Login</a>
+                <a href="leaderboard.html" class="footer-link">Championship</a>
+                <a href="typing-tips.html" class="footer-link">Tips</a>
+                <a href="lessons.html" class="footer-link">Training</a>
+            </div>
+
+            <div class="copyright">
+                © <span id="current-year"></span> Key Racer - By students for students
+            </div>
+        </div>
+    </footer>
+
+    <!-- Load CSS after critical rendering path -->
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/lessons.css">
+    <link rel="stylesheet" href="../styles/preloader.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Load scripts at the end -->
+    <script src="../scripts/preloader.js"></script>
+    <script src="../scripts/keyboard.js"></script>
+    <script src="../scripts/database.js"></script>
+    <script src="../scripts/lessons-integration.js"></script>
+    <script src="../scripts/lessons.js"></script>
+    <script src="../scripts/header-auth.js"></script>
+
+    <!-- Legal Links Footer -->
+    <div class="legal-footer" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(7, 11, 24, 0.9); padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0, 194, 255, 0.3); backdrop-filter: blur(10px);">
+        <div style="display: flex; gap: 15px; align-items: center; font-size: 0.9rem;">
+            <a href="privacy-policy.html" style="color: #00FFDD; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-shield-alt" style="font-size: 0.8rem;"></i>
+                Privacy Policy
+            </a>
+            <span style="color: #555; font-size: 0.8rem;">|</span>
+            <a href="terms-conditions.html" style="color: #FFC107; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-gavel" style="font-size: 0.8rem;"></i>
+                Terms & Conditions
+            </a>
+        </div>
+    </div>
+</body>
+    <!-- Particles.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+      try {
+      if (typeof particlesJS !== 'undefined') {
+      particlesJS('particles-js', {
+        "particles": {
+          "number": { "value": 120, "density": { "enable": true, "value_area": 900 } },
+          "color": { "value": ["#FFC700", "#FF4A4A", "#00FFDD", "#00C2FF"] },
+          "shape": { "type": ["circle", "triangle", "edge"], "stroke": { "width": 0, "color": "#000000" }, "polygon": { "nb_sides": 5 } },
+          "opacity": { "value": 0.6, "random": true, "anim": { "enable": true, "speed": 1.2, "opacity_min": 0.2, "sync": false } },
+          "size": { "value": 5, "random": true, "anim": { "enable": true, "speed": 2, "size_min": 0.1, "sync": false } },
+          "line_linked": { "enable": true, "distance": 180, "color": "#00C2FF", "opacity": 0.5, "width": 1.5 },
+          "move": { "enable": true, "speed": 2, "direction": "none", "random": true, "straight": false, "out_mode": "out", "bounce": false, "attract": { "enable": true, "rotateX": 600, "rotateY": 1200 } }
+        },
+        "interactivity": {
+          "detect_on": "canvas",
+          "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" }, "resize": true },
+          "modes": { "grab": { "distance": 180, "line_linked": { "opacity": 0.8 } }, "bubble": { "distance": 400, "size": 40, "duration": 2, "opacity": 8, "speed": 3 }, "repulse": { "distance": 200, "duration": 0.4 }, "push": { "particles_nb": 6 }, "remove": { "particles_nb": 2 } }
+        },
+        "retina_detect": true
+      });
+      }
+      } catch (error) {
+        console.log('Particles.js not available:', error);
+      }
+      
+      // Set current year for copyright
+      document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+</html>

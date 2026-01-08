@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4P5RF6RD8J"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-4P5RF6RD8J');
+    </script>
+
+    <style>
+      body { background: #070b18 !important; color: #fff; }
+      #particles-js { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="KeyRacer Championship Leaderboard - See top typing racers, their WPM scores, accuracy ratings, and rankings. Compete to reach the top of our global leaderboard.">
+    <meta name="keywords" content="typing leaderboard, championship standings, typing competition rankings, WPM leaderboard, typing champions, keyracer rankings">
+    <meta name="author" content="KeyRacer">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://keyracer.in/leaderboard.html">
+    <meta property="og:title" content="Championship Leaderboard - KeyRacer">
+    <meta property="og:description" content="See top typing racers, their WPM scores, accuracy ratings, and rankings. Compete to reach the top of our global leaderboard.">
+    <meta property="og:image" content="https://keyracer.in/assets/images/logo.png">
+    <meta property="og:site_name" content="KeyRacer">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://keyracer.in/leaderboard.html">
+    <meta property="twitter:title" content="Championship Leaderboard - KeyRacer">
+    <meta property="twitter:description" content="See top typing racers and compete to reach the top of our global leaderboard.">
+    <meta property="twitter:image" content="https://keyracer.in/assets/images/logo.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://keyracer.in/leaderboard.html" />
+    
+    <!-- Structured Data for Leaderboard Page -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Championship Leaderboard",
+        "url": "https://keyracer.in/leaderboard.html",
+        "description": "See top typing racers, their WPM scores, accuracy ratings, and rankings. Compete to reach the top of our global leaderboard.",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "KeyRacer",
+            "url": "https://keyracer.in/"
+        },
+        "mainEntity": {
+            "@type": "ItemList",
+            "name": "Typing Championship Leaderboard",
+            "description": "Global rankings of top typing racers",
+            "numberOfItems": 100,
+            "itemListElement": {
+                "@type": "Person",
+                "name": "Championship Participants",
+                "description": "Competitive typing racers ranked by WPM and accuracy"
+            }
+        },
+        "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "https://keyracer.in/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Championship Leaderboard",
+                    "item": "https://keyracer.in/leaderboard.html"
+                }
+            ]
+        }
+    }
+    </script>
+    
+    <title>Championship Leaderboard - KeyRacer | Top Typing Racers & Rankings</title>
+    
+
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/leaderboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+<body>
+    <!-- Hackathon-style Particles.js Background -->
+    <div id="particles-js"></div>
+    <!-- Particle Effects Layer -->
+    <div id="particles-js"></div>
+    
+    <!-- Header Section -->
+    <header>
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="../index.html">
+                    <img src="../assets/images/logo.png" alt="Key Racer Logo" class="logo-img">
+                </a>
+            </div>
+            
+            <nav class="main-nav">
+                <a href="typing-test.html" class="nav-item"><i class="fas fa-home"></i> Home</a>
+                <a href="lessons.html" class="nav-item"><i class="fas fa-graduation-cap"></i> Training</a>
+                <a href="typing-tips.html" class="nav-item"><i class="fas fa-lightbulb"></i> Tips</a>
+                <a href="leaderboard.html" class="nav-item active"><i class="fas fa-trophy"></i> Championship</a>
+            </nav>
+            
+            <div class="header-actions">
+                <a href="../index.html" class="pref-btn"><i class="fas fa-cog"></i> Preference</a>
+                <a href="login.html" id="loginBtn" class="nav-item"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="#" id="logoutBtn" class="nav-item" style="display: none;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <button class="nav-toggle" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+    </div>
+    </header>
+    
+    <div class="container">
+        <div class="championship-header">
+            <h1><i class="fas fa-trophy"></i> Championship Standings</h1>
+            <p>Compete against the fastest typists from around the world</p>
+        </div>
+        
+        <div class="leaderboard-section">
+            <div class="table-container">                    <table class="rankings-table" id="wpm-tab">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Racer</th>
+                                <th>Speed <i class="fas fa-sort-down"></i></th>
+                                <th>Accuracy</th>
+                                <th>Division</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-tbody">
+                            <!-- Leaderboard data will be populated dynamically -->
+                            <tr class="loading-row">
+                                <td colspan="6">
+                                    <div class="loading-content">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        <span>Loading championship standings...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+            <div class="pagination">
+                <button class="page-btn prev-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <span class="page-ellipsis">...</span>
+                <button class="page-btn">10</button>
+                <button class="page-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+                            
+    </div>
+        
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="about.html" class="footer-link">About</a>
+                <a href="login.html" class="footer-link">Login</a>
+                <a href="index.html" class="footer-link">Home</a>
+                <a href="typing-tips.html" class="footer-link">Tips</a>
+                <a href="lessons.html" class="footer-link">Training</a>
+            </div>
+            
+            <div class="copyright">
+                © <span id="current-year"></span> Key Racer - The ultimate keyboard racing championship
+            </div>
+            </div>
+        </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Remove duplicate particles.js initialization to prevent animation override
+        // Only initialize particles.js once
+        document.addEventListener('DOMContentLoaded', function() {
+            // Current year for copyright
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            
+            // Initialize particles.js if available
+            try {
+            if (typeof particlesJS !== 'undefined') {
+                particlesJS('particles-js', {
+                    "particles": {
+                        "number": {
+                            "value": 120,
+                            "density": { "enable": true, "value_area": 900 }
+                        },
+                        "color": {
+                            "value": ["#FFC700", "#FF4A4A", "#00FFDD", "#00C2FF"]
+                        },
+                        "shape": {
+                            "type": ["circle", "triangle", "edge"],
+                            "stroke": { "width": 0, "color": "#000000" },
+                            "polygon": { "nb_sides": 5 }
+                        },
+                        "opacity": {
+                            "value": 0.6,
+                            "random": true,
+                            "anim": { "enable": true, "speed": 1.2, "opacity_min": 0.2, "sync": false }
+                        },
+                        "size": {
+                            "value": 5,
+                            "random": true,
+                            "anim": { "enable": true, "speed": 2, "size_min": 0.1, "sync": false }
+                        },
+                        "line_linked": {
+                            "enable": true,
+                            "distance": 180,
+                            "color": "#00C2FF",
+                            "opacity": 0.5,
+                            "width": 1.5
+                        },
+                        "move": {
+                            "enable": true,
+                            "speed": 2,
+                            "direction": "none",
+                            "random": true,
+                            "straight": false,
+                            "out_mode": "out",
+                            "bounce": false,
+                            "attract": { "enable": true, "rotateX": 600, "rotateY": 1200 }
+                        }
+                    },
+                    "interactivity": {
+                        "detect_on": "canvas",
+                        "events": {
+                            "onhover": { "enable": true, "mode": "grab" },
+                            "onclick": { "enable": true, "mode": "push" },
+                            "resize": true
+                        },
+                        "modes": {
+                            "grab": { "distance": 180, "line_linked": { "opacity": 0.8 } },
+                            "bubble": { "distance": 400, "size": 40, "duration": 2, "opacity": 8, "speed": 3 },
+                            "repulse": { "distance": 200, "duration": 0.4 },
+                            "push": { "particles_nb": 6 },
+                            "remove": { "particles_nb": 2 }
+                        }
+                    },
+                    "retina_detect": true
+                });
+            }
+            } catch (error) {
+                console.log('Particles.js not available:', error);
+            }
+            
+            // Mobile navigation toggle
+            const navToggle = document.querySelector('.nav-toggle');
+            const mainNav = document.querySelector('.main-nav');
+            if (navToggle && mainNav) {
+                navToggle.addEventListener('click', function() {
+                    mainNav.classList.toggle('show');
+                });
+            }
+            
+            // Pagination interactions
+            const pageBtns = document.querySelectorAll('.page-btn:not(.prev-btn):not(.next-btn)');
+            pageBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    pageBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update prev/next buttons state
+                    document.querySelector('.prev-btn').disabled = this.textContent === '1';
+                    document.querySelector('.next-btn').disabled = this.textContent === '10';
+                });
+            });
+            
+            // Previous button
+            document.querySelector('.prev-btn').addEventListener('click', function() {
+                if (!this.disabled) {
+                    const active = document.querySelector('.page-btn.active');
+                    const prev = active.previousElementSibling;
+                    if (prev && !prev.classList.contains('prev-btn')) {
+                        active.classList.remove('active');
+                        prev.classList.add('active');
+                        
+                        // Update button states
+                        this.disabled = prev.textContent === '1';
+                        document.querySelector('.next-btn').disabled = false;
+                    }
+                }
+            });
+            
+            // Next button
+            document.querySelector('.next-btn').addEventListener('click', function() {
+                if (!this.disabled) {
+                    const active = document.querySelector('.page-btn.active');
+                    let next = active.nextElementSibling;
+                    if (next && (next.classList.contains('page-btn') && !next.classList.contains('next-btn'))) {
+                        active.classList.remove('active');
+                        next.classList.add('active');
+                        
+                        // Update button states
+                        this.disabled = next.textContent === '10';
+                        document.querySelector('.prev-btn').disabled = false;
+                    }
+                }
+            });
+
+            // Listen for real-time leaderboard updates and refresh table
+            if (window.realTimeLeaderboard) {
+                window.realTimeLeaderboardUpdateHandler = function(testRecord) {
+                    // Update leaderboard table in real-time
+                    if (window.leaderboardManager) {
+                        window.leaderboardManager.updateLeaderboardRealTime(testRecord);
+                    }
+                };
+                // Subscribe to BroadcastChannel for cross-tab updates
+                if (typeof BroadcastChannel !== 'undefined') {
+                    const channel = new BroadcastChannel('leaderboard_updates');
+                    channel.addEventListener('message', (event) => {
+                        if (event.data.type === 'leaderboard_update') {
+                            window.realTimeLeaderboardUpdateHandler(event.data.data);
+                        }
+                    });
+                }
+            }
+            
+            // Auto-refresh leaderboard every 10 seconds when page is visible
+            setInterval(() => {
+                if (!document.hidden && window.leaderboardManager) {
+                    window.leaderboardManager.loadLeaderboardData();
+                }
+            }, 10000);
+        });
+    </script>
+    
+    <script src="../scripts/database.js?v=2"></script>
+    <script src="../scripts/leaderboard.js?v=6"></script>
+    <script src="../scripts/realtime-leaderboard.js?v=4"></script>
+    <script src="../scripts/header-auth.js?v=2"></script>
+    
+    <script>
+        async function clearLeaderboardData() {
+            if (!confirm('Are you sure you want to clear ALL leaderboard data? This cannot be undone!')) {
+                return;
+            }
+            
+            try {
+                // Clear server data first
+                const response = await fetch('/api/leaderboard/clear', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Server data cleared:', result);
+                }
+                
+                // Clear localStorage
+                localStorage.removeItem('typingRecords');
+                localStorage.removeItem('leaderboard_update');
+                
+                // Clear IndexedDB
+                if (window.indexedDB) {
+                    const request = indexedDB.open('TypingSpeedDB', 1);
+                    request.onsuccess = function(event) {
+                        const db = event.target.result;
+                        const transaction = db.transaction(['typingRecords'], 'readwrite');
+                        const store = transaction.objectStore('typingRecords');
+                        store.clear();
+                    };
+                }
+                
+                alert('All leaderboard data cleared successfully!');
+                window.location.reload();
+                
+            } catch (error) {
+                console.error('Error clearing data:', error);
+                alert('Error clearing data. Check console for details.');
+            }
+        }
+    </script>
+
+    <!-- Legal Links Footer -->
+    <div class="legal-footer" style="position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(7, 11, 24, 0.9); padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0, 194, 255, 0.3); backdrop-filter: blur(10px);">
+        <div style="display: flex; gap: 15px; align-items: center; font-size: 0.9rem;">
+            <a href="privacy-policy.html" style="color: #00FFDD; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-shield-alt" style="font-size: 0.8rem;"></i>
+                Privacy Policy
+            </a>
+            <span style="color: #555; font-size: 0.8rem;">|</span>
+            <a href="terms-conditions.html" style="color: #FFC107; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-gavel" style="font-size: 0.8rem;"></i>
+                Terms & Conditions
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+``` 

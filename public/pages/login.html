@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4P5RF6RD8J"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-4P5RF6RD8J');
+    </script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Login to KeyRacer - Access your typing account, track progress, compete in championships, and improve your WPM with personalized typing challenges.">
+    <meta name="keywords" content="keyracer login, typing account, user login, typing progress, account access, sign in">
+    <meta name="author" content="KeyRacer">
+    <meta name="robots" content="noindex, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://keyracer.in/login.html">
+    <meta property="og:title" content="Login - KeyRacer">
+    <meta property="og:description" content="Login to KeyRacer to access your typing account and track your progress.">
+    <meta property="og:image" content="https://keyracer.in/assets/images/logo.png">
+    <meta property="og:site_name" content="KeyRacer">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://keyracer.in/login.html" />
+    
+    <title>Login - KeyRacer | Access Your Typing Account</title>
+    
+    <!-- Critical CSS for preloader and immediate visibility -->
+    <style>
+        :root {
+            --primary-color: #FF4A4A;
+            --secondary-color: #1E2761;
+            --accent-color: #00FFDD;
+            --background-color: #070B18;
+            --highlight-color: #FFC700;
+        }
+        
+        html, body {
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-color);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        
+        .preloader-hidden {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+        
+        .loader {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+        
+        .loader:before {
+            content: '';
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--primary-color);
+            border-bottom-color: var(--accent-color);
+            position: absolute;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loader:after {
+            content: '';
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-left-color: var(--highlight-color);
+            border-right-color: var(--highlight-color);
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            animation: spin 0.8s linear infinite reverse;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Hide preloader immediately if JS is disabled */
+        .no-js #preloader {
+            display: none;
+        }
+        
+        /* Force immediate visibility for authentication forms */
+        .auth-container, .logo-section, .auth-form {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    </style>
+    
+    <!-- Load JavaScript to immediately handle preloader -->
+    <script>
+        // Mark that JS is enabled
+        document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+        
+        // Hide preloader ASAP
+        function hidePreloader() {
+            const preloader = document.getElementById('preloader');
+            if (preloader && !preloader.classList.contains('preloader-hidden')) {
+                preloader.classList.add('preloader-hidden');
+                setTimeout(() => {
+                    if (preloader.parentNode) {
+                        preloader.parentNode.removeChild(preloader);
+                    }
+                }, 300);
+            }
+        }
+        
+        // Multiple triggers to ensure preloader is hidden
+        document.addEventListener('DOMContentLoaded', hidePreloader);
+        window.addEventListener('load', hidePreloader);
+        setTimeout(hidePreloader, 1500); // Fallback
+    </script>
+    
+    <!-- Google AdSense script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9511160987539177" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader"></div>
+    </div>
+    
+    <!-- Particles Background -->
+    <div id="particles-js"><canvas class="particles-js-canvas-el" width="2452" height="1894" style="width: 100%; height: 100%;"></canvas></div>
+    
+    <div class="login-page">
+        <!-- Logo in top-left corner -->
+        <div class="corner-logo">
+            <a href="/" class="logo-link">
+                <img src="../assets/images/logo.png" alt="Key Racer Logo" class="corner-logo-img">
+            </a>
+        </div>
+        
+        <div class="auth-container">
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="register">Register</button>
+                <div class="tab-indicator"></div>
+            </div>
+            
+            <div class="auth-forms">
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form active">
+                    <h1 class="form-title">Driver Login</h1>
+                    
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <div class="input-with-icon">
+                            <input type="email" id="login-email" required placeholder="Enter your email">
+                            <i class="fas fa-envelope"></i>
+                </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <div class="input-with-icon">
+                            <input type="password" id="login-password" required placeholder="Enter your password">
+                            <i class="fas fa-lock"></i>
+                </div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="remember-option">
+                            <input type="checkbox" id="remember-me">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                        <a href="#" class="forgot-link">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" class="auth-btn">Login <i class="fas fa-sign-in-alt"></i></button>
+                    
+                    <div class="social-login">
+                        <div class="social-buttons">
+                            <button type="button" class="social-btn google" style="width: 100%; max-width: 320px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 14px; background: #fff; color: #444; border: 1px solid #ddd; border-radius: 6px; padding: 12px 0; font-weight: 600; font-size: 1.08rem; box-shadow: 0 2px 8px rgba(60,64,67,0.08); transition: box-shadow 0.2s, border 0.2s; cursor: pointer;">
+                                <img src="../assets/google-logo.svg" alt="Google Logo" style="height: 24px; width: 24px; display: inline-block; vertical-align: middle; margin-right: 0;"> 
+                                <span style="color: #444; font-weight: 500; font-family: 'Roboto', Arial, sans-serif; letter-spacing: 0.1px;">Continue with Google</span>
+                            </button>
+                            <style>
+                            .social-btn.google:hover {
+                                box-shadow: 0 4px 16px rgba(60,64,67,0.16);
+                                border: 1px solid #4285f4;
+                            }
+                            
+                            /* Comprehensive Responsive Design */
+                            @media (max-width: 1200px) {
+                                .auth-container { max-width: 90%; padding: 2rem; }
+                                .corner-logo-img { height: 60px; }
+                            }
+                            
+                            @media (max-width: 992px) {
+                                .auth-container { max-width: 95%; padding: 1.5rem; }
+                                .form-title { font-size: 2rem; }
+                                .auth-btn { padding: 14px 24px; font-size: 1rem; }
+                            }
+                            
+                            @media (max-width: 768px) {
+                                .corner-logo { top: 15px; left: 15px; }
+                                .corner-logo-img { height: 50px; }
+                                .auth-container { max-width: 100%; margin: 20px; padding: 1.5rem; border-radius: 12px; }
+                                .form-title { font-size: 1.8rem; margin-bottom: 1.5rem; }
+                                .auth-tabs { margin-bottom: 1.5rem; }
+                                .auth-tab { padding: 12px 20px; font-size: 0.95rem; }
+                                .form-group { margin-bottom: 1.2rem; }
+                                .input-with-icon input { padding: 14px 16px 14px 45px; font-size: 1rem; }
+                                .auth-btn { padding: 16px 20px; font-size: 1.1rem; margin-bottom: 1rem; }
+                                .social-btn.google { padding: 14px 0; font-size: 1rem; }
+                                .form-options { flex-direction: column; gap: 12px; align-items: flex-start; }
+                            }
+                            
+                            @media (max-width: 576px) {
+                                .login-page { padding: 10px; }
+                                .corner-logo { top: 10px; left: 10px; }
+                                .corner-logo-img { height: 40px; }
+                                .auth-container { margin: 10px; padding: 1.2rem; min-height: auto; }
+                                .form-title { font-size: 1.6rem; margin-bottom: 1.2rem; }
+                                .auth-tabs { margin-bottom: 1.2rem; }
+                                .auth-tab { padding: 10px 16px; font-size: 0.9rem; min-width: 80px; }
+                                .form-group { margin-bottom: 1rem; }
+                                .form-group label { font-size: 0.9rem; margin-bottom: 6px; }
+                                .input-with-icon input { padding: 12px 14px 12px 40px; font-size: 0.95rem; }
+                                .input-with-icon i { left: 12px; font-size: 0.9rem; }
+                                .auth-btn { padding: 14px 18px; font-size: 1rem; margin-bottom: 0.8rem; }
+                                .social-btn.google { padding: 12px 0; font-size: 0.95rem; gap: 10px; }
+                                .social-btn.google img { height: 20px; width: 20px; }
+                                .remember-option { font-size: 0.9rem; }
+                                .forgot-link { font-size: 0.9rem; }
+                            }
+                            
+                            @media (max-width: 480px) {
+                                .auth-container { margin: 5px; padding: 1rem; }
+                                .form-title { font-size: 1.4rem; }
+                                .auth-tab { padding: 8px 12px; font-size: 0.85rem; }
+                                .input-with-icon input { padding: 10px 12px 10px 35px; font-size: 0.9rem; }
+                                .auth-btn { padding: 12px 16px; font-size: 0.95rem; }
+                            }
+                            
+                            @media (max-width: 360px) {
+                                .corner-logo-img { height: 35px; }
+                                .auth-container { margin: 2px; padding: 0.8rem; }
+                                .form-title { font-size: 1.3rem; }
+                                .auth-tab { padding: 6px 10px; font-size: 0.8rem; }
+                                .input-with-icon input { padding: 8px 10px 8px 32px; font-size: 0.85rem; }
+                                .auth-btn { padding: 10px 14px; font-size: 0.9rem; }
+                                .social-btn.google { padding: 10px 0; font-size: 0.9rem; }
+                            }
+                            
+                            @media (max-height: 600px) and (orientation: landscape) {
+                                .auth-container { margin: 10px auto; max-height: 90vh; overflow-y: auto; }
+                                .form-title { font-size: 1.5rem; margin-bottom: 1rem; }
+                                .form-group { margin-bottom: 0.8rem; }
+                                .auth-btn { padding: 10px 20px; margin-bottom: 0.5rem; }
+                            }
+                            </style>
+                    </div>
+                    </div>
+                </form>
+                
+                <!-- Register Form -->
+                <form id="register-form" class="auth-form">
+                    <h1 class="form-title">Join the Race</h1>
+                    
+                    <div class="form-group">
+                        <label for="register-username">Username</label>
+                        <div class="input-with-icon">
+                            <input type="text" id="register-username" required placeholder="Choose a username">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <div class="input-with-icon">
+                            <input type="email" id="register-email" required placeholder="Enter your email">
+                            <i class="fas fa-envelope"></i>
+                </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <div class="input-with-icon">
+                            <input type="password" id="register-password" required placeholder="Create a password">
+                            <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+                
+                    <div class="form-group">
+                        <label for="register-confirm">Confirm Password</label>
+                        <div class="input-with-icon">
+                            <input type="password" id="register-confirm" required placeholder="Confirm your password">
+                            <i class="fas fa-lock"></i>
+            </div>
+        </div>
+        
+                    <div class="form-options">
+                        <label class="remember-option">
+                            <input type="checkbox" id="terms-agree" required>
+                            <span class="checkmark"></span>
+                            I agree to the <a href="terms-conditions.html" class="terms-link">Terms & Conditions</a>
+                        </label>
+                </div>
+                
+                    <button type="submit" class="auth-btn">Create Account <i class="fas fa-user-plus"></i></button>
+                </form>
+            </div>
+                </div>
+                
+        <div class="login-footer">
+            <p class="copyright">© <span id="current-year"></span> Key Racer - By Students For Students</p>
+                </div>
+            </div>
+            
+
+    
+    <!-- Load CSS after critical rendering path -->
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/login.css">
+    <link rel="stylesheet" href="../styles/preloader.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    
+    <!-- Load scripts at the end -->
+    <script src="../scripts/database.js"></script>
+    <script src="../scripts/auth-middleware.js"></script>
+    <script src="../scripts/preloader.js"></script>
+    <script src="../scripts/login.js"></script>
+    <!-- Removed header-auth.js to prevent redirect loops on login page -->
+    
+    <!-- Initialize Particles -->
+    <script>
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: '#00FFDD' },
+            shape: { type: 'circle' },
+            opacity: { value: 0.5, random: false },
+            size: { value: 3, random: true },
+            line_linked: { enable: true, distance: 150, color: '#00FFDD', opacity: 0.4, width: 1 },
+            move: { enable: true, speed: 6, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+        },
+        interactivity: {
+            detect_on: 'canvas',
+            events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+            modes: { grab: { distance: 400, line_linked: { opacity: 1 } }, bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 }, repulse: { distance: 200, duration: 0.4 }, push: { particles_nb: 4 }, remove: { particles_nb: 2 } }
+        },
+        retina_detect: true
+    });
+    </script>
+
+    <!-- Legal Links Footer -->
+    <div class="legal-footer">
+        <div class="legal-links">
+            <a href="privacy-policy.html" class="legal-link">
+                <i class="fas fa-shield-alt"></i>
+                Privacy Policy
+            </a>
+            <span class="legal-divider">|</span>
+            <a href="terms-conditions.html" class="legal-link terms">
+                <i class="fas fa-gavel"></i>
+                Terms & Conditions
+            </a>
+        </div>
+    </div>
+</body>
+</html>

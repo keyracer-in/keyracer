@@ -42,11 +42,11 @@ Key Racer combines the best of typing practice and competitive programming chall
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/key-racer.git
-cd key-racer
+cd key-racer/keyracer
 
 # Run automated setup
-chmod +x setup-coderacer.sh
-./setup-coderacer.sh
+chmod +x scripts/setup/setup-coderacer.sh
+./scripts/setup/setup-coderacer.sh
 ```
 
 ### Manual Setup
@@ -67,15 +67,15 @@ npm run dev
 
 ### 🌐 Access Points
 - **🏠 Main Application**: http://localhost:3000/
-- **🏁 Code Challenges**: http://localhost:3000/code-racer.html
-- **🏆 Leaderboard**: http://localhost:3000/coderacer-leaderboard.html
+- **🏁 Code Challenges**: http://localhost:3000/pages/code-racer.html
+- **🏆 Leaderboard**: http://localhost:3000/pages/coderacer-leaderboard.html
 - **📊 API Documentation**: http://localhost:3000/api/docs
 
 ### System Health Check
 ```bash
 # Verify all components are working
-chmod +x check-coderacer.sh
-./check-coderacer.sh
+chmod +x scripts/utils/check-coderacer.sh
+./scripts/utils/check-coderacer.sh
 ```
 
 ## 🎯 CodeRacer Scoring System
@@ -100,7 +100,7 @@ Our sophisticated scoring algorithm ensures fair competition and rewards consist
 - **7-day streak**: +30 points
 - **30-day streak**: +100 points
 
-> 📖 For detailed CodeRacer documentation, see [CODERACER-README.md](CODERACER-README.md)
+> 📖 For detailed CodeRacer documentation, see [docs/features/coderacer.md](docs/features/coderacer.md)
 
 ## 🛠️ Installation & Setup
 
@@ -190,6 +190,45 @@ For production deployment, consider:
 - Configuring SSL certificates
 - Using MongoDB Atlas for cloud database
 
+## 📁 Project Structure
+
+```
+keyracer/
+├── docs/                      # 📚 All documentation
+│   ├── setup/                 # Setup and configuration guides
+│   ├── features/              # Feature-specific documentation
+│   ├── guides/                # Development and usage guides
+│   └── archive/               # Historical documentation
+├── public/                    # 🌐 Static frontend files
+│   ├── index.html             # Main entry point
+│   ├── pages/                 # HTML pages
+│   ├── scripts/               # Client-side JavaScript
+│   ├── styles/                # CSS stylesheets
+│   └── assets/                # Images, fonts, and static assets
+├── src/                       # ⚙️ Server-side application code
+│   ├── server.js              # Main server entry point
+│   ├── routes/                # API route handlers
+│   ├── models/                # Database models (Mongoose schemas)
+│   ├── middleware/            # Express middleware
+│   ├── services/              # Business logic services
+│   └── utils/                 # Utility functions
+├── scripts/                   # 🔧 Build and deployment scripts
+│   ├── deploy/                # Deployment scripts
+│   ├── setup/                 # Setup automation scripts
+│   └── utils/                 # Utility scripts
+├── tests/                     # 🧪 Test files
+│   ├── unit/                  # Unit tests
+│   ├── integration/           # Integration tests
+│   └── fixtures/              # Test fixtures and mock data
+├── data/                      # 📊 Data files (JSON, etc.)
+├── .github/                   # GitHub workflows and templates
+├── package.json               # Node.js dependencies and scripts
+├── .env.example               # Environment variables template
+└── README.md                  # This file
+```
+
+> 📖 For detailed information about the project structure and file organization, see [STRUCTURE.md](STRUCTURE.md)
+
 ## 🏗️ Technology Stack
 
 ### Frontend
@@ -219,30 +258,131 @@ For production deployment, consider:
 
 ## 📚 API Documentation
 
+### Base URL
+- **Development**: `http://localhost:3000/api`
+- **Production**: `https://keyracer.in/api`
+
 ### Authentication Endpoints
-```
-POST /api/auth/register       # User registration
-POST /api/auth/login          # User login
-POST /api/auth/logout         # User logout
-GET  /auth/google             # Google OAuth
-POST /api/auth/forgot         # Password reset request
-POST /api/auth/reset          # Password reset
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/auth/register` | Register a new user | No |
+| POST | `/api/auth/login` | User login | No |
+| POST | `/api/auth/logout` | User logout | Yes |
+| GET | `/api/auth/me` | Get current user info | Yes |
+| POST | `/api/auth/forgot-password` | Request password reset | No |
+| POST | `/api/auth/reset-password` | Reset password with token | No |
+| POST | `/api/auth/verify-email-token` | Verify email with token | No |
+| GET | `/auth/google` | Initiate Google OAuth | No |
+| GET | `/auth/google/callback` | Google OAuth callback | No |
+| POST | `/api/auth/google/verify` | Verify Google ID token | No |
+
+### Challenge Endpoints (CodeRacer)
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/challenges` | Get all challenges with filters | No |
+| GET | `/api/challenges/:id` | Get specific challenge | No |
+| POST | `/api/challenges/:id/submit` | Submit challenge solution | Yes |
+| GET | `/api/user/progress` | Get user's challenge progress | Yes |
+
+**Query Parameters for `/api/challenges`**:
+- `language`: Filter by programming language (python, javascript, java, etc.)
+- `difficulty`: Filter by difficulty (easy, medium, hard, expert)
+- `category`: Filter by category
+- `page`: Page number (default: 1)
+- `limit`: Results per page (default: 20)
+
+### Leaderboard Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/leaderboard/submit` | Submit typing test result | No |
+| GET | `/api/leaderboard` | Get typing leaderboard | No |
+| GET | `/api/coderacer-leaderboard` | Get CodeRacer leaderboard | No |
+| GET | `/api/coderacer-leaderboard/user-stats` | Get user's CodeRacer stats | No |
+
+**Query Parameters for leaderboards**:
+- `page`: Page number (default: 1)
+- `limit`: Results per page (default: 50)
+- `language`: Filter by programming language (CodeRacer only)
+- `difficulty`: Filter by difficulty (CodeRacer only)
+
+### Aptitude Test Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/aptitude/questions/:topic/:difficulty` | Get aptitude questions | No |
+| POST | `/api/aptitude/submit` | Submit aptitude test (JWT auth) | Yes |
+| POST | `/api/aptitude/submit-secure` | Submit aptitude test (email-based) | No |
+| GET | `/api/aptitude/leaderboard` | Get aptitude leaderboard | No |
+| GET | `/api/aptitude/stats` | Get user's aptitude stats | Yes |
+
+**Available Topics**: `quantitative`, `logical`, `verbal`, `technical`  
+**Available Difficulties**: `easy`, `medium`, `hard`
+
+### Hackathon Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/hackathons` | Get all hackathons | No |
+| POST | `/api/hackathons` | Create a hackathon | Yes |
+| GET | `/api/hackathons/:id` | Get specific hackathon | No |
+| PUT | `/api/hackathons/:id` | Update hackathon | Yes |
+| DELETE | `/api/hackathons/:id` | Delete hackathon | Yes |
+| POST | `/api/hackathons/:id/register` | Register for hackathon | Yes |
+
+### KeyRacer AI Agent Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/keyracer-agent/chat` | Chat with AI career agent | No |
+| POST | `/api/keyracer-agent/analyze-resume` | Analyze resume (PDF) | No |
+
+**Chat Modes**: `interview`, `market`, `roadmap`
+
+### Response Format
+
+All API responses follow this format:
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "data": { ... },
+  "message": "Optional success message"
+}
 ```
 
-### Challenge Endpoints
-```
-GET  /api/challenges          # Get all challenges
-GET  /api/challenges/:id      # Get specific challenge
-POST /api/challenges/solve    # Submit solution
-GET  /api/leaderboard         # Get leaderboard data
+**Error Response**:
+```json
+{
+  "success": false,
+  "message": "Error description"
+}
 ```
 
-### User Endpoints
-```
-GET  /api/user/profile        # Get user profile
-PUT  /api/user/profile        # Update user profile
-GET  /api/user/stats          # Get user statistics
-```
+### Authentication
+
+The API supports two authentication methods:
+
+1. **JWT Tokens**: Sent via `Authorization: Bearer <token>` header or `token` cookie
+2. **Google OAuth**: Handled via `/auth/google` flow
+
+Protected endpoints require authentication and will return `401 Unauthorized` if not authenticated.
+
+### Rate Limiting
+
+- Authentication endpoints: 5 requests per 15 minutes per IP
+- General API endpoints: 100 requests per 15 minutes per IP
+
+### CORS
+
+CORS is enabled for all origins in development. In production, only configured origins are allowed.
+
+---
+
+For detailed API usage examples and integration guides, see [docs/guides/api-documentation.md](docs/guides/api-documentation.md)
 
 ## 🤝 Contributing
 
@@ -257,12 +397,40 @@ We welcome contributions from the community! Here's how you can help:
 6. Push to the branch (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
 
+### Development Workflow
+```bash
+# 1. Clone and setup
+git clone https://github.com/yourusername/key-racer.git
+cd key-racer/keyracer
+npm install
+
+# 2. Create your feature branch
+git checkout -b feature/my-new-feature
+
+# 3. Start development server
+npm run dev
+
+# 4. Make your changes
+# - Frontend files: public/pages/, public/scripts/, public/styles/
+# - Backend files: src/routes/, src/models/, src/services/
+# - Documentation: docs/
+
+# 5. Run tests
+npm test
+
+# 6. Commit and push
+git add .
+git commit -m "Add: my new feature"
+git push origin feature/my-new-feature
+```
+
 ### Development Guidelines
 - Follow the existing code style
 - Write clear, descriptive commit messages
 - Add tests for new features
 - Update documentation as needed
 - Ensure all tests pass before submitting
+- Place files in the correct directory (see [STRUCTURE.md](STRUCTURE.md))
 
 ### Types of Contributions
 - 🐛 Bug fixes
