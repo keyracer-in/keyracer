@@ -568,7 +568,7 @@ class AptitudeManager {
                             Login to Save Score
                         </button>
                     ` : `
-                        <button class="view-leaderboard-btn" onclick="window.location.href='/aptitude-leaderboard.html'">
+                        <button class="view-leaderboard-btn" onclick="window.location.href='/pages/aptitude-leaderboard.html'">
                             <i class="fas fa-trophy"></i>
                             View Leaderboard
                         </button>
