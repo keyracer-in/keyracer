@@ -68,12 +68,18 @@ router.post('/submit-secure', async (req, res) => {
 
         // Update user stats
         if (!user.aptitudeStats) {
-            user.aptitudeStats = { testsCompleted: 0, totalScore: 0, bestAccuracy: 0, badges: [], solvedQuestions: [] };
+            user.aptitudeStats = { testsCompleted: 0, totalScore: 0, bestAccuracy: 0, averageTime: 0, badges: [], solvedQuestions: [] };
         }
         
-        user.aptitudeStats.testsCompleted += 1;
+        // Calculate new average time
+        const currentTotalTime = user.aptitudeStats.averageTime * user.aptitudeStats.testsCompleted;
+        const newTotalTime = currentTotalTime + (timeTaken || 0);
+        const newTestsCompleted = user.aptitudeStats.testsCompleted + 1;
+        
+        user.aptitudeStats.testsCompleted = newTestsCompleted;
         user.aptitudeStats.totalScore += totalScore;
         user.aptitudeStats.bestAccuracy = Math.max(user.aptitudeStats.bestAccuracy, accuracy);
+        user.aptitudeStats.averageTime = Math.round(newTotalTime / newTestsCompleted);
         
         // Add correctly answered questions to solved list
         for (let i = 0; i < questionIds.length; i++) {
@@ -142,14 +148,21 @@ router.post('/submit', requireAuth, async (req, res) => {
                 testsCompleted: 0,
                 totalScore: 0,
                 bestAccuracy: 0,
+                averageTime: 0,
                 badges: [],
                 solvedQuestions: []
             };
         }
 
-        user.aptitudeStats.testsCompleted += 1;
+        // Calculate new average time
+        const currentTotalTime = user.aptitudeStats.averageTime * user.aptitudeStats.testsCompleted;
+        const newTotalTime = currentTotalTime + (timeTaken || 0);
+        const newTestsCompleted = user.aptitudeStats.testsCompleted + 1;
+
+        user.aptitudeStats.testsCompleted = newTestsCompleted;
         user.aptitudeStats.totalScore += totalScore;
         user.aptitudeStats.bestAccuracy = Math.max(user.aptitudeStats.bestAccuracy, accuracy);
+        user.aptitudeStats.averageTime = Math.round(newTotalTime / newTestsCompleted);
         
         // Add newly solved questions
         newlySolvedQuestions.forEach(questionId => {
@@ -192,19 +205,30 @@ router.get('/leaderboard', async (req, res) => {
         const users = await User.find({ 
             'aptitudeStats.testsCompleted': { $gt: 0 } 
         })
-        .select('username email aptitudeStats')
+        .select('username displayName email aptitudeStats')
         .sort({ 'aptitudeStats.totalScore': -1 })
         .limit(50);
 
-        const leaderboard = users.map(user => ({
-            name: user.username || user.email?.split('@')[0] || 'Anonymous',
-            score: user.aptitudeStats.totalScore,
-            accuracy: user.aptitudeStats.bestAccuracy,
-            timeTaken: 180, // Mock average time
-            badges: user.aptitudeStats.badges || []
+        const leaderboard = users.map((user, index) => ({
+            rank: index + 1,
+            user: {
+                name: user.displayName || user.username || user.email?.split('@')[0] || 'Anonymous'
+            },
+            stats: {
+                totalPoints: user.aptitudeStats.totalScore || 0,
+                questionsCompleted: user.aptitudeStats.solvedQuestions?.length || 0,
+                bestAccuracy: user.aptitudeStats.bestAccuracy || 0,
+                averageTime: user.aptitudeStats.averageTime || 0,
+                badges: user.aptitudeStats.badges || []
+            }
         }));
 
-        res.json({ success: true, leaderboard });
+        res.json({ 
+            success: true, 
+            data: {
+                leaderboard 
+            }
+        });
     } catch (error) {
         console.error('Error loading leaderboard:', error);
         res.status(500).json({ success: false, message: 'Server error' });

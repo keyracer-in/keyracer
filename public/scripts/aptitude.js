@@ -619,21 +619,17 @@ class AptitudeManager {
             const response = await fetch(`/api/aptitude/leaderboard?period=${period}`);
             if (response.ok) {
                 const data = await response.json();
-                if (data.success) {
-                    this.displayLeaderboard(data.leaderboard);
+                if (data.success && data.data && data.data.leaderboard) {
+                    this.displayLeaderboard(data.data.leaderboard);
                     return;
                 }
             }
         } catch (error) {
-            console.log('API leaderboard failed, using mock data');
+            console.log('API leaderboard failed:', error);
         }
         
-        // Fallback mock data
-        const mockLeaderboard = [
-            { name: 'Guest User', score: 80, accuracy: 85.5, timeTaken: 180, badges: ['good'] },
-            { name: 'Demo Player', score: 60, accuracy: 75.0, timeTaken: 240, badges: [] }
-        ];
-        this.displayLeaderboard(mockLeaderboard);
+        // Show no data message instead of mock data
+        this.displayNoDataMessage('No leaderboard data available yet. Complete some challenges to appear here!');
     }
 
     displayLeaderboard(leaderboard) {
@@ -654,20 +650,31 @@ class AptitudeManager {
             return;
         }
 
-        tbody.innerHTML = leaderboard.map((entry, index) => `
-            <tr>
-                <td class="rank-cell">${index + 1}</td>
-                <td>${entry.name || entry.username || 'Anonymous'}</td>
-                <td>${entry.score}</td>
-                <td>${Math.floor(entry.timeTaken / 60)}:${(entry.timeTaken % 60).toString().padStart(2, '0')}</td>
-                <td>${entry.accuracy.toFixed(1)}%</td>
-                <td>
-                    ${(entry.badges || []).map(badge => `
-                        <span class="badge-mini">${this.getBadgeName(badge)}</span>
-                    `).join('')}
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = leaderboard.map((entry) => {
+            const accuracy = entry.stats?.bestAccuracy || entry.accuracy || 0;
+            const badges = entry.stats?.badges || entry.badges || [];
+            const avgTime = entry.stats?.averageTime || 0;
+            
+            // Format time as MM:SS
+            const minutes = Math.floor(avgTime / 60);
+            const seconds = avgTime % 60;
+            const timeDisplay = avgTime > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}` : '-';
+            
+            return `
+                <tr>
+                    <td class="rank-cell">${entry.rank || '-'}</td>
+                    <td>${entry.user?.name || entry.name || entry.username || 'Anonymous'}</td>
+                    <td>${entry.stats?.totalPoints || entry.score || 0}</td>
+                    <td>${timeDisplay}</td>
+                    <td>${accuracy > 0 ? accuracy.toFixed(1) + '%' : '-'}</td>
+                    <td>
+                        ${badges.length > 0 ? badges.map(badge => `
+                            <span class="badge-mini">${this.getBadgeName(badge)}</span>
+                        `).join('') : '-'}
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
 }
 
@@ -685,4 +692,9 @@ document.addEventListener('DOMContentLoaded', () => {
             window.aptitudeManager.loadLeaderboard(period);
         });
     });
+    
+    // Load initial leaderboard data if on leaderboard page
+    if (window.location.pathname.includes('aptitude-leaderboard')) {
+        window.aptitudeManager.loadLeaderboard('all-time');
+    }
 });
