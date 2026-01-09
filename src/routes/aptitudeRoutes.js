@@ -5,7 +5,7 @@ const AptitudeAttempt = require('../models/AptitudeAttempt');
 const { authenticate } = require('../middleware/authMiddleware');
 
 // Get questions by topic and difficulty
-router.get('/aptitude/questions/:topic/:difficulty', async (req, res) => {
+router.get('/questions/:topic/:difficulty', async (req, res) => {
   try {
     const { topic, difficulty } = req.params;
     const { email } = req.query;
@@ -31,7 +31,7 @@ router.get('/aptitude/questions/:topic/:difficulty', async (req, res) => {
 });
 
 // Secure aptitude submission (no auth required but server validates)
-router.post('/aptitude/submit-secure', async (req, res) => {
+router.post('/submit-secure', async (req, res) => {
   try {
     const { email, displayName, answers, timeTaken, questionIds } = req.body;
     
@@ -151,7 +151,7 @@ router.post('/aptitude/submit-secure', async (req, res) => {
 });
 
 // Original submit (keep for JWT users)
-router.post('/aptitude/submit', authenticate, async (req, res) => {
+router.post('/submit', authenticate, async (req, res) => {
   try {
     const { testType, duration, questions, timeTaken } = req.body;
     
@@ -221,7 +221,7 @@ router.post('/aptitude/submit', authenticate, async (req, res) => {
 });
 
 // Get leaderboard
-router.get('/aptitude/leaderboard', async (req, res) => {
+router.get('/leaderboard', async (req, res) => {
   try {
     const { period = 'all-time' } = req.query;
     
@@ -258,7 +258,7 @@ router.get('/aptitude/leaderboard', async (req, res) => {
 });
 
 // Get user stats
-router.get('/aptitude/stats', authenticate, async (req, res) => {
+router.get('/stats', authenticate, async (req, res) => {
   try {
     const stats = await AptitudeAttempt.aggregate([
       { $match: { userId: req.user._id } },
