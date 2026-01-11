@@ -19,11 +19,142 @@ class AptitudeManager {
 
     async loadContent() {
         try {
-            const response = await fetch('data/aptitude-content.json');
-            this.content = await response.json();
+            // Load lightweight index JSON instead of full content
+            const response = await fetch('/data/aptitude-index.json');
+            const data = await response.json();
+            this.topicsIndex = data.topics;
+            this.content = {}; // Keep for backward compatibility
+            
+            // Build content object for backward compatibility
+            this.topicsIndex.forEach(topic => {
+                this.content[topic.id] = {
+                    title: topic.title,
+                    icon: topic.icon,
+                    file: topic.file,
+                    sections: topic.sections || [],
+                    sectionIcons: topic.sectionIcons || {}
+                };
+            });
         } catch (error) {
-            console.error('Error loading content:', error);
+            console.error('Error loading content index:', error);
         }
+    }
+
+    loadSubtopics(topic) {
+        const subtopicGrid = document.getElementById('subtopicGrid');
+        if (!subtopicGrid) return;
+        
+        const topicData = this.content[topic];
+        if (!topicData || !topicData.sections) return;
+        
+        // Clear existing subtopics
+        subtopicGrid.innerHTML = '';
+        
+        // Get section icons
+        const sectionIcons = topicData.sectionIcons || {};
+        
+        // Create subtopic cards
+        topicData.sections.forEach((section, index) => {
+            const card = document.createElement('button');
+            card.className = 'learn-topic-card';
+            
+            // Get icon for this section, fallback to book-reader
+            const iconClass = sectionIcons[section] || 'fa-book-reader';
+            
+            card.innerHTML = `
+                <i class="fas ${iconClass}"></i>
+                <span>${section}</span>
+                <small>Click to learn</small>
+            `;
+            card.addEventListener('click', () => {
+                window.showLearningContent(topic, section);
+            });
+            subtopicGrid.appendChild(card);
+        });
+    }
+
+    async loadSubtopicContent(topic, subtopic) {
+        const learningContent = document.getElementById('learningContent');
+        if (!learningContent) return;
+        
+        try {
+            // Show loading state
+            learningContent.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--accent-color);"></i><p>Loading content...</p></div>';
+            
+            // Fetch markdown file
+            const topicData = this.content[topic];
+            if (!topicData) {
+                throw new Error('Topic not found');
+            }
+            
+            const response = await fetch(`/content/aptitude/${topicData.file}`);
+            if (!response.ok) {
+                throw new Error(`Failed to load content: ${response.status}`);
+            }
+            
+            const markdown = await response.text();
+            
+            // Parse markdown with marked.js
+            const html = typeof marked !== 'undefined' 
+                ? marked.parse(markdown)
+                : this.parseMarkdown(markdown);
+            
+            // Apply enhanced CSS classes
+            const enhancedHtml = this.enhanceContent(html);
+            
+            // Extract the specific subtopic section
+            const subtopicHtml = this.extractSubtopicSection(enhancedHtml, subtopic);
+            
+            learningContent.innerHTML = subtopicHtml;
+        } catch (error) {
+            console.error('Error loading subtopic content:', error);
+            learningContent.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: var(--text-color);">
+                    <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: var(--warning-color); margin-bottom: 15px;"></i>
+                    <p>Failed to load content. Please try again later.</p>
+                    <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: var(--accent-color); color: white; border: none; border-radius: 6px; cursor: pointer;">
+                        Retry
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    extractSubtopicSection(html, subtopic) {
+        // Create a temporary div to parse HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        
+        // Find all h2 headers
+        const headers = tempDiv.querySelectorAll('h2');
+        let startElement = null;
+        let endElement = null;
+        
+        // Find the matching subtopic header
+        for (let i = 0; i < headers.length; i++) {
+            const headerText = headers[i].textContent.trim().replace(/[📊💰🏦⚙️🚗🔢📐📈📝🎯🌟📖✍️📰🔗🧠🔢🔤🔐👨‍👩‍👧‍👦🧭📊📋🥧]/g, '').trim();
+            if (headerText === subtopic || headerText.includes(subtopic)) {
+                startElement = headers[i];
+                endElement = headers[i + 1] || null;
+                break;
+            }
+        }
+        
+        if (!startElement) {
+            // If subtopic not found, return full content
+            return html;
+        }
+        
+        // Extract content between start and end
+        let result = '';
+        let currentElement = startElement;
+        
+        while (currentElement && currentElement !== endElement) {
+            result += currentElement.outerHTML;
+            currentElement = currentElement.nextElementSibling;
+        }
+        
+        return result || html;
     }
 
     setupEventListeners() {
@@ -69,7 +200,7 @@ class AptitudeManager {
         this.loadTopicContent(topic);
     }
 
-    loadTopicContent(topic, subsection = null) {
+    async loadTopicContent(topic, subsection = null) {
         if (!this.content || !this.content[topic]) return;
 
         const contentTitle = document.querySelector('.content-title');
@@ -80,12 +211,38 @@ class AptitudeManager {
         }
 
         if (learningContent) {
-            if (subsection) {
-                const sections = this.parseSections(this.content[topic].content);
-                const sectionContent = sections.find(s => s.title === subsection);
-                learningContent.innerHTML = sectionContent ? this.parseMarkdown(sectionContent.content) : 'Section not found';
-            } else {
-                learningContent.innerHTML = this.parseMarkdown(this.content[topic].content);
+            try {
+                // Show loading state
+                learningContent.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--accent-color);"></i><p>Loading content...</p></div>';
+                
+                // Fetch markdown file
+                const response = await fetch(`../content/aptitude/${this.content[topic].file}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to load content: ${response.status}`);
+                }
+                
+                const markdown = await response.text();
+                
+                // Parse markdown with marked.js
+                const html = typeof marked !== 'undefined' 
+                    ? marked.parse(markdown)
+                    : this.parseMarkdown(markdown); // Fallback to old parser
+                
+                // Apply enhanced CSS classes
+                const enhancedHtml = this.enhanceContent(html);
+                
+                learningContent.innerHTML = enhancedHtml;
+            } catch (error) {
+                console.error('Error loading topic content:', error);
+                learningContent.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-color);">
+                        <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: var(--warning-color); margin-bottom: 15px;"></i>
+                        <p>Failed to load content. Please try again later.</p>
+                        <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: var(--accent-color); color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            Retry
+                        </button>
+                    </div>
+                `;
             }
         }
 
@@ -177,6 +334,76 @@ class AptitudeManager {
             .replace(/<\/ul><\/p>/g, '</ul>')
             .replace(/<p><div/g, '<div')
             .replace(/<\/div><\/p>/g, '</div>');
+    }
+
+    enhanceContent(html) {
+        // Wrap blockquotes with formulas in formula-card
+        html = html.replace(
+            /<blockquote>\s*<p><strong>Formula<\/strong>:(.*?)<\/p>(.*?)<\/blockquote>/gs,
+            (match, formula, rest) => {
+                return `<div class="formula-card">
+                    <div class="formula-card-title">Formula</div>
+                    <div class="formula-card-content">${formula.trim()}</div>
+                    ${rest ? `<div class="formula-card-description">${rest.trim()}</div>` : ''}
+                </div>`;
+            }
+        );
+
+        // Wrap blockquotes with examples in example-box-enhanced
+        html = html.replace(
+            /<blockquote>\s*<p><strong>Example[^<]*<\/strong>:(.*?)<\/p>(.*?)<\/blockquote>/gs,
+            (match, title, content) => {
+                return `<div class="example-box-enhanced">
+                    <div class="example-header">
+                        <span class="example-icon">📝</span>
+                        <span class="example-title">Example</span>
+                    </div>
+                    <div class="example-question">${title.trim()}</div>
+                    <div class="example-solution">${content.trim()}</div>
+                </div>`;
+            }
+        );
+
+        // Wrap tip blockquotes in tip-box
+        html = html.replace(
+            /<blockquote>\s*<p>💡 <strong>([^<]+)<\/strong>:(.*?)<\/p>\s*<\/blockquote>/gs,
+            '<div class="tip-box"><div class="box-content"><div class="box-title">$1</div>$2</div></div>'
+        );
+
+        // Wrap warning blockquotes in warning-box
+        html = html.replace(
+            /<blockquote>\s*<p>⚠️ <strong>([^<]+)<\/strong>:(.*?)<\/p>\s*<\/blockquote>/gs,
+            '<div class="warning-box"><div class="box-content"><div class="box-title">$1</div>$2</div></div>'
+        );
+
+        // Wrap important blockquotes in important-box
+        html = html.replace(
+            /<blockquote>\s*<p>✓ <strong>([^<]+)<\/strong>:(.*?)<\/p>\s*<\/blockquote>/gs,
+            '<div class="important-box"><div class="box-content"><div class="box-title">$1</div>$2</div></div>'
+        );
+
+        // Convert numbered lists to step boxes
+        html = html.replace(
+            /<ol>\s*<li>(.*?)<\/li>\s*<\/ol>/gs,
+            (match, items) => {
+                const listItems = match.match(/<li>(.*?)<\/li>/gs);
+                if (listItems && listItems.length > 1) {
+                    const steps = listItems.map((item, index) => {
+                        const content = item.replace(/<\/?li>/g, '');
+                        return `<div class="step-box">
+                            <div class="step-content">
+                                <div class="step-number">${index + 1}</div>
+                                <div class="step-text">${content}</div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                    return `<div class="step-container">${steps}</div>`;
+                }
+                return match;
+            }
+        );
+
+        return html;
     }
 
     async loadQuestions(topic, difficulty = 'medium') {

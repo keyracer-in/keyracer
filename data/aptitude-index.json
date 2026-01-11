@@ -1,0 +1,92 @@
+{
+  "topics": [
+    {
+      "id": "quant",
+      "title": "Quantitative Aptitude",
+      "icon": "fa-calculator",
+      "file": "quantitative.md",
+      "description": "Numbers, Algebra, Geometry",
+      "sections": [
+        "Percentages",
+        "Profit & Loss",
+        "Interest Calculations",
+        "Time & Work",
+        "Time, Speed & Distance",
+        "Number Systems",
+        "Algebra"
+      ],
+      "sectionIcons": {
+        "Percentages": "fa-percent",
+        "Profit & Loss": "fa-dollar-sign",
+        "Interest Calculations": "fa-piggy-bank",
+        "Time & Work": "fa-clock",
+        "Time, Speed & Distance": "fa-car",
+        "Number Systems": "fa-hashtag",
+        "Algebra": "fa-square-root-alt"
+      }
+    },
+    {
+      "id": "logical-reasoning",
+      "title": "Logical Reasoning",
+      "icon": "fa-puzzle-piece",
+      "file": "logical-reasoning.md",
+      "description": "Patterns, Sequences, Logic",
+      "sections": [
+        "Number Series",
+        "Letter Series",
+        "Figure Series",
+        "Coding-Decoding",
+        "Blood Relations",
+        "Direction Sense",
+        "Syllogisms"
+      ],
+      "sectionIcons": {
+        "Number Series": "fa-sort-numeric-up",
+        "Letter Series": "fa-font",
+        "Figure Series": "fa-shapes",
+        "Coding-Decoding": "fa-lock",
+        "Blood Relations": "fa-users",
+        "Direction Sense": "fa-compass",
+        "Syllogisms": "fa-project-diagram"
+      }
+    },
+    {
+      "id": "verbal",
+      "title": "Verbal Reasoning",
+      "icon": "fa-language",
+      "file": "verbal-reasoning.md",
+      "description": "Grammar, Vocabulary, Reading",
+      "sections": [
+        "Analogies",
+        "Synonyms & Antonyms",
+        "Sentence Completion",
+        "Reading Comprehension"
+      ],
+      "sectionIcons": {
+        "Analogies": "fa-link",
+        "Synonyms & Antonyms": "fa-book",
+        "Sentence Completion": "fa-pen",
+        "Reading Comprehension": "fa-newspaper"
+      }
+    },
+    {
+      "id": "data-interpretation",
+      "title": "Data Interpretation",
+      "icon": "fa-chart-bar",
+      "file": "data-interpretation.md",
+      "description": "Charts, Graphs, Tables",
+      "sections": [
+        "Bar Charts",
+        "Line Graphs",
+        "Pie Charts",
+        "Tables"
+      ],
+      "sectionIcons": {
+        "Bar Charts": "fa-chart-bar",
+        "Line Graphs": "fa-chart-line",
+        "Pie Charts": "fa-chart-pie",
+        "Tables": "fa-table"
+      }
+    }
+  ]
+}

@@ -11,7 +11,15 @@ class EnhancedAICareerAgent {
     this.resumeAnalysis = null;
     this.chatSessions = this.loadChatSessions();
     this.currentSessionId = this.generateSessionId();
+    
+    // Initialize mode theming on page load
+    const appShell = document.querySelector('.app-shell');
+    if (appShell) {
+      appShell.setAttribute('data-mode', this.currentMode);
+    }
+    
     this.initializeUI();
+    this.attachSessionEvents();
   }
 
   initializeUI() {
@@ -70,6 +78,57 @@ class EnhancedAICareerAgent {
     this.showWelcomeMessage();
     this.updateHistorySidebar();
   }
+  
+  attachSessionEvents() {
+    // Listen for session loaded event from session manager
+    window.addEventListener('sessionLoaded', (e) => {
+      const { session } = e.detail;
+      this.loadSessionData(session);
+    });
+    
+    // Listen for new session created event
+    window.addEventListener('newSessionCreated', (e) => {
+      const { sessionId } = e.detail;
+      this.startNewChat(sessionId);
+    });
+  }
+  
+  loadSessionData(session) {
+    // Save current session before switching
+    this.saveCurrentSession();
+    
+    // Load the selected session
+    this.currentSessionId = session.id;
+    this.currentMode = session.mode;
+    this.chatHistory = session.messages ? session.messages.slice() : [];
+    this.resumeAnalysis = session.resumeAnalysis;
+    
+    // Update UI
+    this.updateModeButtons();
+    this.displayChatHistory();
+    
+    // Update mode indicator
+    this.updateModeIndicatorBadge(this.currentMode);
+  }
+  
+  startNewChat(sessionId) {
+    // Save current session
+    this.saveCurrentSession();
+    
+    // Reset to new session
+    this.currentSessionId = sessionId || this.generateSessionId();
+    this.chatHistory = [];
+    this.resumeAnalysis = null;
+    
+    // Clear chat display
+    const messagesContainer = document.getElementById('chat-messages');
+    if (messagesContainer) {
+      messagesContainer.innerHTML = '';
+    }
+    
+    // Show welcome message
+    this.showWelcomeMessage();
+  }
 
   addQuickActions() {
     // Removed quick actions grid - users can ask naturally
@@ -96,7 +155,7 @@ class EnhancedAICareerAgent {
     }
     
     this.addMessage('🗺️ **Generating Personalized Learning Roadmap**\n\nAnalyzing your profile and market trends...', 'system');
-    this.setLoading(true);
+    this.showProgress('Generating Learning Roadmap', 'generating', 25);
     
     try {
       const response = await fetch('/api/keyracer-agent/generate-roadmap', {
@@ -110,21 +169,22 @@ class EnhancedAICareerAgent {
       
       const data = await response.json();
       if (data.success) {
+        this.hideProgress();
         this.addMessage(data.roadmap, 'bot');
       } else {
+        this.hideProgress();
         this.addMessage('❌ Failed to generate roadmap: ' + data.error, 'error');
       }
     } catch (error) {
+      this.hideProgress();
       this.addMessage('❌ Failed to generate roadmap. Please try again.', 'error');
-    } finally {
-      this.setLoading(false);
     }
   }
 
   async findJobs() {
     const skills = this.resumeAnalysis?.technical_skills || ['JavaScript', 'React', 'Node.js'];
     this.addMessage(`🔍 **Searching Job Market**\n\nLooking for opportunities matching: ${skills.slice(0, 3).join(', ')}...`, 'system');
-    this.setLoading(true);
+    this.setLoading(true, 'searching');
     
     try {
       const response = await fetch('/api/keyracer-agent/find-jobs', {
@@ -215,7 +275,7 @@ ${gaps.map(gap => `• ${gap}`).join('\n')}
     formData.append('targetRole', 'Software Engineer');
 
     this.addMessage(`📄 **Resume Analysis in Progress**\n\n**File:** ${file.name} (${(file.size / 1024).toFixed(1)} KB)\n\n🔍 Extracting skills and experience...\n⚡ Identifying gaps and opportunities...\n📊 Generating insights and recommendations...`, 'system');
-    this.setLoading(true);
+    this.showProgress('Analyzing Resume', 'analyzing', 20);
 
     try {
       const response = await fetch('/api/keyracer-agent/analyze-resume', {
@@ -227,6 +287,7 @@ ${gaps.map(gap => `• ${gap}`).join('\n')}
 
       if (data.success) {
         this.resumeAnalysis = data.structured;
+        this.hideProgress();
         this.addMessage(data.analysis, 'bot');
         this.showNotification('✅ Resume analyzed successfully!', 'success');
         
@@ -238,13 +299,14 @@ ${gaps.map(gap => `• ${gap}`).join('\n')}
           this.addMessage('🚀 **Analysis Complete! What\'s Next?**\n\n**Try asking:**\n• "Generate a learning roadmap for me"\n• "Find job opportunities that match my skills"\n• "Start a mock interview"\n• "What skills should I improve?"\n\nJust ask naturally - I understand your requests!', 'system');
         }, 2000);
       } else {
+        this.hideProgress();
         this.addMessage('❌ Failed to analyze resume: ' + data.error, 'error');
       }
     } catch (error) {
       console.error('Upload error:', error);
+      this.hideProgress();
       this.addMessage('❌ Error uploading resume. Please try again.', 'error');
     } finally {
-      this.setLoading(false);
       event.target.value = '';
     }
   }
@@ -279,19 +341,53 @@ Ready to supercharge your career journey?`;
   switchMode(mode) {
     if (this.currentMode === mode) return;
     
+    const previousMode = this.currentMode;
     this.currentMode = mode;
     
-    // Update UI with animation
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.mode === mode);
+    // Apply mode-specific theming to app shell
+    const appShell = document.querySelector('.app-shell');
+    if (appShell) {
+      appShell.setAttribute('data-mode', mode);
+    }
+    
+    // Update mode indicator badge
+    this.updateModeIndicatorBadge(mode);
+    
+    // Update UI with smooth animation
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    const modeIndicator = document.querySelector('.mode-indicator');
+    
+    // Add transition class for smooth animation
+    if (modeIndicator) {
+      modeIndicator.style.transition = 'transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1)';
+    }
+    
+    modeButtons.forEach(btn => {
+      const isActive = btn.dataset.mode === mode;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      
+      // Add subtle animation to button
+      if (isActive) {
+        btn.style.transform = 'scale(1.02)';
+        setTimeout(() => {
+          btn.style.transform = '';
+        }, 300);
+      }
     });
 
-    // Clear messages with fade effect
+    // Fade out messages container
     const messagesContainer = document.getElementById('chat-messages');
-    messagesContainer.style.opacity = '0.5';
+    if (messagesContainer) {
+      messagesContainer.style.transition = 'opacity 300ms ease';
+      messagesContainer.style.opacity = '0.5';
+    }
     
+    // Show mode transition message after fade
     setTimeout(() => {
-      messagesContainer.style.opacity = '1';
+      if (messagesContainer) {
+        messagesContainer.style.opacity = '1';
+      }
       
       const modeMessages = {
         career: '🚀 **Career Guidance Mode Activated**\n\nI\'ll provide comprehensive career advice including market insights, learning roadmaps, skill analysis, and job opportunities. What can I help you with?',
@@ -299,7 +395,58 @@ Ready to supercharge your career journey?`;
       };
       
       this.addMessage(modeMessages[mode], 'system');
+      
+      // Update chat container aria-labelledby
+      const chatContainer = document.getElementById('chat-container');
+      if (chatContainer) {
+        chatContainer.setAttribute('aria-labelledby', `mode-${mode}`);
+      }
     }, 300);
+  }
+  
+  updateModeIndicatorBadge(mode) {
+    const badge = document.getElementById('mode-indicator-badge');
+    if (!badge) return;
+    
+    const modeConfig = {
+      career: {
+        icon: 'fa-briefcase',
+        text: 'Career Guidance',
+        tooltip: 'Get comprehensive career advice, learning roadmaps, and job opportunities'
+      },
+      interview: {
+        icon: 'fa-microphone',
+        text: 'Interview Prep',
+        tooltip: 'Practice technical and behavioral interviews with real-time feedback'
+      }
+    };
+    
+    const config = modeConfig[mode];
+    if (!config) return;
+    
+    // Update badge with animation
+    badge.style.transform = 'scale(0.9)';
+    badge.style.opacity = '0.5';
+    
+    setTimeout(() => {
+      const icon = badge.querySelector('.mode-badge-icon');
+      const text = badge.querySelector('.mode-badge-text');
+      const tooltip = badge.querySelector('.mode-badge-tooltip');
+      
+      if (icon) {
+        icon.className = `fas ${config.icon} mode-badge-icon`;
+      }
+      if (text) {
+        text.textContent = config.text;
+      }
+      if (tooltip) {
+        tooltip.textContent = config.tooltip;
+      }
+      
+      // Animate back
+      badge.style.transform = 'scale(1)';
+      badge.style.opacity = '1';
+    }, 150);
   }
 
   async sendMessage() {
@@ -311,7 +458,10 @@ Ready to supercharge your career journey?`;
     this.addMessage(message, 'user');
     input.value = '';
     this.chatHistory.push({ role: 'user', content: message });
-    this.setLoading(true);
+    
+    // Show skeleton loader for expected response
+    const skeletonId = this.showSkeleton('message', 1);
+    this.setLoading(true, this.currentMode === 'interview' ? 'interviewing' : 'thinking');
 
     try {
       let endpoint = '/api/keyracer-agent/ai-chat';
@@ -336,6 +486,9 @@ Ready to supercharge your career journey?`;
 
       const data = await response.json();
 
+      // Hide skeleton before showing actual message
+      this.hideSkeleton(skeletonId);
+
       if (data.success) {
         this.addMessage(data.response, 'bot');
         this.chatHistory.push({ role: 'model', content: data.response });
@@ -344,6 +497,7 @@ Ready to supercharge your career journey?`;
       }
     } catch (error) {
       console.error('Chat error:', error);
+      this.hideSkeleton(skeletonId);
       this.addMessage('❌ Failed to send message. Please check your connection.', 'error');
     } finally {
       this.setLoading(false);
@@ -373,6 +527,7 @@ Ready to supercharge your career journey?`;
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message`;
     
+    // Avatar
     const avatarDiv = document.createElement('div');
     avatarDiv.className = 'message-avatar';
     
@@ -385,44 +540,123 @@ Ready to supercharge your career journey?`;
     
     avatarDiv.innerHTML = avatars[type] || avatars.bot;
     
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'message-content';
+    // Content wrapper
+    const contentWrapper = document.createElement('div');
+    contentWrapper.className = 'message-content';
     
-    // Enhanced formatting for different message types
-    let formattedText = this.formatMessage(text);
+    // Message text bubble
+    const textDiv = document.createElement('div');
+    textDiv.className = 'message-text';
     
-    // Add special formatting for roadmaps
-    if (text.includes('Month') && text.includes('Goal:')) {
-      formattedText = this.formatRoadmap(formattedText);
+    // Check if this should be a response card
+    let shouldUseCard = false;
+    let cardElement = null;
+    
+    // Detect roadmap responses - look for month-based structure or "roadmap" keyword
+    if ((text.includes('Month') || text.includes('roadmap') || text.includes('Roadmap')) && 
+        (text.includes('Goal:') || text.includes('Projects:') || text.includes('Resources:') || text.includes('## Month'))) {
+      try {
+        const roadmapData = this.parseRoadmapResponse(text);
+        if (window.ResponseCards && roadmapData.phases.length > 0) {
+          cardElement = window.ResponseCards.createRoadmapCard(roadmapData);
+          shouldUseCard = true;
+        }
+      } catch (error) {
+        console.error('Error creating roadmap card:', error);
+      }
+    } 
+    // Detect job listing responses - look for job-related keywords and table structure
+    else if ((text.includes('job') || text.includes('Job') || text.includes('Position')) && 
+             (text.includes('| Company |') || text.includes('| Position |') || text.includes('Apply Link'))) {
+      try {
+        const jobsData = this.parseJobsResponse(text);
+        if (window.ResponseCards && jobsData.jobs.length > 0) {
+          cardElement = window.ResponseCards.createJobListingCard(jobsData);
+          shouldUseCard = true;
+        }
+      } catch (error) {
+        console.error('Error creating jobs card:', error);
+      }
+    } 
+    // Detect skill analysis responses - look for skill-related keywords and structure
+    else if ((text.includes('Skill') || text.includes('skill') || text.includes('Gap Analysis')) && 
+             (text.includes('Strengths:') || text.includes('Improve:') || text.includes('🎯') || text.includes('⚠️'))) {
+      try {
+        const skillsData = this.parseSkillsResponse(text);
+        if (window.ResponseCards && (skillsData.strengths.length > 0 || skillsData.improvements.length > 0)) {
+          cardElement = window.ResponseCards.createSkillAnalysisCard(skillsData);
+          shouldUseCard = true;
+        }
+      } catch (error) {
+        console.error('Error creating skills card:', error);
+      }
     }
     
-    // Add special formatting for job listings
-    if (text.includes('Company') && text.includes('Position')) {
-      formattedText = this.formatJobListings(formattedText);
+    // Use card if available, otherwise use markdown formatting
+    if (shouldUseCard && cardElement) {
+      contentWrapper.appendChild(cardElement);
+    } else {
+      // Use markdown formatter for regular messages
+      const formattedText = window.MarkdownFormatter ? window.MarkdownFormatter.format(text) : text;
+      textDiv.innerHTML = formattedText;
+      contentWrapper.appendChild(textDiv);
     }
     
-    // Add special formatting for skill analysis
-    if (text.includes('Technical Strengths') || text.includes('Skill Gap')) {
-      formattedText = this.formatSkillAnalysis(formattedText);
+    // Message actions (for bot messages only)
+    if (type === 'bot' || type === 'system') {
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'message-actions';
+      actionsDiv.innerHTML = `
+        <button class="action-btn" aria-label="Copy message" title="Copy">
+          <i class="fas fa-copy"></i>
+        </button>
+        <button class="action-btn" aria-label="Regenerate response" title="Regenerate">
+          <i class="fas fa-redo"></i>
+        </button>
+        <button class="action-btn" aria-label="Bookmark message" title="Bookmark">
+          <i class="fas fa-bookmark"></i>
+        </button>
+      `;
+      
+      // Add event listeners for actions
+      const copyBtn = actionsDiv.querySelector('.action-btn:nth-child(1)');
+      const regenerateBtn = actionsDiv.querySelector('.action-btn:nth-child(2)');
+      const bookmarkBtn = actionsDiv.querySelector('.action-btn:nth-child(3)');
+      
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => this.copyMessage(text));
+      }
+      
+      if (regenerateBtn) {
+        regenerateBtn.addEventListener('click', () => this.regenerateResponse());
+      }
+      
+      if (bookmarkBtn) {
+        bookmarkBtn.addEventListener('click', () => this.bookmarkMessage(text));
+      }
+      
+      contentWrapper.appendChild(actionsDiv);
     }
     
-    contentDiv.innerHTML = formattedText;
+    // Message metadata
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'message-meta';
     
+    const now = new Date();
+    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    metaDiv.innerHTML = `
+      <span class="message-time">${timeString}</span>
+      ${type === 'bot' ? '<span class="message-model"><i class="fas fa-robot"></i> Llama 3.3 70B</span>' : ''}
+    `;
+    
+    contentWrapper.appendChild(metaDiv);
+    
+    // Assemble message
     messageDiv.appendChild(avatarDiv);
-    messageDiv.appendChild(contentDiv);
-    
-    // Add animation
-    messageDiv.style.opacity = '0';
-    messageDiv.style.transform = 'translateY(20px)';
+    messageDiv.appendChild(contentWrapper);
     
     messagesContainer.appendChild(messageDiv);
-    
-    // Trigger animation
-    setTimeout(() => {
-      messageDiv.style.transition = 'all 0.3s ease';
-      messageDiv.style.opacity = '1';
-      messageDiv.style.transform = 'translateY(0)';
-    }, 50);
     
     // Save to session if needed
     if (saveToHistory) {
@@ -431,123 +665,167 @@ Ready to supercharge your career journey?`;
     
     this.scrollToBottom();
   }
-
-  formatMessage(text) {
-    // Check if this is a roadmap table and format it specially
-    if (text.includes('Roadmap Summary:') && text.includes('| Month |')) {
-      return this.formatRoadmapTable(text);
-    }
+  
+  copyMessage(text) {
+    // Remove HTML tags for plain text copy
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = text;
+    const plainText = tempDiv.textContent || tempDiv.innerText || '';
     
-    // Check if this is a job listings table and format it specially
-    if (text.includes('job postings') && text.includes('| Company |')) {
-      return this.formatJobListingsTable(text);
-    }
-    
-    // Check if this is skill analysis with emoji headers
-    if (text.includes('🎯') || text.includes('⚠️') || text.includes('🚀')) {
-      return this.formatSkillAnalysisContent(text);
-    }
-    
-    return text
-      // Headers with better styling
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="highlight">$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em class="emphasis">$1</em>')
-      .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-      
-      // Enhanced headers with icons
-      .replace(/^### (.*$)/gm, '<h3 class="section-header"><i class="fas fa-chevron-right"></i> $1</h3>')
-      .replace(/^## (.*$)/gm, '<h2 class="main-header"><i class="fas fa-star"></i> $1</h2>')
-      .replace(/^# (.*$)/gm, '<h1 class="title-header"><i class="fas fa-crown"></i> $1</h1>')
-      
-      // Enhanced lists with better formatting
-      .replace(/^\• (.*$)/gm, '<li class="bullet-item"><i class="fas fa-check-circle"></i> $1</li>')
-      .replace(/^- (.*$)/gm, '<li class="dash-item"><i class="fas fa-arrow-right"></i> $1</li>')
-      .replace(/^\d+\. (.*$)/gm, '<li class="numbered-item"><span class="number">$&</span></li>')
-      
-      // Wrap lists in containers
-      .replace(/((<li class="bullet-item">.*<\/li>\s*)+)/g, '<ul class="enhanced-list bullet-list">$1</ul>')
-      .replace(/((<li class="dash-item">.*<\/li>\s*)+)/g, '<ul class="enhanced-list dash-list">$1</ul>')
-      .replace(/((<li class="numbered-item">.*<\/li>\s*)+)/g, '<ol class="enhanced-list numbered-list">$1</ol>')
-      
-      // Enhanced paragraphs and line breaks
-      .replace(/\n\n/g, '</p><p class="paragraph">')
-      .replace(/\n/g, '<br class="line-break">')
-      
-      // Wrap in paragraph container
-      .replace(/^(.+)/, '<p class="paragraph">$1')
-      .replace(/(.+)$/, '$1</p>');
+    navigator.clipboard.writeText(plainText).then(() => {
+      this.showNotification('✅ Message copied to clipboard', 'success');
+    }).catch(() => {
+      this.showNotification('❌ Failed to copy message', 'error');
+    });
   }
   
-  formatRoadmapTable(text) {
+  regenerateResponse() {
+    // Get the last user message and resend it
+    const lastUserMessage = this.chatHistory.slice().reverse().find(msg => msg.role === 'user');
+    if (lastUserMessage) {
+      this.showNotification('🔄 Regenerating response...', 'info');
+      // Remove the last bot response
+      this.chatHistory = this.chatHistory.slice(0, -1);
+      // Resend the message
+      const input = document.getElementById('chat-input');
+      if (input) {
+        input.value = lastUserMessage.content;
+        this.sendMessage();
+      }
+    }
+  }
+  
+  bookmarkMessage(text) {
+    // Save bookmarked messages to localStorage
+    const bookmarks = JSON.parse(localStorage.getItem('keyracer_bookmarks') || '[]');
+    bookmarks.push({
+      text,
+      timestamp: new Date().toISOString(),
+      mode: this.currentMode
+    });
+    localStorage.setItem('keyracer_bookmarks', JSON.stringify(bookmarks));
+    this.showNotification('🔖 Message bookmarked', 'success');
+  }
+
+  /**
+   * Parse roadmap response text into structured data for ResponseCards
+   * Handles both markdown table format and markdown header format
+   */
+  parseRoadmapResponse(text) {
     const lines = text.split('\n');
-    let html = '';
+    const phases = [];
     let inTable = false;
+    let currentPhase = null;
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       
-      if (line.includes('Roadmap Summary:')) {
-        html += '<div class="roadmap-summary-header"><i class="fas fa-map"></i> <strong>Learning Roadmap Summary</strong></div>';
-      } else if (line.startsWith('| Month |')) {
-        // Start of table - create header
-        html += '<div class="roadmap-table-container">';
-        html += '<div class="roadmap-timeline">';
+      // Handle markdown table format (old format)
+      if (line.startsWith('| Month |') || line.startsWith('| Phase |')) {
         inTable = true;
-      } else if (line.startsWith('| ---')) {
-        // Skip separator line
         continue;
-      } else if (line.startsWith('|') && inTable) {
-        // Table row
+      }
+      
+      if (line.startsWith('|---')) {
+        continue;
+      }
+      
+      if (line.startsWith('|') && inTable) {
         const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
         if (cells.length >= 4) {
-          html += `
-            <div class="roadmap-phase">
-              <div class="phase-header">
-                <div class="phase-timeline">${cells[0]}</div>
-                <div class="phase-goal"><i class="fas fa-target"></i> ${cells[1]}</div>
-              </div>
-              <div class="phase-content">
-                <div class="phase-section">
-                  <div class="section-title"><i class="fas fa-code"></i> Projects</div>
-                  <div class="section-content">${cells[2]}</div>
-                </div>
-                <div class="phase-section">
-                  <div class="section-title"><i class="fas fa-book"></i> Resources</div>
-                  <div class="section-content">${cells[3]}</div>
-                </div>
-                ${cells[4] ? `
-                  <div class="phase-section">
-                    <div class="section-title"><i class="fas fa-tools"></i> Tools</div>
-                    <div class="section-content">${cells[4]}</div>
-                  </div>
-                ` : ''}
-              </div>
-            </div>
-          `;
+          phases.push({
+            title: cells[0],
+            goal: cells[1],
+            projects: cells[2].split(',').map(p => p.trim()).filter(p => p),
+            resources: cells[3].split(',').map(r => r.trim()).filter(r => r)
+          });
         }
-      } else if (inTable && !line.startsWith('|')) {
-        // End of table
-        html += '</div></div>';
+      }
+      
+      if (inTable && !line.startsWith('|')) {
         inTable = false;
-        if (line) {
-          html += `<div class="roadmap-conclusion">${line}</div>`;
+      }
+      
+      // Handle markdown header format (new API format)
+      // Look for patterns like "## Month 1-2: Foundation" or "## Month 1: Getting Started"
+      if (line.match(/^##\s*(Month|Phase)\s*\d+/i)) {
+        // Save previous phase if exists
+        if (currentPhase && currentPhase.title) {
+          phases.push(currentPhase);
         }
-      } else if (line) {
-        // Regular content
-        html += `<p class="paragraph">${line}</p>`;
+        
+        // Extract title from header
+        const titleMatch = line.match(/^##\s*(.+)$/);
+        currentPhase = {
+          title: titleMatch ? titleMatch[1] : line.replace(/^##\s*/, ''),
+          goal: '',
+          projects: [],
+          resources: []
+        };
+      }
+      // Extract goal
+      else if (currentPhase && line.match(/^\*\*Goal:\*\*/i)) {
+        currentPhase.goal = line.replace(/^\*\*Goal:\*\*/i, '').trim();
+      }
+      // Extract projects
+      else if (currentPhase && line.match(/^\*\*Projects?:\*\*/i)) {
+        const projectText = line.replace(/^\*\*Projects?:\*\*/i, '').trim();
+        if (projectText) {
+          currentPhase.projects = projectText.split(/[,;]/).map(p => p.trim()).filter(p => p);
+        }
+        // Look ahead for bullet points
+        for (let j = i + 1; j < lines.length && j < i + 5; j++) {
+          const nextLine = lines[j].trim();
+          if (nextLine.match(/^[•\-\*]\s+/)) {
+            currentPhase.projects.push(nextLine.replace(/^[•\-\*]\s+/, '').trim());
+          } else if (nextLine.match(/^\*\*/)) {
+            break;
+          }
+        }
+      }
+      // Extract resources
+      else if (currentPhase && line.match(/^\*\*Resources?:\*\*/i)) {
+        const resourceText = line.replace(/^\*\*Resources?:\*\*/i, '').trim();
+        if (resourceText) {
+          currentPhase.resources = resourceText.split(/[,;]/).map(r => r.trim()).filter(r => r);
+        }
+        // Look ahead for bullet points
+        for (let j = i + 1; j < lines.length && j < i + 5; j++) {
+          const nextLine = lines[j].trim();
+          if (nextLine.match(/^[•\-\*]\s+/)) {
+            currentPhase.resources.push(nextLine.replace(/^[•\-\*]\s+/, '').trim());
+          } else if (nextLine.match(/^\*\*/)) {
+            break;
+          }
+        }
+      }
+      // Extract tools
+      else if (currentPhase && line.match(/^\*\*Tools?:\*\*/i)) {
+        const toolText = line.replace(/^\*\*Tools?:\*\*/i, '').trim();
+        if (toolText) {
+          currentPhase.resources.push(...toolText.split(/[,;]/).map(t => t.trim()).filter(t => t));
+        }
       }
     }
     
-    if (inTable) {
-      html += '</div></div>';
+    // Add the last phase if exists
+    if (currentPhase && currentPhase.title) {
+      phases.push(currentPhase);
     }
     
-    return html;
+    return {
+      id: Date.now(),
+      title: 'Your Learning Roadmap',
+      phases: phases
+    };
   }
-  
-  formatJobListingsTable(text) {
+
+  /**
+   * Parse job listings response text into structured data for ResponseCards
+   */
+  parseJobsResponse(text) {
     const lines = text.split('\n');
-    let html = '';
+    const jobs = [];
     let inTable = false;
     let jobCount = 0;
     
@@ -555,116 +833,112 @@ Ready to supercharge your career journey?`;
       const line = lines[i].trim();
       
       if (line.includes('job postings')) {
-        const match = line.match(/(\d+)\s+active.*job postings/);
-        jobCount = match ? match[1] : '5';
-        html += `<div class="job-listings-header"><i class="fas fa-briefcase"></i> <strong>${jobCount} Active Job Opportunities Found</strong></div>`;
-      } else if (line.startsWith('| Company |')) {
-        // Start of table
-        html += '<div class="job-listings-container">';
+        const match = line.match(/(\d+)\s+/);
+        jobCount = match ? parseInt(match[1]) : 0;
+      }
+      
+      if (line.startsWith('| Company |')) {
         inTable = true;
-      } else if (line.startsWith('|---')) {
-        // Skip separator line
         continue;
-      } else if (line.startsWith('|') && inTable) {
-        // Table row
+      }
+      
+      if (line.startsWith('|---')) {
+        continue;
+      }
+      
+      if (line.startsWith('|') && inTable) {
         const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
         if (cells.length >= 4) {
-          const company = cells[0];
-          const position = cells[1];
-          const location = cells[2];
-          const requirements = cells[3];
-          const applyLink = cells[4] || '#';
-          
-          html += `
-            <div class="job-card">
-              <div class="job-header">
-                <div class="company-info">
-                  <div class="company-name">${company}</div>
-                  <div class="job-location"><i class="fas fa-map-marker-alt"></i> ${location}</div>
-                </div>
-                <div class="job-actions">
-                  <a href="${applyLink}" target="_blank" class="apply-btn">
-                    <i class="fas fa-external-link-alt"></i> Apply
-                  </a>
-                </div>
-              </div>
-              <div class="job-content">
-                <div class="job-title">${position}</div>
-                <div class="job-requirements">
-                  <div class="requirements-label"><i class="fas fa-code"></i> Required Skills:</div>
-                  <div class="requirements-tags">
-                    ${requirements.split(',').map(req => `<span class="skill-tag">${req.trim()}</span>`).join('')}
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
+          jobs.push({
+            company: cells[0],
+            title: cells[1],
+            location: cells[2],
+            skills: cells[3].split(',').map(s => s.trim()).filter(s => s),
+            applyUrl: cells[4] || '#',
+            detailsUrl: cells[4] || '#',
+            level: cells[2].toLowerCase().includes('senior') ? 'senior' : 'junior'
+          });
         }
-      } else if (inTable && !line.startsWith('|')) {
-        // End of table
-        html += '</div>';
-        inTable = false;
-        if (line && line.includes('Note:')) {
-          html += `<div class="job-disclaimer">${line}</div>`;
-        } else if (line) {
-          html += `<p class="paragraph">${line}</p>`;
-        }
-      } else if (line && !inTable) {
-        // Regular content
-        html += `<p class="paragraph">${line}</p>`;
+      }
+      
+      if (inTable && !line.startsWith('|')) {
+        break;
       }
     }
     
-    if (inTable) {
-      html += '</div>';
-    }
-    
-    return html;
+    return {
+      id: Date.now(),
+      count: jobCount || jobs.length,
+      jobs: jobs
+    };
   }
 
-  formatSkillAnalysisContent(text) {
+  /**
+   * Parse skill analysis response text into structured data for ResponseCards
+   */
+  parseSkillsResponse(text) {
     const lines = text.split('\n');
-    let html = '';
+    const data = {
+      id: Date.now(),
+      overallScore: 75,
+      strengths: [],
+      improvements: [],
+      actions: []
+    };
+    
     let currentSection = null;
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       
-      if (line.includes('🎯') && line.includes('Strengths')) {
-        html += '<div class="skill-analysis-section strengths-section">';
-        html += '<div class="skill-section-header strengths-header"><i class="fas fa-bullseye"></i> <strong>Your Technical Strengths</strong></div>';
-        html += '<div class="skill-items-container">';
+      // Detect section headers - more flexible matching
+      if (line.match(/🎯|strength|technical\s+strength/i)) {
         currentSection = 'strengths';
-      } else if (line.includes('⚠️') && (line.includes('Improve') || line.includes('Areas'))) {
-        if (currentSection) html += '</div></div>';
-        html += '<div class="skill-analysis-section improvements-section">';
-        html += '<div class="skill-section-header improvements-header"><i class="fas fa-exclamation-triangle"></i> <strong>Areas to Improve</strong></div>';
-        html += '<div class="skill-items-container">';
+        continue;
+      } else if (line.match(/⚠️|improve|gap|area.*improve|skill.*gap/i)) {
         currentSection = 'improvements';
-      } else if (line.includes('🚀') && (line.includes('Recommended') || line.includes('Actions'))) {
-        if (currentSection) html += '</div></div>';
-        html += '<div class="skill-analysis-section actions-section">';
-        html += '<div class="skill-section-header actions-header"><i class="fas fa-rocket"></i> <strong>Recommended Actions</strong></div>';
-        html += '<div class="skill-items-container">';
+        continue;
+      } else if (line.match(/🚀|recommend|action|next\s+step/i)) {
         currentSection = 'actions';
-      } else if (line && !line.includes('🎯') && !line.includes('⚠️') && !line.includes('🚀')) {
-        // Content line
-        if (currentSection && line) {
-          html += `<div class="skill-item">${line}</div>`;
-        } else if (line) {
-          html += `<p class="paragraph">${line}</p>`;
+        continue;
+      }
+      
+      // Skip empty lines and section headers
+      if (!line || line.match(/^\*\*.*\*\*$/) || line.match(/^#{1,3}\s/)) {
+        continue;
+      }
+      
+      // Extract bullet points
+      const bulletMatch = line.match(/^[•\-\*]\s*(.+)$/);
+      if (bulletMatch) {
+        const cleanLine = bulletMatch[1].trim();
+        
+        if (currentSection === 'strengths' && cleanLine) {
+          data.strengths.push({
+            name: cleanLine,
+            level: 80,
+            levelText: 'Advanced'
+          });
+        } else if (currentSection === 'improvements' && cleanLine) {
+          data.improvements.push({
+            name: cleanLine,
+            level: 40,
+            levelText: 'Beginner'
+          });
+        } else if (currentSection === 'actions' && cleanLine) {
+          data.actions.push(cleanLine);
         }
       }
     }
     
-    if (currentSection) {
-      html += '</div></div>';
-    }
-    
-    return html;
+    return data;
   }
 
-  setLoading(loading) {
+  
+
+  
+
+  setLoading(loading, context = 'thinking') {
     this.isProcessing = loading;
     const sendBtn = document.getElementById('send-button');
     const input = document.getElementById('chat-input');
@@ -672,8 +946,40 @@ Ready to supercharge your career journey?`;
     
     if (sendBtn) sendBtn.disabled = loading;
     if (input) input.disabled = loading;
+    
     if (typingIndicator) {
-      typingIndicator.style.display = loading ? 'block' : 'none';
+      if (loading) {
+        // Set contextual message based on context
+        const contextMessages = {
+          thinking: 'AI is thinking...',
+          analyzing: 'Analyzing your resume...',
+          searching: 'Searching job market...',
+          generating: 'Generating roadmap...',
+          processing: 'Processing your request...',
+          interviewing: 'Preparing interview question...'
+        };
+        
+        const message = contextMessages[context] || contextMessages.thinking;
+        const textElement = typingIndicator.querySelector('.typing-text');
+        
+        if (textElement) {
+          textElement.textContent = message;
+        }
+        
+        // Set data attribute for context-specific styling
+        typingIndicator.setAttribute('data-context', context);
+        
+        // Show with animation
+        typingIndicator.style.display = 'flex';
+        typingIndicator.classList.remove('hiding');
+      } else {
+        // Hide with animation
+        typingIndicator.classList.add('hiding');
+        setTimeout(() => {
+          typingIndicator.style.display = 'none';
+          typingIndicator.classList.remove('hiding');
+        }, 300);
+      }
     }
     
     // Disable quick action buttons during processing
@@ -686,6 +992,312 @@ Ready to supercharge your career journey?`;
         btn.style.pointerEvents = 'auto';
       }
     });
+  }
+  
+  /**
+   * Show progress indicator for long operations
+   * @param {string} title - Title of the operation
+   * @param {string} context - Context type (analyzing, generating, searching)
+   * @param {number} estimatedSeconds - Estimated time in seconds
+   */
+  showProgress(title, context = 'processing', estimatedSeconds = 30) {
+    const progressIndicator = document.getElementById('progress-indicator');
+    if (!progressIndicator) return;
+    
+    // Hide typing indicator if showing
+    const typingIndicator = document.getElementById('typing-indicator');
+    if (typingIndicator) {
+      typingIndicator.style.display = 'none';
+    }
+    
+    // Set title and context
+    const titleElement = document.getElementById('progress-title-text');
+    if (titleElement) {
+      titleElement.textContent = title;
+    }
+    
+    progressIndicator.setAttribute('data-context', context);
+    
+    // Set estimated time
+    const etaElement = document.getElementById('progress-eta');
+    if (etaElement) {
+      etaElement.textContent = `${estimatedSeconds}s`;
+    }
+    
+    // Reset progress
+    this.updateProgress(0, 'Initializing...');
+    
+    // Show indicator
+    progressIndicator.style.display = 'block';
+    progressIndicator.classList.remove('hiding');
+    
+    // Start simulated progress
+    this.startProgressSimulation(estimatedSeconds);
+  }
+  
+  /**
+   * Update progress bar
+   * @param {number} percentage - Progress percentage (0-100)
+   * @param {string} status - Status message
+   */
+  updateProgress(percentage, status = '') {
+    const fillElement = document.getElementById('progress-bar-fill');
+    const percentageElement = document.getElementById('progress-percentage');
+    const statusElement = document.getElementById('progress-status-text');
+    
+    if (fillElement) {
+      fillElement.style.width = `${percentage}%`;
+    }
+    
+    if (percentageElement) {
+      percentageElement.textContent = `${Math.round(percentage)}%`;
+    }
+    
+    if (statusElement && status) {
+      statusElement.textContent = status;
+    }
+  }
+  
+  /**
+   * Simulate progress for long operations
+   * @param {number} estimatedSeconds - Estimated duration
+   */
+  startProgressSimulation(estimatedSeconds) {
+    // Clear any existing simulation
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+    }
+    
+    let progress = 0;
+    const steps = estimatedSeconds * 2; // Update every 500ms
+    const increment = 100 / steps;
+    
+    // Status messages for different progress stages
+    const statusMessages = [
+      { threshold: 0, message: 'Initializing...' },
+      { threshold: 20, message: 'Processing data...' },
+      { threshold: 40, message: 'Analyzing information...' },
+      { threshold: 60, message: 'Generating results...' },
+      { threshold: 80, message: 'Finalizing...' },
+      { threshold: 95, message: 'Almost done...' }
+    ];
+    
+    this.progressInterval = setInterval(() => {
+      progress += increment;
+      
+      // Slow down as we approach 100%
+      if (progress > 90) {
+        progress += increment * 0.3;
+      }
+      
+      // Cap at 95% until actual completion
+      if (progress > 95) {
+        progress = 95;
+      }
+      
+      // Find appropriate status message
+      const currentStatus = statusMessages
+        .reverse()
+        .find(s => progress >= s.threshold);
+      
+      this.updateProgress(progress, currentStatus?.message || 'Processing...');
+      
+      // Update ETA
+      const remainingSeconds = Math.ceil((100 - progress) / increment * 0.5);
+      const etaElement = document.getElementById('progress-eta');
+      if (etaElement && remainingSeconds > 0) {
+        etaElement.textContent = `${remainingSeconds}s`;
+      }
+      
+      if (progress >= 95) {
+        clearInterval(this.progressInterval);
+      }
+    }, 500);
+  }
+  
+  /**
+   * Hide progress indicator
+   */
+  hideProgress() {
+    const progressIndicator = document.getElementById('progress-indicator');
+    if (!progressIndicator) return;
+    
+    // Clear simulation interval
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = null;
+    }
+    
+    // Complete the progress
+    this.updateProgress(100, 'Complete!');
+    
+    // Hide with animation after a brief delay
+    setTimeout(() => {
+      progressIndicator.classList.add('hiding');
+      setTimeout(() => {
+        progressIndicator.style.display = 'none';
+        progressIndicator.classList.remove('hiding');
+      }, 300);
+    }, 500);
+  }
+  
+  /**
+   * Show skeleton loader for cards
+   * @param {string} type - Type of skeleton (roadmap, job, skill, message)
+   * @param {number} count - Number of skeleton items to show
+   */
+  showSkeleton(type = 'message', count = 1) {
+    const messagesContainer = document.getElementById('chat-messages');
+    if (!messagesContainer) return;
+    
+    const skeletonId = `skeleton-${type}-${Date.now()}`;
+    const skeletonContainer = document.createElement('div');
+    skeletonContainer.id = skeletonId;
+    skeletonContainer.className = 'skeleton-container';
+    
+    for (let i = 0; i < count; i++) {
+      let skeletonHTML = '';
+      
+      switch (type) {
+        case 'roadmap':
+          skeletonHTML = this.createRoadmapSkeleton();
+          break;
+        case 'job':
+          skeletonHTML = this.createJobSkeleton();
+          break;
+        case 'skill':
+          skeletonHTML = this.createSkillSkeleton();
+          break;
+        case 'message':
+        default:
+          skeletonHTML = this.createMessageSkeleton();
+          break;
+      }
+      
+      skeletonContainer.innerHTML += skeletonHTML;
+    }
+    
+    messagesContainer.appendChild(skeletonContainer);
+    this.scrollToBottom();
+    
+    return skeletonId;
+  }
+  
+  /**
+   * Hide skeleton loader
+   * @param {string} skeletonId - ID of skeleton container to remove
+   */
+  hideSkeleton(skeletonId) {
+    const skeleton = document.getElementById(skeletonId);
+    if (skeleton) {
+      skeleton.style.opacity = '0';
+      skeleton.style.transition = 'opacity 0.3s ease-out';
+      setTimeout(() => {
+        skeleton.remove();
+      }, 300);
+    }
+  }
+  
+  /**
+   * Create message skeleton HTML
+   */
+  createMessageSkeleton() {
+    return `
+      <div class="skeleton-message">
+        <div class="skeleton skeleton-message-avatar"></div>
+        <div class="skeleton-message-content">
+          <div class="skeleton-message-bubble">
+            <div class="skeleton skeleton-message-text long"></div>
+            <div class="skeleton skeleton-message-text medium"></div>
+            <div class="skeleton skeleton-message-text short"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  /**
+   * Create roadmap skeleton HTML
+   */
+  createRoadmapSkeleton() {
+    return `
+      <div class="skeleton-card">
+        <div class="skeleton-header">
+          <div class="skeleton skeleton-avatar"></div>
+          <div class="skeleton skeleton-title"></div>
+        </div>
+        <div class="skeleton-roadmap">
+          ${Array(3).fill(0).map(() => `
+            <div class="skeleton-phase">
+              <div class="skeleton-phase-header">
+                <div class="skeleton skeleton-phase-title"></div>
+                <div class="skeleton skeleton-phase-badge"></div>
+              </div>
+              <div class="skeleton-phase-content">
+                <div class="skeleton-phase-section">
+                  <div class="skeleton skeleton-section-title"></div>
+                  <div class="skeleton skeleton-section-text"></div>
+                  <div class="skeleton skeleton-section-text short"></div>
+                </div>
+                <div class="skeleton-phase-section">
+                  <div class="skeleton skeleton-section-title"></div>
+                  <div class="skeleton skeleton-section-text"></div>
+                  <div class="skeleton skeleton-section-text short"></div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  
+  /**
+   * Create job skeleton HTML
+   */
+  createJobSkeleton() {
+    return `
+      <div class="skeleton-job">
+        <div class="skeleton-job-header">
+          <div class="skeleton-job-info">
+            <div class="skeleton skeleton-company-name"></div>
+            <div class="skeleton skeleton-job-location"></div>
+          </div>
+          <div class="skeleton skeleton-apply-btn"></div>
+        </div>
+        <div class="skeleton skeleton-job-title"></div>
+        <div class="skeleton-tags">
+          <div class="skeleton skeleton-tag"></div>
+          <div class="skeleton skeleton-tag"></div>
+          <div class="skeleton skeleton-tag"></div>
+          <div class="skeleton skeleton-tag"></div>
+        </div>
+      </div>
+    `;
+  }
+  
+  /**
+   * Create skill analysis skeleton HTML
+   */
+  createSkillSkeleton() {
+    return `
+      <div class="skeleton-card">
+        <div class="skeleton-header">
+          <div class="skeleton skeleton-avatar"></div>
+          <div class="skeleton skeleton-title"></div>
+        </div>
+        ${Array(3).fill(0).map(() => `
+          <div class="skeleton-skill-section">
+            <div class="skeleton skeleton-skill-header"></div>
+            <div class="skeleton-skill-content">
+              <div class="skeleton skeleton-skill-item"></div>
+              <div class="skeleton skeleton-skill-item"></div>
+              <div class="skeleton skeleton-skill-item"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
   }
 
   scrollToBottom() {
@@ -736,26 +1348,8 @@ Ready to supercharge your career journey?`;
 
   // toggleSuggestions method removed - suggestions now always visible
   
-  formatRoadmap(text) {
-    return text
-      .replace(/Month \d+-\d+:/g, '<div class="roadmap-month">$&</div>')
-      .replace(/\*\*Goal:\*\*/g, '<div class="roadmap-goal"><i class="fas fa-target"></i> <strong>Goal:</strong></div>')
-      .replace(/\*\*Projects:\*\*/g, '<div class="roadmap-projects"><i class="fas fa-code"></i> <strong>Projects:</strong></div>')
-      .replace(/\*\*Resources:\*\*/g, '<div class="roadmap-resources"><i class="fas fa-book"></i> <strong>Resources:</strong></div>');
-  }
   
-  formatJobListings(text) {
-    // Enhanced table formatting for job listings
-    return text.replace(/<table>/g, '<div class="job-listings-container"><table class="job-listings-table">')
-               .replace(/<\/table>/g, '</table></div>');
-  }
   
-  formatSkillAnalysis(text) {
-    return text
-      .replace(/Technical Strengths:/g, '<div class="skill-section strengths"><i class="fas fa-check-circle"></i> <strong>Technical Strengths:</strong></div>')
-      .replace(/Areas to Improve:/g, '<div class="skill-section improvements"><i class="fas fa-arrow-up"></i> <strong>Areas to Improve:</strong></div>')
-      .replace(/Recommended Actions:/g, '<div class="skill-section actions"><i class="fas fa-rocket"></i> <strong>Recommended Actions:</strong></div>');
-  }
   
   // Chat History Management
   generateSessionId() {
@@ -781,26 +1375,33 @@ Ready to supercharge your career journey?`;
   saveCurrentSession() {
     if (this.chatHistory.length === 0) return;
     
-    const existingIndex = this.chatSessions.findIndex(s => s.id === this.currentSessionId);
     const sessionData = {
       id: this.currentSessionId,
       title: this.generateSessionTitle(),
+      preview: this.generateSessionPreview(),
       timestamp: new Date().toISOString(),
       mode: this.currentMode,
       messages: this.chatHistory.slice(),
       resumeAnalysis: this.resumeAnalysis
     };
     
-    if (existingIndex >= 0) {
-      this.chatSessions[existingIndex] = sessionData;
+    // Update session manager if available
+    if (window.sessionManager) {
+      window.sessionManager.addSession(sessionData);
     } else {
-      this.chatSessions.unshift(sessionData);
+      // Fallback to old method
+      const existingIndex = this.chatSessions.findIndex(s => s.id === this.currentSessionId);
+      if (existingIndex >= 0) {
+        this.chatSessions[existingIndex] = sessionData;
+      } else {
+        this.chatSessions.unshift(sessionData);
+      }
+      
+      // Keep only last 20 sessions
+      this.chatSessions = this.chatSessions.slice(0, 20);
+      this.saveChatSessions();
+      this.updateHistorySidebar();
     }
-    
-    // Keep only last 20 sessions
-    this.chatSessions = this.chatSessions.slice(0, 20);
-    this.saveChatSessions();
-    this.updateHistorySidebar();
   }
   
   generateSessionTitle() {
@@ -808,11 +1409,23 @@ Ready to supercharge your career journey?`;
     
     const firstUserMessage = this.chatHistory.find(msg => msg.role === 'user');
     if (firstUserMessage) {
-      const title = firstUserMessage.content.substring(0, 30);
+      const title = firstUserMessage.content.substring(0, 40);
       return title.length < firstUserMessage.content.length ? title + '...' : title;
     }
     
     return `${this.currentMode} Chat - ${new Date().toLocaleDateString()}`;
+  }
+  
+  generateSessionPreview() {
+    if (this.chatHistory.length === 0) return 'No messages yet';
+    
+    const lastUserMessage = [...this.chatHistory].reverse().find(msg => msg.role === 'user');
+    if (lastUserMessage) {
+      const preview = lastUserMessage.content.substring(0, 60);
+      return preview.length < lastUserMessage.content.length ? preview + '...' : preview;
+    }
+    
+    return 'Chat in progress';
   }
   
   updateHistorySidebar() {
@@ -949,4 +1562,462 @@ Ready to supercharge your career journey?`;
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   window.enhancedAICareerAgent = new EnhancedAICareerAgent();
+});
+
+/**
+ * Sidebar Toggle and Mobile Drawer Functionality
+ * Task 2.3: Mobile drawer with slide animation
+ * Requirement: 9.2
+ */
+
+// Initialize sidebar toggle on page load
+document.addEventListener('DOMContentLoaded', () => {
+  initializeSidebarToggle();
+  initializeModeSelector();
+});
+
+function initializeSidebarToggle() {
+  const sidebarToggle = document.querySelector('.sidebar-toggle');
+  const sidebar = document.querySelector('.session-sidebar');
+  
+  if (!sidebarToggle || !sidebar) return;
+  
+  // Create overlay for mobile
+  const overlay = document.createElement('div');
+  overlay.className = 'sidebar-overlay';
+  document.body.appendChild(overlay);
+  
+  // Toggle sidebar
+  sidebarToggle.addEventListener('click', () => {
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+      // Mobile: use 'open' class with overlay
+      const isOpen = sidebar.classList.contains('open');
+      if (isOpen) {
+        closeSidebarMobile();
+      } else {
+        openSidebarMobile();
+      }
+    } else {
+      // Desktop: use 'closed' class (toggle closed state)
+      const isClosed = sidebar.classList.contains('closed');
+      if (isClosed) {
+        openSidebarDesktop();
+      } else {
+        closeSidebarDesktop();
+      }
+    }
+  });
+  
+  // Close sidebar when clicking overlay (mobile only)
+  overlay.addEventListener('click', () => {
+    closeSidebarMobile();
+  });
+  
+  // Close sidebar on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        closeSidebarMobile();
+      }
+    }
+  });
+  
+  function openSidebarMobile() {
+    sidebar.classList.add('open');
+    sidebar.classList.remove('closed');
+    overlay.classList.add('active');
+    sidebarToggle.setAttribute('aria-expanded', 'true');
+    trapFocus(sidebar);
+  }
+  
+  function closeSidebarMobile() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    sidebarToggle.setAttribute('aria-expanded', 'false');
+    sidebarToggle.focus();
+  }
+  
+  function openSidebarDesktop() {
+    sidebar.classList.remove('closed');
+    sidebarToggle.setAttribute('aria-expanded', 'true');
+    // Save preference
+    localStorage.setItem('sidebar-state', 'open');
+  }
+  
+  function closeSidebarDesktop() {
+    sidebar.classList.add('closed');
+    sidebarToggle.setAttribute('aria-expanded', 'false');
+    // Save preference
+    localStorage.setItem('sidebar-state', 'closed');
+  }
+  
+  // Restore sidebar state on desktop
+  if (window.innerWidth > 768) {
+    const savedState = localStorage.getItem('sidebar-state');
+    if (savedState === 'closed') {
+      closeSidebarDesktop();
+    }
+  }
+  
+  // Handle window resize
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (window.innerWidth > 768) {
+        // Desktop: remove mobile classes, restore saved state
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        
+        const savedState = localStorage.getItem('sidebar-state');
+        if (savedState === 'closed') {
+          sidebar.classList.add('closed');
+        } else {
+          sidebar.classList.remove('closed');
+        }
+      } else {
+        // Mobile: remove desktop classes
+        sidebar.classList.remove('closed');
+      }
+    }, 250);
+  });
+}
+
+function trapFocus(element) {
+  const focusableElements = element.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  
+  if (focusableElements.length === 0) return;
+  
+  const firstFocusable = focusableElements[0];
+  const lastFocusable = focusableElements[focusableElements.length - 1];
+  
+  element.addEventListener('keydown', function(e) {
+    if (e.key !== 'Tab') return;
+    
+    if (e.shiftKey) {
+      if (document.activeElement === firstFocusable) {
+        e.preventDefault();
+        lastFocusable.focus();
+      }
+    } else {
+      if (document.activeElement === lastFocusable) {
+        e.preventDefault();
+        firstFocusable.focus();
+      }
+    }
+  });
+  
+  // Focus first element
+  firstFocusable.focus();
+}
+
+function initializeModeSelector() {
+  const modeButtons = document.querySelectorAll('.mode-btn');
+  const modeIndicator = document.querySelector('.mode-indicator');
+  
+  if (!modeButtons.length || !modeIndicator) return;
+  
+  modeButtons.forEach((button, index) => {
+    button.addEventListener('click', () => {
+      // Update active state
+      modeButtons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+      
+      button.classList.add('active');
+      button.setAttribute('aria-selected', 'true');
+      
+      // Update mode indicator position
+      const mode = button.dataset.mode;
+      if (mode === 'interview') {
+        modeIndicator.style.transform = 'translateX(100%)';
+      } else {
+        modeIndicator.style.transform = 'translateX(0)';
+      }
+      
+      // Apply mode-specific theming
+      applyModeTheming(mode);
+    });
+  });
+}
+
+function applyModeTheming(mode) {
+  const root = document.documentElement;
+  
+  if (mode === 'career') {
+    // Blue theme for career mode
+    root.style.setProperty('--mode-accent', '#06b6d4');
+  } else if (mode === 'interview') {
+    // Purple theme for interview mode
+    root.style.setProperty('--mode-accent', '#7c3aed');
+  }
+  
+  // Announce mode change to screen readers
+  announceToScreenReader(`Switched to ${mode} mode`);
+}
+
+function announceToScreenReader(message) {
+  const announcement = document.createElement('div');
+  announcement.setAttribute('role', 'status');
+  announcement.setAttribute('aria-live', 'polite');
+  announcement.className = 'sr-only';
+  announcement.textContent = message;
+  
+  document.body.appendChild(announcement);
+  
+  setTimeout(() => {
+    document.body.removeChild(announcement);
+  }, 1000);
+}
+
+// Session management functions
+function initializeSessionManagement() {
+  const newChatBtn = document.querySelector('.new-chat-btn');
+  const sessionItems = document.querySelectorAll('.session-item');
+  const sessionSearch = document.getElementById('session-search');
+  
+  // New chat button
+  if (newChatBtn) {
+    newChatBtn.addEventListener('click', () => {
+      createNewSession();
+    });
+  }
+  
+  // Session item clicks
+  sessionItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (!e.target.closest('.session-actions')) {
+        const sessionId = item.dataset.sessionId;
+        loadSession(sessionId);
+      }
+    });
+    
+    // Session actions
+    const pinBtn = item.querySelector('.session-actions button:first-child');
+    const deleteBtn = item.querySelector('.session-actions button:last-child');
+    
+    if (pinBtn) {
+      pinBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        togglePinSession(item);
+      });
+    }
+    
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteSession(item);
+      });
+    }
+  });
+  
+  // Session search
+  if (sessionSearch) {
+    sessionSearch.addEventListener('input', (e) => {
+      filterSessions(e.target.value);
+    });
+  }
+}
+
+function createNewSession() {
+  // Clear current chat
+  const chatMessages = document.getElementById('chat-messages');
+  if (chatMessages) {
+    chatMessages.innerHTML = '';
+  }
+  
+  // Update active session
+  document.querySelectorAll('.session-item').forEach(item => {
+    item.classList.remove('active');
+    item.setAttribute('aria-current', 'false');
+  });
+  
+  announceToScreenReader('New chat session created');
+}
+
+function loadSession(sessionId) {
+  // Update active state
+  document.querySelectorAll('.session-item').forEach(item => {
+    item.classList.remove('active');
+    item.setAttribute('aria-current', 'false');
+  });
+  
+  const activeItem = document.querySelector(`[data-session-id="${sessionId}"]`);
+  if (activeItem) {
+    activeItem.classList.add('active');
+    activeItem.setAttribute('aria-current', 'true');
+  }
+  
+  // Load session messages (implement based on your data structure)
+  announceToScreenReader('Session loaded');
+}
+
+function togglePinSession(item) {
+  const isPinned = item.classList.contains('pinned');
+  
+  if (isPinned) {
+    item.classList.remove('pinned');
+    announceToScreenReader('Session unpinned');
+  } else {
+    item.classList.add('pinned');
+    announceToScreenReader('Session pinned');
+  }
+}
+
+function deleteSession(item) {
+  const sessionTitle = item.querySelector('.session-title').textContent;
+  
+  if (confirm(`Delete session "${sessionTitle}"?`)) {
+    item.remove();
+    announceToScreenReader('Session deleted');
+  }
+}
+
+function filterSessions(query) {
+  const sessionItems = document.querySelectorAll('.session-item');
+  const lowerQuery = query.toLowerCase();
+  
+  sessionItems.forEach(item => {
+    const title = item.querySelector('.session-title').textContent.toLowerCase();
+    const preview = item.querySelector('.session-preview').textContent.toLowerCase();
+    
+    if (title.includes(lowerQuery) || preview.includes(lowerQuery)) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+// Initialize session management when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  initializeSessionManagement();
+});
+
+// Auto-resize textarea
+function initializeTextareaAutoResize() {
+  const textarea = document.querySelector('.text-input');
+  
+  if (!textarea) return;
+  
+  textarea.addEventListener('input', function() {
+    // Reset height to auto to get the correct scrollHeight
+    this.style.height = 'auto';
+    
+    // Calculate new height (max 5 lines)
+    const lineHeight = parseInt(getComputedStyle(this).lineHeight);
+    const maxHeight = lineHeight * 5;
+    const newHeight = Math.min(this.scrollHeight, maxHeight);
+    
+    this.style.height = newHeight + 'px';
+    
+    // Enable/disable send button
+    const sendBtn = document.querySelector('.send-btn');
+    if (sendBtn) {
+      sendBtn.disabled = this.value.trim().length === 0;
+    }
+  });
+  
+  // Handle keyboard shortcuts
+  textarea.addEventListener('keydown', function(e) {
+    // Cmd/Ctrl + Enter to send
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      const sendBtn = document.querySelector('.send-btn');
+      if (sendBtn && !sendBtn.disabled) {
+        sendBtn.click();
+      }
+    }
+    
+    // Escape to clear
+    if (e.key === 'Escape') {
+      this.value = '';
+      this.style.height = 'auto';
+      this.dispatchEvent(new Event('input'));
+    }
+  });
+}
+
+// Initialize textarea auto-resize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  initializeTextareaAutoResize();
+});
+
+// Scroll to bottom functionality
+function initializeScrollToBottom() {
+  const chatMessages = document.querySelector('.chat-messages');
+  const scrollBtn = document.querySelector('.scroll-to-bottom');
+  
+  if (!chatMessages || !scrollBtn) return;
+  
+  // Show/hide scroll button based on scroll position
+  chatMessages.addEventListener('scroll', () => {
+    const isNearBottom = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 100;
+    
+    if (isNearBottom) {
+      scrollBtn.style.display = 'none';
+    } else {
+      scrollBtn.style.display = 'flex';
+    }
+  });
+  
+  // Scroll to bottom on click
+  scrollBtn.addEventListener('click', () => {
+    chatMessages.scrollTo({
+      top: chatMessages.scrollHeight,
+      behavior: 'smooth'
+    });
+  });
+}
+
+// Initialize scroll to bottom when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  initializeScrollToBottom();
+});
+
+// File upload zone functionality
+function initializeFileUploadZone() {
+  const uploadZone = document.querySelector('.file-upload-zone');
+  const fileInput = document.getElementById('resume-upload');
+  
+  if (!uploadZone || !fileInput) return;
+  
+  // Click to upload
+  uploadZone.addEventListener('click', () => {
+    fileInput.click();
+  });
+  
+  // Drag and drop
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = 'var(--primary)';
+    uploadZone.style.background = 'var(--surface-hover)';
+  });
+  
+  uploadZone.addEventListener('dragleave', () => {
+    uploadZone.style.borderColor = '';
+    uploadZone.style.background = '';
+  });
+  
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = '';
+    uploadZone.style.background = '';
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      fileInput.files = files;
+      fileInput.dispatchEvent(new Event('change'));
+    }
+  });
+}
+
+// Initialize file upload zone when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  initializeFileUploadZone();
 });

@@ -11,6 +11,13 @@
     min-height: calc(100vh - 160px);
 }
 
+.learn-subtopic-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 160px);
+}
+
 .learn-welcome-card {
     background: var(--card-bg);
     border-radius: 20px;
@@ -19,6 +26,13 @@
     width: 100%;
     border: 1px solid rgba(0, 194, 255, 0.2);
     text-align: center;
+    position: relative;
+}
+
+.learn-welcome-card .back-to-topics-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
 }
 
 .learn-topic-grid {

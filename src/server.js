@@ -278,6 +278,12 @@ if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
 // Static files - Serve the public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
+// Serve content directory for markdown files
+app.use('/content', express.static(path.join(__dirname, '../content')));
+
+// Serve data directory for JSON files
+app.use('/data', express.static(path.join(__dirname, '../data')));
+
 // Global rate limiting
 const globalLimiter = rateLimit({
   windowMs: parseInt(process.env.GLOBAL_RATE_LIMIT_WINDOW) || 900000, // 15 minutes

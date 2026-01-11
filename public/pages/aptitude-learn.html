@@ -15,8 +15,10 @@
     <title>Aptitude Learning | KeyRacer</title>
     <link rel="stylesheet" href="../styles/style.css">
     <link rel="stylesheet" href="../styles/aptitude.css">
+    <link rel="stylesheet" href="../styles/aptitude-enhanced.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <header class="tutorial-header">
@@ -66,14 +68,30 @@
                     </button>
                     <button class="learn-topic-card" data-topic="verbal">
                         <i class="fas fa-language"></i>
-                        <span>Verbal Ability</span>
+                        <span>Verbal Reasoning</span>
                         <small>Grammar, Vocabulary, Reading</small>
                     </button>
-                    <button class="learn-topic-card" data-topic="puzzles">
-                        <i class="fas fa-lightbulb"></i>
-                        <span>Puzzles</span>
-                        <small>Brain Teasers, Riddles</small>
+                    <button class="learn-topic-card" data-topic="data-interpretation">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Data Interpretation</span>
+                        <small>Charts, Graphs, Tables</small>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subtopic Selection Screen -->
+        <div class="learn-subtopic-screen" id="learnSubtopicScreen" style="display: none;">
+            <div class="learn-welcome-card">
+                <button class="back-to-topics-btn" id="backToMainTopicsBtn">
+                    <i class="fas fa-arrow-left"></i> Back to Topics
+                </button>
+                <i class="fas fa-calculator welcome-icon" id="subtopicIcon"></i>
+                <h1 class="welcome-title" id="subtopicMainTitle">Quantitative Aptitude</h1>
+                <p class="welcome-subtitle">Choose a subtopic to learn</p>
+                
+                <div class="learn-topic-grid" id="subtopicGrid">
+                    <!-- Subtopics will be dynamically loaded here -->
                 </div>
             </div>
         </div>
@@ -81,8 +99,8 @@
         <!-- Learning Content Screen -->
         <div class="learn-content-screen" id="learnContentScreen" style="display: none;">
             <div class="learn-topbar">
-                <button class="back-to-topics-btn" id="backToTopicsBtn">
-                    <i class="fas fa-arrow-left"></i> Back to Topics
+                <button class="back-to-topics-btn" id="backToSubtopicsBtn">
+                    <i class="fas fa-arrow-left"></i> Back to Subtopics
                 </button>
                 <h2 class="learn-topic-title" id="learnTopicTitle">Quantitative Aptitude</h2>
                 <a href="aptitude-challenges.html" class="practice-now-btn">
@@ -120,34 +138,67 @@
         const topicNames = {
             'quant': 'Quantitative Aptitude',
             'logical-reasoning': 'Logical Reasoning',
-            'verbal': 'Verbal Ability',
-            'puzzles': 'Puzzles & Brain Teasers'
+            'verbal': 'Verbal Reasoning',
+            'data-interpretation': 'Data Interpretation'
         };
         
-        // Topic selection
+        const topicIcons = {
+            'quant': 'fa-calculator',
+            'logical-reasoning': 'fa-puzzle-piece',
+            'verbal': 'fa-language',
+            'data-interpretation': 'fa-chart-bar'
+        };
+        
+        let currentTopic = null;
+        
+        // Main topic selection - show subtopics
         document.querySelectorAll('.learn-topic-card').forEach(card => {
             card.addEventListener('click', () => {
                 const topic = card.dataset.topic;
-                showLearningContent(topic);
+                showSubtopics(topic);
             });
         });
         
-        // Back to topics
-        document.getElementById('backToTopicsBtn').addEventListener('click', () => {
+        // Back to main topics from subtopics
+        document.getElementById('backToMainTopicsBtn').addEventListener('click', () => {
             document.getElementById('learnWelcomeScreen').style.display = 'flex';
+            document.getElementById('learnSubtopicScreen').style.display = 'none';
+        });
+        
+        // Back to subtopics from content
+        document.getElementById('backToSubtopicsBtn').addEventListener('click', () => {
+            document.getElementById('learnSubtopicScreen').style.display = 'flex';
             document.getElementById('learnContentScreen').style.display = 'none';
         });
         
-        function showLearningContent(topic) {
+        function showSubtopics(topic) {
+            currentTopic = topic;
             document.getElementById('learnWelcomeScreen').style.display = 'none';
+            document.getElementById('learnSubtopicScreen').style.display = 'flex';
+            
+            // Update title and icon
+            document.getElementById('subtopicMainTitle').textContent = topicNames[topic];
+            document.getElementById('subtopicIcon').className = `fas ${topicIcons[topic]} welcome-icon`;
+            
+            // Load subtopics from aptitude manager
+            if (window.aptitudeManager) {
+                window.aptitudeManager.loadSubtopics(topic);
+            }
+        }
+        
+        function showLearningContent(topic, subtopic) {
+            document.getElementById('learnSubtopicScreen').style.display = 'none';
             document.getElementById('learnContentScreen').style.display = 'block';
-            document.getElementById('learnTopicTitle').textContent = topicNames[topic];
+            document.getElementById('learnTopicTitle').textContent = `${topicNames[topic]} - ${subtopic}`;
             
             // Load content using aptitude manager
             if (window.aptitudeManager) {
-                window.aptitudeManager.loadTopicContent(topic);
+                window.aptitudeManager.loadSubtopicContent(topic, subtopic);
             }
         }
+        
+        // Make showLearningContent available globally for dynamic subtopic cards
+        window.showLearningContent = showLearningContent;
     </script>
 </body>
 </html>

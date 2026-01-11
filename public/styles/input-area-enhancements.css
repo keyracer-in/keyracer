@@ -1,0 +1,487 @@
+/**
+ * Input Area Enhancements Styles
+ * Task 5: Enhance input area
+ * Requirements: 4.1, 4.2, 4.5, 13.1-13.4, 5.1-5.5
+ */
+
+/* Input Area Container */
+.input-area {
+  position: relative;
+  padding: var(--space-4, 1rem) var(--space-6, 1.5rem);
+  background: transparent;
+  border-top: none;
+}
+
+/* Quick Actions - Task 5.3 */
+.quick-actions {
+  display: flex;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem) 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border, #334155) transparent;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  max-width: 800px; /* Match input width */
+  margin: 0 auto; /* Center the quick actions */
+  /* Removed background - transparent */
+}
+
+.quick-actions::-webkit-scrollbar {
+  height: 4px;
+}
+
+.quick-actions::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quick-actions::-webkit-scrollbar-thumb {
+  background: var(--border, #334155);
+  border-radius: 2px;
+}
+
+.quick-action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-2, 0.5rem) var(--space-4, 1rem);
+  background: transparent;
+  border: none; /* Removed border */
+  border-radius: var(--radius-full, 9999px);
+  color: var(--text-secondary, #94a3b8);
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: var(--font-medium, 500);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.quick-action-chip:hover {
+  background: var(--bg-hover, #334155);
+  color: var(--text-primary, #f1f5f9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.quick-action-chip:active {
+  transform: translateY(0);
+}
+
+.quick-action-chip i {
+  font-size: var(--text-base, 1rem);
+  color: var(--primary, #6366f1);
+}
+
+/* File Upload Zone - Task 5.2 */
+.file-upload-zone {
+  position: relative;
+  padding: var(--space-4, 1rem);
+  margin: 0 auto var(--space-4, 1rem); /* Center and add bottom margin */
+  max-width: 800px; /* Match input width */
+  background: var(--bg-main, #0f172a);
+  border: 2px dashed var(--border, #334155);
+  border-radius: var(--radius-lg, 0.75rem);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-upload-zone:hover {
+  border-color: var(--primary, #6366f1);
+  background: var(--surface-hover, rgba(99, 102, 241, 0.05));
+}
+
+.file-upload-zone[data-state="dragover"] {
+  border-color: var(--primary, #6366f1);
+  background: var(--surface-hover, rgba(99, 102, 241, 0.1));
+  transform: scale(1.02);
+}
+
+.file-upload-zone i {
+  font-size: var(--text-xl, 1.25rem);
+  color: var(--text-secondary, #94a3b8);
+  margin-right: var(--space-2, 0.5rem);
+}
+
+.file-upload-zone span {
+  color: var(--text-secondary, #94a3b8);
+  font-size: var(--text-sm, 0.875rem);
+}
+
+/* File Upload Progress */
+.file-upload-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+}
+
+.file-info i {
+  font-size: var(--text-2xl, 1.5rem);
+  color: var(--danger, #ef4444);
+  margin: 0;
+}
+
+.file-details {
+  flex: 1;
+  text-align: left;
+}
+
+.file-name {
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--text-primary, #f1f5f9);
+  margin-bottom: var(--space-1, 0.25rem);
+  word-break: break-word;
+}
+
+.file-size {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--text-secondary, #94a3b8);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-card, #1e293b);
+  border-radius: var(--radius-full, 9999px);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary, #6366f1), var(--secondary, #10b981));
+  border-radius: var(--radius-full, 9999px);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--text-secondary, #94a3b8);
+  text-align: center;
+}
+
+/* File Uploaded State */
+.file-uploaded {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3, 0.75rem);
+}
+
+.file-remove-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--danger, #ef4444);
+  border: none;
+  border-radius: var(--radius-md, 0.5rem);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.file-remove-btn:hover {
+  background: var(--danger-dark, #dc2626);
+  transform: scale(1.1);
+}
+
+.file-remove-btn:active {
+  transform: scale(0.95);
+}
+
+/* File Error State */
+.file-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem);
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: var(--radius-md, 0.5rem);
+}
+
+.file-error i {
+  font-size: var(--text-xl, 1.25rem);
+  color: var(--danger, #ef4444);
+  margin: 0;
+}
+
+.error-message {
+  flex: 1;
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--danger, #ef4444);
+  text-align: left;
+}
+
+.error-dismiss-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--danger, #ef4444);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.error-dismiss-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-sm, 0.375rem);
+}
+
+/* Text Input Wrapper - Task 5.1 */
+.text-input-wrapper {
+  position: relative;
+  max-width: 800px; /* Reduced width */
+  margin: 0 auto; /* Center the input */
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-xl, 1rem);
+  transition: all 0.3s ease;
+}
+
+.text-input-wrapper:focus-within {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.text-input {
+  width: 100%;
+  min-height: 44px;
+  max-height: 132px;
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  background: transparent;
+  border: none;
+  color: var(--text-primary, #f1f5f9);
+  font-size: var(--text-base, 1rem);
+  font-family: inherit;
+  line-height: 1.5;
+  resize: none;
+  overflow-y: hidden;
+  transition: height 0.2s ease;
+}
+
+.text-input:focus {
+  outline: none;
+}
+
+.text-input::placeholder {
+  color: var(--text-secondary, #94a3b8);
+}
+
+/* Text Input Wrapper - Position send button inline */
+.text-input-wrapper {
+  position: relative;
+}
+
+.send-btn {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary, #6366f1), var(--primary-dark, #4f46e5));
+  border: none;
+  border-radius: var(--radius-lg, 0.75rem);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.send-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.send-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.send-btn i {
+  font-size: var(--text-lg, 1.125rem);
+}
+
+/* Input Disclaimer */
+.input-disclaimer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2, 0.5rem);
+  margin-top: var(--space-3, 0.75rem);
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--text-tertiary, #64748b);
+}
+
+.input-disclaimer i {
+  font-size: var(--text-sm, 0.875rem);
+}
+
+/* Keyboard Shortcuts Hint */
+.keyboard-shortcuts-hint {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: var(--space-2, 0.5rem);
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  background: var(--bg-card, #1e293b);
+  border: 1px solid var(--border, #334155);
+  border-radius: var(--radius-md, 0.5rem);
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--text-secondary, #94a3b8);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.text-input:focus ~ .keyboard-shortcuts-hint {
+  opacity: 1;
+}
+
+.keyboard-shortcuts-hint kbd {
+  padding: 2px 6px;
+  background: var(--bg-main, #0f172a);
+  border: 1px solid var(--border, #334155);
+  border-radius: var(--radius-sm, 0.375rem);
+  font-family: monospace;
+  font-size: var(--text-xs, 0.75rem);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .input-area {
+    padding: var(--space-3, 0.75rem);
+  }
+  
+  .quick-actions {
+    padding: var(--space-3, 0.75rem) 0;
+    gap: var(--space-2, 0.5rem);
+  }
+  
+  .quick-action-chip {
+    padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+    font-size: var(--text-xs, 0.75rem);
+  }
+  
+  .quick-action-chip i {
+    font-size: var(--text-sm, 0.875rem);
+  }
+  
+  .file-upload-zone {
+    padding: var(--space-3, 0.75rem);
+    margin-bottom: var(--space-3, 0.75rem);
+  }
+  
+  .text-input {
+    font-size: var(--text-sm, 0.875rem);
+  }
+  
+  .send-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .keyboard-shortcuts-hint {
+    display: none;
+  }
+}
+
+/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.quick-action-chip {
+  animation: slideInUp 0.3s ease backwards;
+}
+
+.quick-action-chip:nth-child(1) { animation-delay: 0.05s; }
+.quick-action-chip:nth-child(2) { animation-delay: 0.1s; }
+.quick-action-chip:nth-child(3) { animation-delay: 0.15s; }
+.quick-action-chip:nth-child(4) { animation-delay: 0.2s; }
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Focus Visible */
+.quick-action-chip:focus-visible,
+.file-remove-btn:focus-visible,
+.error-dismiss-btn:focus-visible,
+.send-btn:focus-visible {
+  outline: 2px solid var(--primary, #6366f1);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .quick-action-chip,
+  .text-input-wrapper,
+  .send-btn,
+  .file-upload-zone {
+    transition: none;
+    animation: none;
+  }
+  
+  .quick-action-chip:hover {
+    transform: none;
+  }
+  
+  .send-btn:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Dark Mode Support (if using data-theme attribute) */
+[data-theme="light"] {
+  --bg-main: #ffffff;
+  --bg-card: #f8fafc;
+  --surface: #ffffff;
+  --surface-hover: rgba(99, 102, 241, 0.05);
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --border: #e2e8f0;
+}
