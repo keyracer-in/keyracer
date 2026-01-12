@@ -7,17 +7,24 @@ const axios = require('axios');
 // Use PyPDF2-like approach with pdf2pic or pdf-parse as fallback
 let pdfParse;
 try {
-  const pdfParseModule = require('pdf-parse');
-  // The module exports PDFParse as a named export
-  pdfParse = typeof pdfParseModule === 'function' ? pdfParseModule : 
-             (pdfParseModule.PDFParse && typeof pdfParseModule.PDFParse === 'function' ? pdfParseModule.PDFParse :
-             (pdfParseModule.default && typeof pdfParseModule.default === 'function' ? pdfParseModule.default : null));
+  // pdf-parse exports a default function, not the PDFParse class
+  // The correct way is to require it directly as a function
+  pdfParse = require('pdf-parse');
   
-  if (!pdfParse) {
-    console.error('pdf-parse loaded but no valid function found. Module type:', typeof pdfParseModule);
-    console.error('Module keys:', Object.keys(pdfParseModule));
+  // If it's an object with PDFParse, we need to use it differently
+  if (typeof pdfParse !== 'function' && pdfParse.PDFParse) {
+    // Wrap the PDFParse class to work like the function API
+    const PDFParseClass = pdfParse.PDFParse;
+    pdfParse = async (buffer) => {
+      const parser = new PDFParseClass();
+      return await parser.parse(buffer);
+    };
+    console.log('PDF parser loaded successfully (using PDFParse class wrapper)');
+  } else if (typeof pdfParse === 'function') {
+    console.log('PDF parser loaded successfully (direct function)');
   } else {
-    console.log('PDF parser loaded successfully');
+    console.error('pdf-parse loaded but no valid function found. Module type:', typeof pdfParse);
+    pdfParse = null;
   }
 } catch (e) {
   console.log('pdf-parse not available, using text extraction fallback:', e.message);
@@ -42,8 +49,9 @@ class KeyRacerAgentService {
       // PDF text extraction (matching PyPDF2 approach)
       if (pdfParse && typeof pdfParse === 'function') {
         try {
+          // Call pdfParse directly as a function (it returns a promise)
           const pdfData = await pdfParse(pdfBuffer);
-          resumeText = pdfData.text;
+          resumeText = pdfData.text || '';
           console.log('PDF parsed successfully, extracted text length:', resumeText.length);
         } catch (pdfError) {
           console.error('PDF parsing failed:', pdfError.message);
