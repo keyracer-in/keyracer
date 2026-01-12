@@ -7,11 +7,16 @@ const axios = require('axios');
 // Use PyPDF2-like approach with pdf2pic or pdf-parse as fallback
 let pdfParse;
 try {
-  pdfParse = require('pdf-parse');
-  // Verify it's a function
-  if (typeof pdfParse !== 'function') {
-    console.error('pdf-parse loaded but is not a function:', typeof pdfParse);
-    pdfParse = null;
+  const pdfParseModule = require('pdf-parse');
+  // Handle both default export and direct function export
+  pdfParse = typeof pdfParseModule === 'function' ? pdfParseModule : 
+             (pdfParseModule.default && typeof pdfParseModule.default === 'function' ? pdfParseModule.default : null);
+  
+  if (!pdfParse) {
+    console.error('pdf-parse loaded but no valid function found. Module type:', typeof pdfParseModule);
+    console.error('Module keys:', Object.keys(pdfParseModule));
+  } else {
+    console.log('PDF parser loaded successfully');
   }
 } catch (e) {
   console.log('pdf-parse not available, using text extraction fallback:', e.message);
