@@ -4,36 +4,33 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 
-// Use PyPDF2-like approach with pdf2pic or pdf-parse as fallback
-let pdfParse;
-try {
-  // pdf-parse exports a default function, not the PDFParse class
-  // The correct way is to require it directly as a function
-  pdfParse = require('pdf-parse');
-  
-  // If it's an object with PDFParse, we need to use it differently
-  if (typeof pdfParse !== 'function' && pdfParse.PDFParse) {
-    // Wrap the PDFParse class to work like the function API
-    const PDFParseClass = pdfParse.PDFParse;
-    pdfParse = async (buffer, options = {}) => {
-      // PDFParse constructor expects options with verbosity level
-      const defaultOptions = {
-        verbosity: pdfParse.VerbosityLevel?.ERRORS || 0,
-        ...options
-      };
-      const parser = new PDFParseClass(defaultOptions);
-      return await parser.parse(buffer);
-    };
-    console.log('PDF parser loaded successfully (using PDFParse class wrapper)');
-  } else if (typeof pdfParse === 'function') {
-    console.log('PDF parser loaded successfully (direct function)');
-  } else {
-    console.error('pdf-parse loaded but no valid function found. Module type:', typeof pdfParse);
-    pdfParse = null;
+// Use pdf.js-extract for simple and reliable PDF text extraction
+const PDFExtract = require('pdf.js-extract').PDFExtract;
+const pdfExtract = new PDFExtract();
+
+// Helper function to extract text from PDF buffer
+async function extractPDFText(buffer) {
+  try {
+    const data = await pdfExtract.extractBuffer(buffer);
+    // Combine all text from all pages
+    let text = '';
+    if (data && data.pages) {
+      for (const page of data.pages) {
+        if (page.content) {
+          for (const item of page.content) {
+            if (item.str) {
+              text += item.str + ' ';
+            }
+          }
+          text += '\n'; // Add newline between pages
+        }
+      }
+    }
+    return text.trim();
+  } catch (error) {
+    console.error('PDF extraction error:', error.message);
+    return null;
   }
-} catch (e) {
-  console.log('pdf-parse not available, using text extraction fallback:', e.message);
-  pdfParse = null;
 }
 
 const router = express.Router();
@@ -51,21 +48,18 @@ class KeyRacerAgentService {
     try {
       let resumeText = '';
       
-      // PDF text extraction (matching PyPDF2 approach)
-      if (pdfParse && typeof pdfParse === 'function') {
-        try {
-          // Call pdfParse directly as a function (it returns a promise)
-          const pdfData = await pdfParse(pdfBuffer);
-          resumeText = pdfData.text || '';
+      // PDF text extraction using pdf.js-extract
+      try {
+        resumeText = await extractPDFText(pdfBuffer);
+        if (resumeText && resumeText.length > 0) {
           console.log('PDF parsed successfully, extracted text length:', resumeText.length);
-        } catch (pdfError) {
-          console.error('PDF parsing failed:', pdfError.message);
-          console.error('PDF parse error stack:', pdfError.stack);
-          resumeText = 'PDF text extraction failed - using default analysis';
+        } else {
+          console.log('PDF extraction returned empty text, using default analysis');
+          resumeText = 'PDF text extraction returned no content - using default analysis';
         }
-      } else {
-        console.log('PDF parser not available or not a function, type:', typeof pdfParse);
-        resumeText = 'PDF parser not available - using default analysis';
+      } catch (pdfError) {
+        console.error('PDF parsing failed:', pdfError.message);
+        resumeText = 'PDF text extraction failed - using default analysis';
       }
 
       // Structured prompt matching the Python implementation
