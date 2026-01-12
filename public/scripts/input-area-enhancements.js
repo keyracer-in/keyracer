@@ -45,6 +45,35 @@ class InputAreaEnhancer {
     this.initKeyboardShortcuts();
     this.initFileUpload();
     this.initQuickActions();
+    
+    // Listen for new session events to reset state
+    window.addEventListener('newSessionCreated', () => {
+      this.resetToInitialState();
+    });
+  }
+  
+  /**
+   * Reset to initial state when starting a new session
+   */
+  resetToInitialState() {
+    // Reset conversation state
+    this.conversationState = 'initial';
+    
+    // Reset uploaded file
+    this.uploadedFile = null;
+    
+    // Reset file upload zone
+    this.resetFileUploadZone();
+    
+    // Update quick actions to show initial state
+    this.updateQuickActions();
+    
+    // Clear textarea
+    if (this.textarea) {
+      this.textarea.value = '';
+      this.handleTextareaResize();
+      this.updateSendButtonState();
+    }
   }
   
   /**
