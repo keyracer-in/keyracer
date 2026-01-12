@@ -161,39 +161,36 @@ class EnhancedAICareerAgent {
 
   async analyzeSkills() {
     if (!this.resumeAnalysis) {
-      this.addMessage('📄 Please upload your resume first for skill gap analysis.', 'system');
+      this.addMessage('📄 Please upload your resume first for personalized skill gap analysis.', 'system');
       return;
     }
     
-    const skills = this.resumeAnalysis.technical_skills || [];
-    const gaps = this.resumeAnalysis.current_gaps || [];
+    this.addMessage('🔍 **Analyzing Your Skills**\n\nGenerating personalized analysis based on your resume and current market trends...', 'system');
+    this.setLoading(true, 'analyzing');
     
-    const analysis = `📊 **Comprehensive Skill Gap Analysis**
-
-**🎯 Your Technical Strengths:**
-${skills.map(skill => `• ${skill}`).join('\n')}
-
-**⚠️ Identified Skill Gaps:**
-${gaps.map(gap => `• ${gap}`).join('\n')}
-
-**📈 Market Demand Analysis:**
-• **High Demand:** Cloud Technologies (AWS, Azure), System Design
-• **Growing:** AI/ML, DevOps, Microservices
-• **Essential:** Data Structures & Algorithms
-
-**🚀 Recommended Learning Path:**
-1. **Week 1-2:** System Design Fundamentals
-2. **Week 3-4:** Cloud Platform Basics (AWS/Azure)
-3. **Week 5-6:** Advanced Algorithms & Data Structures
-4. **Week 7-8:** DevOps & CI/CD Practices
-
-**💡 Action Items:**
-• Build 2-3 portfolio projects showcasing new skills
-• Get cloud certifications (AWS Solutions Architect)
-• Practice system design problems daily
-• Contribute to open source projects`;
-    
-    this.addMessage(analysis, 'bot');
+    try {
+      const response = await fetch('/api/keyracer-agent/analyze-skills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          analysis: this.resumeAnalysis,
+          targetRole: 'Software Engineer'
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        this.addMessage(data.skillAnalysis, 'bot');
+      } else {
+        this.addMessage('❌ Failed to analyze skills: ' + data.error, 'error');
+      }
+    } catch (error) {
+      console.error('Skill analysis error:', error);
+      this.addMessage('❌ Failed to analyze skills. Please check your connection and try again.', 'error');
+    } finally {
+      this.setLoading(false);
+    }
   }
 
   async handleResumeUpload(event) {

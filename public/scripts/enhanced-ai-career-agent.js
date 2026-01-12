@@ -149,12 +149,25 @@ class EnhancedAICareerAgent {
   }
 
   async generateRoadmap() {
+    // Check for resume analysis before personalized requests (Requirement 9.1)
     if (!this.resumeAnalysis) {
-      this.addMessage('📄 Please upload your resume first for personalized roadmap generation.', 'system');
+      this.addMessage('📄 **Resume Required**\n\nPlease upload your resume first to generate a personalized learning roadmap.\n\n💡 **Why?** Your roadmap will be customized based on:\n• Your current technical skills\n• Your experience level\n• Your specific skill gaps\n• Your career achievements', 'system');
       return;
     }
     
-    this.addMessage('🗺️ **Generating Personalized Learning Roadmap**\n\nAnalyzing your profile and market trends...', 'system');
+    // Handle incomplete resume data gracefully (Requirement 9.2)
+    const candidateName = this.resumeAnalysis.candidate_name || 'there';
+    const skillCount = this.resumeAnalysis.technical_skills?.length || 0;
+    const gapCount = this.resumeAnalysis.current_gaps?.length || 0;
+    
+    if (skillCount === 0 || gapCount === 0) {
+      this.addMessage('⚠️ **Incomplete Resume Data**\n\nYour resume analysis is incomplete. The roadmap may be less personalized.\n\n**Missing:**\n' + 
+        (skillCount === 0 ? '• Technical skills\n' : '') +
+        (gapCount === 0 ? '• Skill gaps\n' : '') +
+        '\n💡 **Tip:** Try re-uploading your resume for better results.', 'system');
+    }
+    
+    this.addMessage(`🗺️ **Generating Personalized Learning Roadmap for ${candidateName}**\n\nAnalyzing your profile and market trends...`, 'system');
     this.showProgress('Generating Learning Roadmap', 'generating', 25);
     
     try {
@@ -167,23 +180,47 @@ class EnhancedAICareerAgent {
         })
       });
       
+      // Show specific error messages for API failures (Requirement 9.5)
+      if (!response.ok) {
+        this.hideProgress();
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        this.addMessage(`❌ **Roadmap Generation Failed**\n\n**Error:** ${errorData.error || response.statusText}\n**Status Code:** ${response.status}\n\n💡 **What to try:**\n• Check your internet connection\n• Try again in a few moments\n• Contact support if the issue persists`, 'error');
+        return;
+      }
+      
       const data = await response.json();
       if (data.success) {
         this.hideProgress();
+        // Add personalization indicator before the roadmap
+        this.addPersonalizationIndicator('roadmap');
         this.addMessage(data.roadmap, 'bot');
       } else {
         this.hideProgress();
-        this.addMessage('❌ Failed to generate roadmap: ' + data.error, 'error');
+        this.addMessage(`❌ **Roadmap Generation Failed**\n\n**Error:** ${data.error}\n\n💡 **What to try:**\n• Ensure your resume has been uploaded\n• Try re-uploading your resume\n• Contact support if the issue persists`, 'error');
       }
     } catch (error) {
       this.hideProgress();
-      this.addMessage('❌ Failed to generate roadmap. Please try again.', 'error');
+      console.error('Roadmap generation error:', error);
+      this.addMessage(`❌ **Connection Error**\n\n**Details:** ${error.message}\n\n💡 **What to try:**\n• Check your internet connection\n• Refresh the page and try again\n• Clear your browser cache\n• Contact support if the issue persists`, 'error');
     }
   }
 
   async findJobs() {
-    const skills = this.resumeAnalysis?.technical_skills || ['JavaScript', 'React', 'Node.js'];
-    this.addMessage(`🔍 **Searching Job Market**\n\nLooking for opportunities matching: ${skills.slice(0, 3).join(', ')}...`, 'system');
+    // Check for resume analysis before personalized requests (Requirement 9.1)
+    if (!this.resumeAnalysis) {
+      this.addMessage('📄 **Resume Required**\n\nPlease upload your resume first for personalized job search.\n\n💡 **Why?** Job recommendations will be tailored to:\n• Your technical skills\n• Your experience level\n• Your career achievements\n• Your preferred location', 'system');
+      return;
+    }
+    
+    // Handle incomplete resume data gracefully (Requirement 9.2)
+    const candidateName = this.resumeAnalysis.candidate_name || 'there';
+    const skills = this.resumeAnalysis?.technical_skills || [];
+    
+    if (skills.length === 0) {
+      this.addMessage('⚠️ **Limited Resume Data**\n\nNo technical skills found in your resume. Job search will use default skills.\n\n💡 **Tip:** Try re-uploading your resume with clear technical skills listed.', 'system');
+    }
+    
+    this.addMessage(`🔍 **Searching Job Market for ${candidateName}**\n\nLooking for opportunities matching your skills: ${skills.slice(0, 3).join(', ') || 'General skills'}...`, 'system');
     this.setLoading(true, 'searching');
     
     try {
@@ -192,68 +229,114 @@ class EnhancedAICareerAgent {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           role: 'Software Engineer',
-          skills: skills,
-          location: 'Remote'
+          skills: skills.length > 0 ? skills : ['JavaScript', 'React', 'Node.js'], // Provide fallback values (Requirement 9.4)
+          location: 'Remote',
+          userProfile: this.resumeAnalysis
         })
       });
       
+      // Show specific error messages for API failures (Requirement 9.5)
+      if (!response.ok) {
+        this.setLoading(false);
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        this.addMessage(`❌ **Job Search Failed**\n\n**Error:** ${errorData.error || response.statusText}\n**Status Code:** ${response.status}\n\n💡 **What to try:**\n• Check your internet connection\n• Try again in a few moments\n• Verify your resume has been uploaded\n• Contact support if the issue persists`, 'error');
+        return;
+      }
+      
       const data = await response.json();
       if (data.success) {
+        // Add personalization indicator before the jobs
+        this.addPersonalizationIndicator('jobs');
         this.addMessage(data.jobs, 'bot');
       } else {
-        this.addMessage('❌ Failed to find jobs: ' + data.error, 'error');
+        this.addMessage(`❌ **Job Search Failed**\n\n**Error:** ${data.error}\n\n💡 **What to try:**\n• Ensure your resume has been uploaded\n• Try re-uploading your resume\n• Contact support if the issue persists`, 'error');
       }
     } catch (error) {
-      this.addMessage('❌ Failed to find jobs. Please try again.', 'error');
+      console.error('Job search error:', error);
+      this.addMessage(`❌ **Connection Error**\n\n**Details:** ${error.message}\n\n💡 **What to try:**\n• Check your internet connection\n• Refresh the page and try again\n• Clear your browser cache\n• Contact support if the issue persists`, 'error');
     } finally {
       this.setLoading(false);
     }
   }
 
   async startInterview() {
+    // Check for resume analysis before personalized requests (Requirement 9.1)
+    if (!this.resumeAnalysis) {
+      this.addMessage('📄 **Resume Recommended**\n\nFor the best interview experience, please upload your resume first.\n\n💡 **Benefits:**\n• Questions tailored to your experience level\n• Focus on your technical skills\n• Reference your achievements\n• Appropriate difficulty level\n\n**Continue anyway?** You can still practice, but questions will be generic.', 'system');
+      
+      // Allow interview to continue with generic questions
+      setTimeout(() => {
+        this.switchMode('interview');
+        this.addMessage(`🎯 **Mock Interview Session Started**\n\nI'll conduct a technical interview simulation. Answer as you would in a real interview.\n\n**Interview Format:**\n• Technical questions\n• Behavioral questions  \n• Real-time feedback\n• Performance scoring\n\n⚠️ **Note:** Upload your resume for personalized questions.\n\nReady? Let's begin!`, 'system');
+        
+        setTimeout(() => {
+          this.addMessage(`**Question 1:** Tell me about yourself and walk me through your technical background. What programming languages and technologies are you most comfortable with?`, 'bot');
+        }, 1500);
+      }, 2000);
+      return;
+    }
+    
+    const candidateName = this.resumeAnalysis?.candidate_name || 'there';
     this.switchMode('interview');
-    this.addMessage('🎯 **Mock Interview Session Started**\n\nI\'ll conduct a technical interview simulation. Answer as you would in a real interview.\n\n**Interview Format:**\n• Technical questions\n• Behavioral questions  \n• Real-time feedback\n• Performance scoring\n\nReady? Let\'s begin!', 'system');
+    this.addMessage(`🎯 **Mock Interview Session Started for ${candidateName}**\n\nI'll conduct a technical interview simulation tailored to your experience level. Answer as you would in a real interview.\n\n**Interview Format:**\n• Technical questions\n• Behavioral questions  \n• Real-time feedback\n• Performance scoring\n\nReady? Let's begin!`, 'system');
     
     setTimeout(() => {
-      this.addMessage('**Question 1:** Tell me about yourself and walk me through your technical background. What programming languages and technologies are you most comfortable with?', 'bot');
+      this.addMessage(`**Question 1:** ${candidateName}, tell me about yourself and walk me through your technical background. What programming languages and technologies are you most comfortable with?`, 'bot');
     }, 1500);
   }
 
   async analyzeSkills() {
+    // Check for resume analysis before personalized requests (Requirement 9.1)
     if (!this.resumeAnalysis) {
-      this.addMessage('📄 Please upload your resume first for skill gap analysis.', 'system');
+      this.addMessage('📄 **Resume Required**\n\nPlease upload your resume first for personalized skill gap analysis.\n\n💡 **Why?** Your analysis will include:\n• Assessment of your current technical skills\n• Identification of priority skill gaps\n• Market demand for missing skills\n• Personalized action plan\n• Realistic timeline based on your experience', 'system');
       return;
     }
     
-    const skills = this.resumeAnalysis.technical_skills || [];
-    const gaps = this.resumeAnalysis.current_gaps || [];
+    // Handle incomplete resume data gracefully (Requirement 9.2)
+    const candidateName = this.resumeAnalysis.candidate_name || 'there';
+    const skillCount = this.resumeAnalysis.technical_skills?.length || 0;
+    const gapCount = this.resumeAnalysis.current_gaps?.length || 0;
     
-    const analysis = `📊 **Comprehensive Skill Gap Analysis**
-
-**🎯 Your Technical Strengths:**
-${skills.map(skill => `• ${skill}`).join('\n')}
-
-**⚠️ Identified Skill Gaps:**
-${gaps.map(gap => `• ${gap}`).join('\n')}
-
-**📈 Market Demand Analysis:**
-• **High Demand:** Cloud Technologies (AWS, Azure), System Design
-• **Growing:** AI/ML, DevOps, Microservices
-• **Essential:** Data Structures & Algorithms
-
-**🚀 Recommended Learning Path:**
-1. **Week 1-2:** System Design Fundamentals
-2. **Week 3-4:** Cloud Platform Basics (AWS/Azure)
-3. **Week 5-6:** Advanced Algorithms & Data Structures
-4. **Week 7-8:** DevOps & CI/CD Practices
-
-**💡 Action Items:**
-• Build 2-3 portfolio projects showcasing new skills
-• Get cloud certifications (AWS Solutions Architect)
-• Practice system design problems daily
-• Contribute to open source projects`;
+    if (skillCount === 0 && gapCount === 0) {
+      this.addMessage('⚠️ **Incomplete Resume Data**\n\nYour resume analysis is missing critical information:\n• No technical skills identified\n• No skill gaps identified\n\n💡 **Tip:** Try re-uploading your resume with:\n• Clear technical skills section\n• Detailed work experience\n• Project descriptions\n\n**Continue anyway?** The analysis will be limited.', 'system');
+    }
     
-    this.addMessage(analysis, 'bot');
+    this.addMessage(`🔍 **Analyzing Skills for ${candidateName}**\n\nGenerating personalized analysis based on your ${skillCount} technical skills and identifying ${gapCount} priority gaps...`, 'system');
+    this.setLoading(true, 'analyzing');
+    
+    try {
+      const response = await fetch('/api/keyracer-agent/analyze-skills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          analysis: this.resumeAnalysis,
+          targetRole: 'Software Engineer'
+        })
+      });
+      
+      // Show specific error messages for API failures (Requirement 9.5)
+      if (!response.ok) {
+        this.setLoading(false);
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        this.addMessage(`❌ **Skill Analysis Failed**\n\n**Error:** ${errorData.error || response.statusText}\n**Status Code:** ${response.status}\n\n💡 **What to try:**\n• Check your internet connection\n• Verify your resume has been uploaded\n• Try re-uploading your resume\n• Contact support if the issue persists`, 'error');
+        return;
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Add personalization indicator before the analysis
+        this.addPersonalizationIndicator('skills');
+        this.addMessage(data.skillAnalysis, 'bot');
+      } else {
+        this.addMessage(`❌ **Skill Analysis Failed**\n\n**Error:** ${data.error}\n\n💡 **What to try:**\n• Ensure your resume has been uploaded\n• Try re-uploading your resume\n• Contact support if the issue persists`, 'error');
+      }
+    } catch (error) {
+      console.error('Skill analysis error:', error);
+      this.addMessage(`❌ **Connection Error**\n\n**Details:** ${error.message}\n\n💡 **What to try:**\n• Check your internet connection\n• Refresh the page and try again\n• Clear your browser cache\n• Contact support if the issue persists`, 'error');
+    } finally {
+      this.setLoading(false);
+    }
   }
 
   async handleResumeUpload(event) {
@@ -289,14 +372,17 @@ ${gaps.map(gap => `• ${gap}`).join('\n')}
         this.resumeAnalysis = data.structured;
         this.hideProgress();
         this.addMessage(data.analysis, 'bot');
-        this.showNotification('✅ Resume analyzed successfully!', 'success');
+        
+        // Show personalization confirmation with user's name
+        const candidateName = data.structured.candidate_name || 'there';
+        this.showNotification(`✅ Resume analyzed for ${candidateName}!`, 'success');
         
         // Enable natural conversation instead of button clicks
         // Users can simply ask: "generate roadmap", "find jobs", etc.
         
-        // Show follow-up suggestions
+        // Show follow-up suggestions with personalization
         setTimeout(() => {
-          this.addMessage('🚀 **Analysis Complete! What\'s Next?**\n\n**Try asking:**\n• "Generate a learning roadmap for me"\n• "Find job opportunities that match my skills"\n• "Start a mock interview"\n• "What skills should I improve?"\n\nJust ask naturally - I understand your requests!', 'system');
+          this.addMessage(`🚀 **Analysis Complete, ${candidateName}! What's Next?**\n\n**Personalized Options:**\n• "Generate a learning roadmap for me" - Based on your ${data.structured.technical_skills?.length || 0} skills\n• "Find job opportunities that match my skills" - Tailored to your experience\n• "Start a mock interview" - Adjusted to your level\n• "What skills should I improve?" - Focus on your ${data.structured.current_gaps?.length || 0} gaps\n\n💡 All responses will be personalized using your resume data!`, 'system');
         }, 2000);
       } else {
         this.hideProgress();
@@ -484,21 +570,28 @@ Ready to supercharge your career journey?`;
         })
       });
 
-      const data = await response.json();
-
       // Hide skeleton before showing actual message
       this.hideSkeleton(skeletonId);
+
+      // Show specific error messages for API failures (Requirement 9.5)
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        this.addMessage(`❌ **Message Failed**\n\n**Error:** ${errorData.error || response.statusText}\n**Status Code:** ${response.status}\n\n💡 **What to try:**\n• Check your internet connection\n• Try sending your message again\n• Refresh the page if the issue persists\n• Contact support if problems continue`, 'error');
+        return;
+      }
+
+      const data = await response.json();
 
       if (data.success) {
         this.addMessage(data.response, 'bot');
         this.chatHistory.push({ role: 'model', content: data.response });
       } else {
-        this.addMessage('❌ Error: ' + data.error, 'error');
+        this.addMessage(`❌ **Error Processing Message**\n\n**Details:** ${data.error}\n\n💡 **What to try:**\n• Try rephrasing your question\n• Ensure your resume is uploaded for personalized responses\n• Contact support if the issue persists`, 'error');
       }
     } catch (error) {
       console.error('Chat error:', error);
       this.hideSkeleton(skeletonId);
-      this.addMessage('❌ Failed to send message. Please check your connection.', 'error');
+      this.addMessage(`❌ **Connection Error**\n\n**Details:** ${error.message}\n\n💡 **What to try:**\n• Check your internet connection\n• Refresh the page and try again\n• Clear your browser cache\n• Contact support if the issue persists`, 'error');
     } finally {
       this.setLoading(false);
     }
@@ -1298,6 +1391,53 @@ Ready to supercharge your career journey?`;
         `).join('')}
       </div>
     `;
+  }
+
+  /**
+   * Add personalization indicator to show content is customized
+   * @param {string} type - Type of personalized content (roadmap, jobs, skills, interview)
+   */
+  addPersonalizationIndicator(type) {
+    if (!this.resumeAnalysis) return;
+    
+    const candidateName = this.resumeAnalysis.candidate_name || 'You';
+    const experienceScore = this.resumeAnalysis.experience_score || 0;
+    const skillCount = this.resumeAnalysis.technical_skills?.length || 0;
+    const gapCount = this.resumeAnalysis.current_gaps?.length || 0;
+    
+    let indicatorText = '';
+    
+    switch (type) {
+      case 'roadmap':
+        indicatorText = `✨ **Personalized for ${candidateName}**\n\n📊 Based on your ${skillCount} technical skills and ${gapCount} priority gaps\n🎯 Experience Level: ${experienceScore}/100\n\n`;
+        break;
+      case 'jobs':
+        indicatorText = `✨ **Personalized Job Search for ${candidateName}**\n\n🔍 Matching your ${skillCount} technical skills\n📈 Filtered by your experience level (${experienceScore}/100)\n\n`;
+        break;
+      case 'skills':
+        indicatorText = `✨ **Personalized Skill Analysis for ${candidateName}**\n\n💪 Analyzing your ${skillCount} current skills\n⚠️ Identifying your ${gapCount} priority gaps\n📊 Experience Score: ${experienceScore}/100\n\n`;
+        break;
+      case 'interview':
+        indicatorText = `✨ **Personalized Interview for ${candidateName}**\n\n🎯 Questions tailored to your experience (${experienceScore}/100)\n💼 Focused on your ${skillCount} technical skills\n\n`;
+        break;
+      default:
+        indicatorText = `✨ **Personalized for ${candidateName}**\n\n`;
+    }
+    
+    const messagesContainer = document.getElementById('chat-messages');
+    if (!messagesContainer) return;
+
+    const indicatorDiv = document.createElement('div');
+    indicatorDiv.className = 'personalization-indicator';
+    indicatorDiv.innerHTML = `
+      <div class="personalization-badge">
+        <i class="fas fa-user-check"></i>
+        <span class="personalization-text">${indicatorText}</span>
+      </div>
+    `;
+    
+    messagesContainer.appendChild(indicatorDiv);
+    this.scrollToBottom();
   }
 
   scrollToBottom() {

@@ -4036,3 +4036,131 @@ body {
 }
 
 /* End of styles */
+
+
+/* ============================================
+   Personalization Indicator Styles
+   Task 6: Add Personalization Verification
+   ============================================ */
+
+.personalization-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: var(--space-4) 0;
+    padding: var(--space-3) var(--space-4);
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.personalization-badge {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: linear-gradient(135deg, 
+        rgba(99, 102, 241, 0.1) 0%, 
+        rgba(139, 92, 246, 0.1) 100%);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    max-width: 600px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.personalization-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+    border-color: var(--primary-hover);
+}
+
+.personalization-badge i {
+    font-size: var(--text-xl);
+    color: var(--primary);
+    margin-top: 2px;
+    flex-shrink: 0;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.personalization-text {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    line-height: var(--leading-relaxed);
+    white-space: pre-line;
+}
+
+.personalization-text strong {
+    color: var(--primary);
+    font-weight: var(--font-bold);
+}
+
+/* Pulse animation for the icon */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+/* Fade in up animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .personalization-badge {
+    background: linear-gradient(135deg, 
+        rgba(99, 102, 241, 0.15) 0%, 
+        rgba(139, 92, 246, 0.15) 100%);
+    border-color: rgba(99, 102, 241, 0.5);
+}
+
+[data-theme="dark"] .personalization-badge:hover {
+    border-color: var(--primary);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .personalization-indicator {
+        margin: var(--space-3) 0;
+        padding: var(--space-2);
+    }
+    
+    .personalization-badge {
+        padding: var(--space-3) var(--space-4);
+        max-width: 100%;
+        gap: var(--space-2);
+    }
+    
+    .personalization-badge i {
+        font-size: var(--text-lg);
+    }
+    
+    .personalization-text {
+        font-size: var(--text-xs);
+    }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+    .personalization-badge {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: var(--space-3);
+    }
+    
+    .personalization-text {
+        font-size: 11px;
+    }
+}
