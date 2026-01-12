@@ -8,9 +8,10 @@ const axios = require('axios');
 let pdfParse;
 try {
   const pdfParseModule = require('pdf-parse');
-  // Handle both default export and direct function export
+  // The module exports PDFParse as a named export
   pdfParse = typeof pdfParseModule === 'function' ? pdfParseModule : 
-             (pdfParseModule.default && typeof pdfParseModule.default === 'function' ? pdfParseModule.default : null);
+             (pdfParseModule.PDFParse && typeof pdfParseModule.PDFParse === 'function' ? pdfParseModule.PDFParse :
+             (pdfParseModule.default && typeof pdfParseModule.default === 'function' ? pdfParseModule.default : null));
   
   if (!pdfParse) {
     console.error('pdf-parse loaded but no valid function found. Module type:', typeof pdfParseModule);
