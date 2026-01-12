@@ -8,8 +8,14 @@ const axios = require('axios');
 let pdfParse;
 try {
   pdfParse = require('pdf-parse');
+  // Verify it's a function
+  if (typeof pdfParse !== 'function') {
+    console.error('pdf-parse loaded but is not a function:', typeof pdfParse);
+    pdfParse = null;
+  }
 } catch (e) {
-  console.log('pdf-parse not available, using text extraction fallback');
+  console.log('pdf-parse not available, using text extraction fallback:', e.message);
+  pdfParse = null;
 }
 
 const router = express.Router();
@@ -28,15 +34,18 @@ class KeyRacerAgentService {
       let resumeText = '';
       
       // PDF text extraction (matching PyPDF2 approach)
-      if (pdfParse) {
+      if (pdfParse && typeof pdfParse === 'function') {
         try {
           const pdfData = await pdfParse(pdfBuffer);
           resumeText = pdfData.text;
+          console.log('PDF parsed successfully, extracted text length:', resumeText.length);
         } catch (pdfError) {
           console.error('PDF parsing failed:', pdfError.message);
+          console.error('PDF parse error stack:', pdfError.stack);
           resumeText = 'PDF text extraction failed - using default analysis';
         }
       } else {
+        console.log('PDF parser not available or not a function, type:', typeof pdfParse);
         resumeText = 'PDF parser not available - using default analysis';
       }
 
