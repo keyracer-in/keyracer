@@ -15,8 +15,13 @@ try {
   if (typeof pdfParse !== 'function' && pdfParse.PDFParse) {
     // Wrap the PDFParse class to work like the function API
     const PDFParseClass = pdfParse.PDFParse;
-    pdfParse = async (buffer) => {
-      const parser = new PDFParseClass();
+    pdfParse = async (buffer, options = {}) => {
+      // PDFParse constructor expects options with verbosity level
+      const defaultOptions = {
+        verbosity: pdfParse.VerbosityLevel?.ERRORS || 0,
+        ...options
+      };
+      const parser = new PDFParseClass(defaultOptions);
       return await parser.parse(buffer);
     };
     console.log('PDF parser loaded successfully (using PDFParse class wrapper)');
