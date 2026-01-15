@@ -1,0 +1,424 @@
+/* Tutorial Common Styles - Shared across all language tutorials */
+
+/* Base Tutorial Layout */
+body.tutorial-page {
+    margin: 0;
+    padding: 0;
+    background: #0a0f1a;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Tutorial Header */
+.tutorial-header {
+    background: linear-gradient(135deg, #1a1f35 0%, #0a0f1a 100%);
+    padding: 1rem 2rem;
+    border-bottom: 2px solid rgba(0, 255, 221, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    height: 40px;
+    transition: transform 0.2s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.05);
+}
+
+.main-nav {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-item {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-item:hover {
+    background: rgba(0, 255, 221, 0.1);
+    color: #00FFDD;
+}
+
+/* Tutorial Container Layout */
+.tutorial-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: calc(100vh - 80px);
+}
+
+/* Tutorial Sidebar */
+.tutorial-sidebar {
+    background: #141b2d;
+    border-right: 1px solid rgba(0, 255, 221, 0.1);
+    padding: 2rem 1rem;
+    overflow-y: auto;
+    position: sticky;
+    top: 80px;
+    height: calc(100vh - 80px);
+}
+
+/* Content Navigation Styles */
+.content-navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.nav-section {
+    margin-bottom: 1rem;
+}
+
+.nav-category-title {
+    color: #00FFDD;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 0.75rem 0;
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(0, 255, 221, 0.2);
+}
+
+.nav-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-section li {
+    margin: 0.25rem 0;
+}
+
+.nav-section a {
+    display: block;
+    color: #b8c5d6;
+    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.nav-section a:hover {
+    background: rgba(0, 255, 221, 0.1);
+    color: #00FFDD;
+    transform: translateX(4px);
+}
+
+.nav-section a.active {
+    background: rgba(0, 255, 221, 0.15);
+    color: #00FFDD;
+    font-weight: 600;
+    border-left: 3px solid #00FFDD;
+}
+
+/* Subsections */
+.nav-subsections {
+    list-style: none;
+    padding-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+.nav-subsections li {
+    margin: 0.25rem 0;
+}
+
+.nav-subsections a {
+    font-size: 0.85rem;
+    color: #8a9ab0;
+    padding: 0.35rem 0.5rem;
+}
+
+.nav-subsections a:hover {
+    color: #00FFDD;
+}
+
+/* Nested subsections for h3 headings under h2 */
+.nav-subsections-nested {
+    list-style: none;
+    padding-left: 1rem;
+    margin-top: 0.25rem;
+}
+
+.nav-subsections-nested li {
+    margin: 0.2rem 0;
+}
+
+.nav-subsections-nested a {
+    font-size: 0.8rem;
+    color: #6a7a90;
+    padding: 0.25rem 0.5rem;
+}
+
+.nav-subsections-nested a:hover {
+    color: #00FFDD;
+}
+
+/* TOC Link Styles */
+.toc-link {
+    display: block;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.toc-link.toc-level-2 {
+    font-weight: 500;
+}
+
+.toc-link.toc-level-3 {
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+/* Highlight effect when scrolling to a heading */
+.toc-target-highlight {
+    animation: highlightPulse 2s ease;
+}
+
+@keyframes highlightPulse {
+    0% {
+        background: transparent;
+    }
+    10% {
+        background: rgba(0, 255, 221, 0.15);
+        box-shadow: 0 0 20px rgba(0, 255, 221, 0.3);
+    }
+    100% {
+        background: transparent;
+        box-shadow: none;
+    }
+}
+
+/* Tutorial Content Area */
+.tutorial-content {
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+#main-content {
+    max-width: 900px;
+}
+
+/* Copy Code Button Styles */
+.copy-code-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0, 255, 221, 0.1);
+    color: #00FFDD;
+    border: 1px solid rgba(0, 255, 221, 0.3);
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.2s ease;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.copy-code-btn:hover:not(:disabled) {
+    background: rgba(0, 255, 221, 0.2);
+    border-color: #00FFDD;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 255, 221, 0.2);
+}
+
+.copy-code-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.copy-code-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+/* Copy Success State */
+.copy-code-btn.copy-success {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+    border-color: rgba(76, 175, 80, 0.5);
+    animation: successPulse 0.3s ease;
+}
+
+@keyframes successPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Copy Error State */
+.copy-code-btn.copy-error {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    border-color: rgba(244, 67, 54, 0.5);
+    animation: errorShake 0.3s ease;
+}
+
+@keyframes errorShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-4px);
+    }
+    75% {
+        transform: translateX(4px);
+    }
+}
+
+/* Icon styles within copy button */
+.copy-code-btn i {
+    font-size: 0.9rem;
+}
+
+/* Error Message Styles */
+.error-message {
+    background: rgba(255, 68, 68, 0.1);
+    border: 1px solid rgba(255, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    color: #ff6b6b;
+}
+
+.error-message h1 {
+    color: #ff6b6b;
+    margin-top: 0;
+}
+
+/* Loading State */
+.loading-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 255, 221, 0.1);
+    border-top-color: #00FFDD;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .tutorial-container {
+        grid-template-columns: 250px 1fr;
+    }
+    
+    .tutorial-sidebar {
+        padding: 1.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .tutorial-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .tutorial-sidebar {
+        position: static;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 255, 221, 0.1);
+    }
+    
+    .tutorial-content {
+        padding: 1.5rem 1rem;
+    }
+    
+    .main-nav {
+        gap: 1rem;
+    }
+    
+    .nav-item {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    .header-content {
+        padding: 0 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tutorial-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .logo-img {
+        height: 32px;
+    }
+    
+    .main-nav {
+        gap: 0.5rem;
+    }
+    
+    .nav-item span {
+        display: none;
+    }
+    
+    .tutorial-content {
+        padding: 1rem;
+    }
+}
+
+/* Language-Specific Overrides */
+/* Use body classes like .tutorial-python, .tutorial-java, .tutorial-javascript */
+/* to apply language-specific styling without affecting other tutorials */
+
+/* Example:
+body.tutorial-python .tutorial-header {
+    border-bottom-color: rgba(55, 118, 171, 0.3);
+}
+
+body.tutorial-java .tutorial-header {
+    border-bottom-color: rgba(244, 67, 54, 0.3);
+}
+
+body.tutorial-javascript .tutorial-header {
+    border-bottom-color: rgba(247, 223, 30, 0.3);
+}
+*/

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags - CUSTOMIZE THESE FOR YOUR LANGUAGE -->
+    <title>{Language} Tutorial - Learn {Language} Programming | KeyRacer</title>
+    <meta name="description" content="Learn {language} programming from basics to advanced. Interactive {language} tutorial with code examples, exercises, and hands-on practice.">
+    <meta name="keywords" content="{language} tutorial, learn {language}, {language} programming, {language} basics, {language} course">
+    
+    <!-- Open Graph Tags - CUSTOMIZE THESE FOR YOUR LANGUAGE -->
+    <meta property="og:title" content="{Language} Tutorial - Learn {Language} Programming">
+    <meta property="og:description" content="Master {language} programming with our comprehensive tutorial. From basics to advanced concepts.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://keyracer.com/pages/tutorial-{language}.html">
+    <meta property="og:image" content="https://keyracer.com/assets/images/{language}-tutorial-og.png">
+    
+    <!-- Twitter Card Tags - CUSTOMIZE THESE FOR YOUR LANGUAGE -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{Language} Tutorial - Learn {Language} Programming">
+    <meta name="twitter:description" content="Master {language} programming with our comprehensive tutorial.">
+    <meta name="twitter:image" content="https://keyracer.com/assets/images/{language}-tutorial-twitter.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://keyracer.com/pages/tutorial-{language}.html">
+    
+    <!-- Markdown and Syntax Highlighting -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles/style.css">
+    <link rel="stylesheet" href="../styles/markdown-content.css">
+    <link rel="stylesheet" href="../styles/tutorial-common.css">
+    <link rel="stylesheet" href="../styles/search-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Structured Data (JSON-LD) - CUSTOMIZE THIS FOR YOUR LANGUAGE -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Course",
+      "name": "{Language} Programming Tutorial",
+      "description": "Comprehensive {language} programming tutorial covering basics to advanced concepts",
+      "provider": {
+        "@type": "Organization",
+        "name": "KeyRacer",
+        "sameAs": "https://keyracer.com"
+      },
+      "educationalLevel": "Beginner to Advanced",
+      "inLanguage": "en",
+      "programmingLanguage": "{Language}",
+      "coursePrerequisites": "Basic computer literacy",
+      "teaches": "{Language} programming fundamentals, syntax, data structures, and best practices"
+    }
+    </script>
+</head>
+<body class="tutorial-page tutorial-{language}">
+    <!-- Header -->
+    <header class="tutorial-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <a href="../index.html">
+                    <img src="../assets/images/logo.png" alt="KeyRacer Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="main-nav">
+                <a href="code-racer.html" class="nav-item"><i class="fas fa-home"></i> Home</a>
+                <a href="challenges.html" class="nav-item"><i class="fas fa-code"></i> Challenges</a>
+                <a href="leaderboard.html" class="nav-item"><i class="fas fa-trophy"></i> Leaderboard</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Tutorial Container -->
+    <div class="tutorial-container">
+        <!-- Sidebar Navigation -->
+        <aside class="tutorial-sidebar" id="sidebar">
+            <!-- Navigation and TOC will be dynamically loaded here by markdown-renderer.js -->
+            <div class="sidebar-loading">
+                <p>Loading navigation...</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="tutorial-content">
+            <div id="main-content">
+                <!-- Markdown content will be dynamically loaded here by markdown-renderer.js -->
+                <div class="content-loading">
+                    <p>Loading content...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../scripts/markdown-renderer.js"></script>
+    <script src="../scripts/content-search.js"></script>
+    <script>
+        // Initialize tutorial with language-specific settings
+        document.addEventListener('DOMContentLoaded', () => {
+            const renderer = new MarkdownRenderer();
+            
+            // CUSTOMIZE THESE VALUES FOR YOUR LANGUAGE
+            const language = '{language}';  // e.g., 'python', 'java', 'ruby'
+            const defaultContent = 'tutorials/{language}/introduction';  // Default page to load
+            
+            // Load initial content based on URL hash or default
+            const hash = window.location.hash.slice(1);
+            const initialContent = hash || defaultContent;
+            
+            // Render the content
+            renderer.renderToElement(initialContent, document.getElementById('main-content'));
+        });
+    </script>
+</body>
+</html>

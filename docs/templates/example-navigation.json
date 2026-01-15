@@ -9,12 +9,8 @@
       "path": "tutorials/python/getting-started"
     },
     {
-      "title": "Python Syntax",
+      "title": "Syntax Basics",
       "path": "tutorials/python/syntax"
-    },
-    {
-      "title": "Comments",
-      "path": "tutorials/python/comments"
     },
     {
       "title": "Variables",
@@ -25,8 +21,12 @@
       "path": "tutorials/python/data-types"
     },
     {
-      "title": "Numbers",
-      "path": "tutorials/python/numbers"
+      "title": "Control Flow",
+      "path": "tutorials/python/control-flow"
+    },
+    {
+      "title": "Functions",
+      "path": "tutorials/python/functions"
     },
     {
       "title": "Lists",
@@ -35,10 +35,6 @@
     {
       "title": "Dictionaries",
       "path": "tutorials/python/dictionaries"
-    },
-    {
-      "title": "Functions",
-      "path": "tutorials/python/functions"
     }
   ],
   "Java Tutorial": [
@@ -51,7 +47,7 @@
       "path": "tutorials/java/getting-started"
     },
     {
-      "title": "Java Syntax",
+      "title": "Syntax Basics",
       "path": "tutorials/java/syntax"
     },
     {
@@ -93,38 +89,54 @@
       "path": "tutorials/javascript/getting-started"
     },
     {
-      "title": "JavaScript Syntax",
+      "title": "Syntax Basics",
       "path": "tutorials/javascript/syntax"
     },
     {
       "title": "Variables",
       "path": "tutorials/javascript/variables"
+    }
+  ],
+  "Ruby Tutorial (Example)": [
+    {
+      "title": "Introduction",
+      "path": "tutorials/ruby/introduction"
+    },
+    {
+      "title": "Getting Started",
+      "path": "tutorials/ruby/getting-started"
+    },
+    {
+      "title": "Syntax Basics",
+      "path": "tutorials/ruby/syntax"
+    },
+    {
+      "title": "Variables",
+      "path": "tutorials/ruby/variables"
     },
     {
       "title": "Data Types",
-      "path": "tutorials/javascript/data-types"
+      "path": "tutorials/ruby/data-types"
     },
     {
-      "title": "Functions",
-      "path": "tutorials/javascript/functions"
+      "title": "Control Flow",
+      "path": "tutorials/ruby/control-flow"
     },
     {
-      "title": "Objects",
-      "path": "tutorials/javascript/objects"
+      "title": "Methods",
+      "path": "tutorials/ruby/methods"
     },
     {
-      "title": "Arrays",
-      "path": "tutorials/javascript/arrays"
-    }
-  ],
-  "Guides": [
-    {
-      "title": "Installation Guide",
-      "path": "guides/installation"
+      "title": "Classes & Objects",
+      "path": "tutorials/ruby/classes-objects"
     },
     {
-      "title": "Troubleshooting",
-      "path": "guides/troubleshooting"
+      "title": "Arrays & Hashes",
+      "path": "tutorials/ruby/arrays-hashes"
+    },
+    {
+      "title": "Blocks & Iterators",
+      "path": "tutorials/ruby/blocks-iterators"
     }
   ]
 }
