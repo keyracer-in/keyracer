@@ -84,6 +84,142 @@
       "keywords": "about keyracer, keyracer team, typing platform, digital skills, productivity improvement",
       "priority": 0.7,
       "changeFrequency": "monthly"
+    },
+    "aptitudeLearn": {
+      "path": "/pages/aptitude-learn.html",
+      "title": "Aptitude & Reasoning - Learn and Practice | KeyRacer",
+      "description": "Master quantitative aptitude, logical reasoning, data interpretation, and verbal ability with KeyRacer's comprehensive learning platform. Interactive lessons and practice exercises.",
+      "keywords": "aptitude test, logical reasoning, quantitative aptitude, verbal ability, reasoning practice, data interpretation, aptitude preparation",
+      "priority": 0.8,
+      "changeFrequency": "weekly"
+    },
+    "aptitudeChallenges": {
+      "path": "/pages/aptitude-challenges.html",
+      "title": "Aptitude Challenges - Test Your Skills | KeyRacer",
+      "description": "Challenge yourself with timed aptitude tests covering quantitative reasoning, logical thinking, and verbal skills. Track your performance and compete on leaderboards.",
+      "keywords": "aptitude challenges, aptitude test, reasoning test, quantitative test, aptitude practice, competitive aptitude",
+      "priority": 0.6,
+      "changeFrequency": "weekly"
+    },
+    "aptitudeLeaderboard": {
+      "path": "/pages/aptitude-leaderboard.html",
+      "title": "Aptitude Leaderboard - Top Performers | KeyRacer",
+      "description": "See how you rank against others in aptitude challenges. View top performers in quantitative, logical, and verbal reasoning categories.",
+      "keywords": "aptitude leaderboard, aptitude ranking, top performers, aptitude competition, reasoning leaderboard",
+      "priority": 0.7,
+      "changeFrequency": "daily"
+    },
+    "tutorialPython": {
+      "path": "/pages/tutorial-python.html",
+      "title": "Python Tutorial - Learn Python Programming | KeyRacer",
+      "description": "Learn Python programming from basics to advanced concepts. Interactive tutorials covering syntax, data types, functions, and more with hands-on practice.",
+      "keywords": "python tutorial, learn python, python programming, python basics, python course, python practice",
+      "priority": 0.8,
+      "changeFrequency": "weekly"
+    },
+    "tutorialJavaScript": {
+      "path": "/pages/tutorial-javascript.html",
+      "title": "JavaScript Tutorial - Learn JavaScript Programming | KeyRacer",
+      "description": "Master JavaScript with interactive tutorials covering fundamentals, ES6+ features, DOM manipulation, and modern JavaScript development practices.",
+      "keywords": "javascript tutorial, learn javascript, javascript programming, javascript basics, javascript course, web development",
+      "priority": 0.8,
+      "changeFrequency": "weekly"
+    },
+    "tutorialJava": {
+      "path": "/pages/tutorial-java.html",
+      "title": "Java Tutorial - Learn Java Programming | KeyRacer",
+      "description": "Comprehensive Java programming tutorial covering object-oriented concepts, syntax, data structures, and best practices with interactive examples.",
+      "keywords": "java tutorial, learn java, java programming, java basics, java course, object oriented programming",
+      "priority": 0.8,
+      "changeFrequency": "weekly"
+    },
+    "careerChatWidget": {
+      "path": "/pages/career-chat-widget.html",
+      "title": "AI Career Guidance - Get Personalized Career Advice | KeyRacer",
+      "description": "Get personalized career guidance with KeyRacer's AI-powered career advisor. Receive tailored advice on skills, learning paths, and career development.",
+      "keywords": "career guidance, career advice, ai career advisor, career development, skill development, career planning",
+      "priority": 0.7,
+      "changeFrequency": "weekly"
+    },
+    "coderacerLeaderboard": {
+      "path": "/pages/coderacer-leaderboard.html",
+      "title": "CodeRacer Leaderboard - Top Coders | KeyRacer",
+      "description": "View the top performers in CodeRacer challenges. See who's mastering programming languages and coding exercises across the platform.",
+      "keywords": "coderacer leaderboard, coding leaderboard, programming ranking, top coders, coding competition",
+      "priority": 0.7,
+      "changeFrequency": "daily"
+    },
+    "proSkillsChallenges": {
+      "path": "/pages/pro-skills-challenges.html",
+      "title": "Professional Skills Challenges - Business Communication Tests | KeyRacer",
+      "description": "Test your professional communication skills with timed challenges. Practice business writing, email etiquette, and professional correspondence.",
+      "keywords": "professional skills challenges, business writing test, communication skills, professional writing, business communication",
+      "priority": 0.7,
+      "changeFrequency": "weekly"
+    },
+    "training": {
+      "path": "/pages/training.html",
+      "title": "Typing Training - Improve Your Skills | KeyRacer",
+      "description": "Structured typing training programs to improve your speed and accuracy. Progressive lessons from beginner to advanced levels.",
+      "keywords": "typing training, typing lessons, typing practice, improve typing speed, typing course, typing skills",
+      "priority": 0.5,
+      "changeFrequency": "monthly"
+    },
+    "lessons": {
+      "path": "/pages/lessons.html",
+      "title": "Typing Lessons - Learn Touch Typing | KeyRacer",
+      "description": "Comprehensive typing lessons covering proper finger placement, home row technique, and advanced typing methods. Learn touch typing step by step.",
+      "keywords": "typing lessons, touch typing, typing technique, learn typing, typing method, keyboard lessons",
+      "priority": 0.5,
+      "changeFrequency": "monthly"
+    },
+    "grammarLessonsComplete": {
+      "path": "/pages/grammar-lessons-complete.html",
+      "title": "Grammar Lessons Complete - Continue Your Learning | KeyRacer",
+      "description": "You've completed the grammar lessons! Continue improving your language skills with more advanced exercises and challenges.",
+      "keywords": "grammar lessons, language learning, grammar practice, writing skills, language skills",
+      "priority": 0.5,
+      "changeFrequency": "monthly"
+    },
+    "solveChallenge": {
+      "path": "/pages/solve-challenge.html",
+      "title": "Solve Challenge - Test Your Skills | KeyRacer",
+      "description": "Take on coding and typing challenges. Solve problems, improve your skills, and track your progress across various difficulty levels.",
+      "keywords": "solve challenge, coding challenge, typing challenge, problem solving, skill test, practice challenges",
+      "priority": 0.7,
+      "changeFrequency": "weekly"
+    },
+    "typingTips": {
+      "path": "/pages/typing-tips.html",
+      "title": "Typing Tips - Expert Advice for Better Typing | KeyRacer",
+      "description": "Expert tips and techniques to improve your typing speed and accuracy. Learn best practices, ergonomics, and advanced typing strategies.",
+      "keywords": "typing tips, typing advice, typing techniques, improve typing, typing strategies, typing best practices",
+      "priority": 0.5,
+      "changeFrequency": "monthly"
+    },
+    "hackathon": {
+      "path": "/pages/hackathon.html",
+      "title": "Hackathon - Coding Competitions and Events | KeyRacer",
+      "description": "Participate in coding hackathons and competitive programming events. Collaborate, compete, and showcase your programming skills.",
+      "keywords": "hackathon, coding competition, programming event, competitive programming, coding contest",
+      "priority": 0.6,
+      "changeFrequency": "weekly"
+    },
+    "privacyPolicy": {
+      "path": "/pages/privacy-policy.html",
+      "title": "Privacy Policy | KeyRacer",
+      "description": "KeyRacer's privacy policy. Learn how we collect, use, and protect your personal information and data.",
+      "keywords": "privacy policy, data protection, user privacy, terms of service",
+      "priority": 0.3,
+      "changeFrequency": "yearly"
+    },
+    "termsConditions": {
+      "path": "/pages/terms-conditions.html",
+      "title": "Terms and Conditions | KeyRacer",
+      "description": "KeyRacer's terms and conditions. Read our terms of service, user agreements, and platform usage guidelines.",
+      "keywords": "terms and conditions, terms of service, user agreement, legal terms",
+      "priority": 0.3,
+      "changeFrequency": "yearly"
     }
   },
   "socialProfiles": {
